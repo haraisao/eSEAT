@@ -311,6 +311,7 @@ class eSEAT_Core:
 
         for c in cmds:
             kond = c[0]
+            globals()['seat'] = self
             globals()['rtc_in_data'] = data
             globals()['julius_result'] = None
             if kond[0] :
@@ -319,7 +320,7 @@ class eSEAT_Core:
                     execfile(ffname, globals())
 #                execfile(kond[0], globals())
 
-            if eval(kond[1], globals()):
+            if eval(kond[1].strip(), globals()):
                 for cmd in c[1]:
                     self.activateCommandEx(cmd, data)
         return True
