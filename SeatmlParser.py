@@ -25,6 +25,7 @@ from lxml import etree
 # utils
 import utils
 
+import eSEAT_Core
 
 ###########################################
 #
@@ -40,12 +41,13 @@ class SEATML_Parser():
             self._logger = None
 
         xsd_file = utils.findfile(xsd)
-        print "XSD file '"+xsd+"' = '"+xsd_file+"'."
 
         if xsd_file:
             self.setXsd(xsd_file)
+            print "XSD file '"+xsd+"' = '"+xsd_file+"'."
         else:
             print "ERROR:XSD file '"+xsd+"' not found."
+
         self.include_rules = []
         self.seatml_base_dir = ""
 
@@ -180,7 +182,7 @@ class SEATML_Parser():
     #  Sub parser for GUI items
     #
     def parseGui(self, name, e):
-        if not isinstance(self.parent, eSEAT_Gui) : return
+        if not isinstance(self.parent, eSEAT_Core.eSEAT_Gui) : return
         commands = self.parseCommands(e)
 
         #

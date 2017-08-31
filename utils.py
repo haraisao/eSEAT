@@ -172,5 +172,7 @@ def findfile(fname, path=sys.path):
    if os.path.exists(ff):
      if os.path.isfile(ff):
        return ff
+  if os.path.exists(fname):
+    return fname
   return None
 

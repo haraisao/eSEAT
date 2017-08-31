@@ -42,12 +42,13 @@ from WebAdaptor import *
 #
 #  execute seatml parser files
 #
-ffname = utils.findfile('SeatmlParser.py')
-if ffname :
-    execfile(ffname, globals())
-else:
-    print "SeatmlParser.py not found"
-    os._exit(1)
+#ffname = utils.findfile('SeatmlParser.py')
+#if ffname :
+#    execfile(ffname, globals())
+#else:
+#    print "SeatmlParser.py not found"
+#    os._exit(1)
+from SeatmlParser import *
 
 ###############################################################
 #

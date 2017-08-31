@@ -38,7 +38,7 @@ if sys.platform == "win32":
                     ],
         "options": {
             "py2exe": {
-                "includes": "xml.etree.ElementTree, lxml._elementpath, bs4, OpenRTM_aist, RTC, gzip, multiprocessing",
+                "includes": "xml.etree.ElementTree, lxml._elementpath, bs4, OpenRTM_aist, RTC, gzip, multiprocessing, eSEAT_Core, SeatmlParser, SocketAdaptor, utils, WebAdaptor",
 #                "bundle_files": 1,
                 "dll_excludes": [ "MSVCP90.dll"],
             }

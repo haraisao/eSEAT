@@ -49,12 +49,14 @@ from RTC  import *
 #  eSEAT_Core
 #
 #execfile(os.path.join(rootdir,'eSEAT_Core.py'))
-ffname = utils.findfile('eSEAT_Core.py')
-if ffname :
-    execfile(ffname)
-else:
-    print 'eSEAT_Core.py not found'
-    sys.exit(1)
+#ffname = utils.findfile('eSEAT_Core.py')
+#if ffname :
+#    execfile(ffname)
+#else:
+#    print 'eSEAT_Core.py not found'
+#    sys.exit(1)
+
+from eSEAT_Core  import *
 
 ###############################################################
 #
