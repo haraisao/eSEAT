@@ -265,6 +265,39 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         return True
 
     #
+    # Service Port
+    #
+    def createConsumerPort(self, name, type_name, iftype):
+        self._logger.info("create service_port(consumer): " + name)
+        # initialization of CORBA Port
+        self._consumer_port[name] = OpenRTM_aist.CorbaPort(type_name)
+
+        # initialization of Consumer
+        self._interfaceType[name] = interfaceType(iftype)
+        self._service[name] = OpenRTM_aist.CorbaConsumer(interfaceType=self._interfaceType[name])
+        
+        # Set service consumers to Ports
+        self._consumer_port[name].registerConsumer("myservice0", name, self._service[name])
+
+        # Set CORBA Service Ports
+        self.addPort(self._consumer_port[name])
+    #
+    #
+    def createProviderPort(self, name, type_name, impl_class):
+        self._logger.info("create service_port(provider): " + type_name)
+        # initialization of CORBA Port
+        self._provider_port[name] = OpenRTM_aist.CorbaPort(type_name)
+
+        # initialization of Provider
+        self._service_impl[name]  = impl_class()
+
+        # Set service providers to Ports
+        self._provider_port[name].registerProvider(inst_name, type_name, self._service_impl[name])
+
+        # Set CORBA Service Ports
+        self.addPort(self._provider_port[name])
+
+    #
     #    Create communication adaptor
     #
     def createAdaptor(self, compname, tag):
