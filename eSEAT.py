@@ -128,6 +128,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
 
         self.manager = None
         self.activated=False
+        self._consumer = {}
 
     def exit(self):
         eSEAT_Core.exit(self)
@@ -267,36 +268,45 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     # Service Port
     #
-    def createConsumerPort(self, name, type_name, iftype):
-        self._logger.info("create service_port(consumer): " + name)
-        # initialization of CORBA Port
-        self._consumer_port[name] = OpenRTM_aist.CorbaPort(type_name)
+    def createServicePort(self, name, type_name, klass, srv_type):
+        if srv_type == 'provider':
+            self.createProviderPort(name, type_name, eval(klass))
+        elif srv_type == 'consumer':
+            self.createConsumerPort(name, type_name, eval(klass))
+        else:
+            return False
+        return True
 
-        # initialization of Consumer
-        self._interfaceType[name] = interfaceType(iftype)
-        self._service[name] = OpenRTM_aist.CorbaConsumer(interfaceType=self._interfaceType[name])
+    def createProviderPort(self,inst_name, type_name, impl_class):
+        self._myServicePort = OpenRTM_aist.CorbaPort(type_name)
+        self._myServicePort.registerProvider(inst_name, type_name, impl_class() )
+        self.addPort(self._myServicePort)
+        return RTC.RTC_OK
+
+    def createConsumerPort(self, inst_name, type_name, if_type):
+        self._myServicePort = OpenRTM_aist.CorbaPort(type_name)
+        self._consumer[inst_name] = OpenRTM_aist.CorbaConsumer(interfaceType=if_type)
+        self._myServicePort.registerConsumer(inst_name, type_name, self._consumer[inst_name])
+        self.addPort(self._myServicePort)
+        return RTC.RTC_OK
+
+    def getServicePtr(self, inst_name):
+        if inst_name in self._consumer:
+            return self._consumer[inst_name]._ptr()
+        else:
+            return None
+
+    def callAcynFunc(self, inst_name, func):
+        async_call = OpenRTM_aist.Async_tInvoker(self.getServicePtr(inst_name), func)
+        async_call.invoke()
+        return async_call
         
-        # Set service consumers to Ports
-        self._consumer_port[name].registerConsumer("myservice0", name, self._service[name])
-
-        # Set CORBA Service Ports
-        self.addPort(self._consumer_port[name])
-    #
-    #
-    def createProviderPort(self, name, type_name, impl_class):
-        self._logger.info("create service_port(provider): " + type_name)
-        # initialization of CORBA Port
-        self._provider_port[name] = OpenRTM_aist.CorbaPort(type_name)
-
-        # initialization of Provider
-        self._service_impl[name]  = impl_class()
-
-        # Set service providers to Ports
-        self._provider_port[name].registerProvider(inst_name, type_name, self._service_impl[name])
-
-        # Set CORBA Service Ports
-        self.addPort(self._provider_port[name])
-
+    def callService(self, inst_name, m_name, *val):
+      if inst_name in self._consumer:
+        return self._consumer[inst_name]._ptr().__getattribute__(m_name)(*val)
+      else:
+        return Non
+        
     #
     #    Create communication adaptor
     #
