@@ -268,23 +268,27 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     # Service Port
     #
-    def createServicePort(self, name, type_name, klass, srv_type):
+    def createServicePort(self, name, type_name, klass, srv_type, disp_name=""):
         if srv_type == 'provider':
-            self.createProviderPort(name, type_name, eval(klass))
+            self.createProviderPort(name, type_name, eval(klass), disp_name)
         elif srv_type == 'consumer':
-            self.createConsumerPort(name, type_name, eval(klass))
+            self.createConsumerPort(name, type_name, eval(klass), disp_name)
         else:
             return False
         return True
 
-    def createProviderPort(self,inst_name, type_name, impl_class):
-        self._myServicePort = OpenRTM_aist.CorbaPort(type_name)
+    def createProviderPort(self,inst_name, type_name, impl_class, disp_name=""):
+        if not disp_name :
+            disp_name = inst_name
+        self._myServicePort = OpenRTM_aist.CorbaPort(disp_name)
         self._myServicePort.registerProvider(inst_name, type_name, impl_class() )
         self.addPort(self._myServicePort)
         return RTC.RTC_OK
 
-    def createConsumerPort(self, inst_name, type_name, if_type):
-        self._myServicePort = OpenRTM_aist.CorbaPort(type_name)
+    def createConsumerPort(self, inst_name, type_name, if_type, disp_name=""):
+        if not disp_name :
+            disp_name = inst_name
+        self._myServicePort = OpenRTM_aist.CorbaPort(disp_name)
         self._consumer[inst_name] = OpenRTM_aist.CorbaConsumer(interfaceType=if_type)
         self._myServicePort.registerConsumer(inst_name, type_name, self._consumer[inst_name])
         self.addPort(self._myServicePort)
@@ -296,7 +300,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         else:
             return None
 
-    def callAcynFunc(self, inst_name, func):
+    def callServiceAsync(self, inst_name, func):
         async_call = OpenRTM_aist.Async_tInvoker(self.getServicePtr(inst_name), func)
         async_call.invoke()
         return async_call
