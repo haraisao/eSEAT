@@ -309,7 +309,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
       if inst_name in self._consumer:
         return self._consumer[inst_name]._ptr().__getattribute__(m_name)(*val)
       else:
-        return Non
+        return None
         
     #
     #    Create communication adaptor
@@ -319,8 +319,10 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             name = str(tag.get('name'))
             type = tag.get('type')
 
-            if self.createDataPort(name, tag.get('datatype') ,type):
-                 return 1
+            if type == 'rtcin' or type == 'rtcout' :
+                return self.createDataPort(name, tag.get('datatype') ,type)
+            elif type == 'provider' or type == 'consumer' :
+                return self.createServicePort(name, tag.get('interface'), tag.get('class'), type, tag.get('dispname'))
             else:
                  return eSEAT_Core.createAdaptor(self, compname, tag)
         except:
