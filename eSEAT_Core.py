@@ -42,13 +42,19 @@ from WebAdaptor import *
 #
 #  execute seatml parser files
 #
-ffname = utils.findfile('SeatmlParser.py')
-if ffname :
-    execfile(ffname, globals())
-else:
-    print "SeatmlParser.py not found"
-    os._exit(1)
-#from SeatmlParser import *
+#ffname = utils.findfile('SeatmlParser.py')
+#if ffname :
+#    execfile(ffname, globals())
+#else:
+#    print "SeatmlParser.py not found"
+#    os._exit(1)
+from SeatmlParser import *
+
+def getGlobals():
+    return globals()
+
+def setGlobals(name, val):
+    globals()[name] = val
 
 ###############################################################
 #
@@ -545,11 +551,12 @@ class eSEAT_Core:
             if ffname :
                 execfile(ffname,globals())
         try:
-          if data :
-            exec(data, globals())
+            if data :
+                exec(data, globals())
         except:
-          print data
-          #self._logger.error("Fail to execute script:" + name)
+            print "ERROR..."
+            print data
+            #self._logger.error("Fail to execute script:" + name)
    
         # 
         #  Call 'send' method of Adaptor to send the result...

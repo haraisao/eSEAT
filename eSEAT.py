@@ -289,13 +289,10 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     def createConsumerPort(self, inst_name, type_name, if_type, disp_name=""):
         if not disp_name :
             disp_name = inst_name
-
-        print "= Consumer =", inst_name, type_name, disp_name, if_type
         self._ServicePort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
         self._consumer[inst_name] = OpenRTM_aist.CorbaConsumer(interfaceType=if_type)
         self._ServicePort[inst_name].registerConsumer(inst_name, type_name, self._consumer[inst_name])
         self.addPort(self._ServicePort[inst_name])
-        print "== creaet consumer =="
         return RTC.RTC_OK
 
     def getServicePtr(self, inst_name):
@@ -310,10 +307,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         return async_call
         
     def callService(self, inst_name, m_name, *val):
-        print "== Call Service", inst_name, m_name
         try:
             return self._consumer[inst_name]._ptr().__getattribute__(m_name)(*val)
-        #    return self._consumer[inst_name]._ptr().__getattribute__(m_name)(*val)
         except:
             return None
         
