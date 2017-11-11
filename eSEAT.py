@@ -129,6 +129,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self.manager = None
         self.activated=False
         self._consumer = {}
+        self._ServicePort = {}
 
     def exit(self):
         eSEAT_Core.exit(self)
@@ -270,9 +271,9 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     def createServicePort(self, name, type_name, klass, srv_type, disp_name=""):
         if srv_type == 'provider':
-            self.createProviderPort(name, type_name, eval(klass), disp_name)
+            self.createProviderPort(name, type_name, klass, disp_name)
         elif srv_type == 'consumer':
-            self.createConsumerPort(name, type_name, eval(klass), disp_name)
+            self.createConsumerPort(name, type_name, klass, disp_name)
         else:
             return False
         return True
@@ -280,18 +281,21 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     def createProviderPort(self,inst_name, type_name, impl_class, disp_name=""):
         if not disp_name :
             disp_name = inst_name
-        self._myServicePort = OpenRTM_aist.CorbaPort(disp_name)
-        self._myServicePort.registerProvider(inst_name, type_name, impl_class() )
-        self.addPort(self._myServicePort)
+        self._ServicePort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
+        self._ServicePort[inst_name].registerProvider(inst_name, type_name, impl_class() )
+        self.addPort(self._ServicePort[inst_name])
         return RTC.RTC_OK
 
     def createConsumerPort(self, inst_name, type_name, if_type, disp_name=""):
         if not disp_name :
             disp_name = inst_name
-        self._myServicePort = OpenRTM_aist.CorbaPort(disp_name)
+
+        print "= Consumer =", inst_name, type_name, disp_name, if_type
+        self._ServicePort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
         self._consumer[inst_name] = OpenRTM_aist.CorbaConsumer(interfaceType=if_type)
-        self._myServicePort.registerConsumer(inst_name, type_name, self._consumer[inst_name])
-        self.addPort(self._myServicePort)
+        self._ServicePort[inst_name].registerConsumer(inst_name, type_name, self._consumer[inst_name])
+        self.addPort(self._ServicePort[inst_name])
+        print "== creaet consumer =="
         return RTC.RTC_OK
 
     def getServicePtr(self, inst_name):
@@ -306,15 +310,17 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         return async_call
         
     def callService(self, inst_name, m_name, *val):
-      if inst_name in self._consumer:
-        return self._consumer[inst_name]._ptr().__getattribute__(m_name)(*val)
-      else:
-        return None
+        print "== Call Service", inst_name, m_name
+        try:
+            return self._consumer[inst_name]._ptr().__getattribute__(m_name)(*val)
+        #    return self._consumer[inst_name]._ptr().__getattribute__(m_name)(*val)
+        except:
+            return None
         
     #
     #    Create communication adaptor
     #
-    def createAdaptor(self, compname, tag):
+    def createAdaptor(self, compname, tag, env=globals()):
         try:
             name = str(tag.get('name'))
             type = tag.get('type')
@@ -322,7 +328,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             if type == 'rtcin' or type == 'rtcout' :
                 return self.createDataPort(name, tag.get('datatype') ,type)
             elif type == 'provider' or type == 'consumer' :
-                return self.createServicePort(name, tag.get('interface'), tag.get('class'), type, tag.get('dispname'))
+                return self.createServicePort(name, tag.get('interface'), eval(tag.get('class'), env), type, tag.get('dispname'))
             else:
                  return eSEAT_Core.createAdaptor(self, compname, tag)
         except:

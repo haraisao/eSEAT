@@ -42,13 +42,13 @@ from WebAdaptor import *
 #
 #  execute seatml parser files
 #
-#ffname = utils.findfile('SeatmlParser.py')
-#if ffname :
-#    execfile(ffname, globals())
-#else:
-#    print "SeatmlParser.py not found"
-#    os._exit(1)
-from SeatmlParser import *
+ffname = utils.findfile('SeatmlParser.py')
+if ffname :
+    execfile(ffname, globals())
+else:
+    print "SeatmlParser.py not found"
+    os._exit(1)
+#from SeatmlParser import *
 
 ###############################################################
 #
@@ -104,6 +104,8 @@ class eSEAT_Core:
 
         self._logger = SeatLogger("eSEAT")
 
+        globals()['seat'] = self
+
     #
     #
     def exit(self):
@@ -143,7 +145,7 @@ class eSEAT_Core:
     #
     #  Create Adaptor called by SEATML_Parser
     #
-    def createAdaptor(self, compname, tag):
+    def createAdaptor(self, compname, tag, env=globals()):
         try:
             name = str(tag.get('name'))
             type = tag.get('type')

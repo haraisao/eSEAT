@@ -25,7 +25,7 @@ from lxml import etree
 # utils
 import utils
 
-import eSEAT_Core
+#import eSEAT_Core
 
 ###########################################
 #
@@ -83,7 +83,7 @@ class SEATML_Parser():
         try:
             name = str(tag.get('name'))
             type = tag.get('type')
-            return self.parent.createAdaptor(self.componentName, tag)
+            return self.parent.createAdaptor(self.componentName, tag, globals())
         except:
             self.logError(u"invalid parameters(1): " + type + ": " + name)
             return -1
@@ -160,7 +160,8 @@ class SEATML_Parser():
             ffname = utils.findfile(fname)
             if ffname :
                 execfile(ffname, globals())
-        if txt : exec(txt, globals())
+        if txt :
+            exec(txt, globals())
 
     #
     # get attribute of the tag. If the attribute isnot found, set default value
@@ -182,7 +183,7 @@ class SEATML_Parser():
     #  Sub parser for GUI items
     #
     def parseGui(self, name, e):
-        if not isinstance(self.parent, eSEAT_Core.eSEAT_Gui) : return
+        if not isinstance(self.parent, eSEAT_Gui) : return
         commands = self.parseCommands(e)
 
         #
@@ -352,13 +353,13 @@ class SEATML_Parser():
 
             for a in g.getchildren():
                 #
-                #  <adaptor><agent>
-                if a.tag == 'adaptor' or a.tag == 'agent':
-                    self.createAdaptor(a)
-                #
                 #  <script>
-                elif a.tag == 'script':
+                if a.tag == 'script':
                     self.procScript(a, a.get('execfile'))
+                #
+                #  <adaptor><agent>
+                elif a.tag == 'adaptor' or a.tag == 'agent':
+                    self.createAdaptor(a)
                 #
                 #  <onexec>
                 elif a.tag == 'onexec':
