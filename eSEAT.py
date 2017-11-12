@@ -38,7 +38,6 @@ sys.path.append(os.path.join(rootdir,'3rd_party'))
 
 #
 #
-
 ########
 #  for OpenRTM-aist
 import OpenRTM_aist
@@ -56,7 +55,8 @@ from RTC  import *
 #    print 'eSEAT_Core.py not found'
 #    sys.exit(1)
 
-from eSEAT_Core  import *
+#from eSEAT_Core  import *
+from eSEAT_Core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals
 
 ###############################################################
 #
@@ -286,7 +286,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._ProviderPort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
         self._ProviderPort[inst_name].registerProvider(inst_name, type_name, impl_class() )
         self.addPort(self._ProviderPort[inst_name])
-        return RTC.RTC_OK
+        return RTC_OK
     #
     # Create Consumer
     def createConsumerPort(self, inst_name, type_name, if_type, disp_name=""):
@@ -296,7 +296,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._consumer[inst_name] = OpenRTM_aist.CorbaConsumer(interfaceType=if_type)
         self._ConsumerPort[inst_name].registerConsumer(inst_name, type_name, self._consumer[inst_name])
         self.addPort(self._ConsumerPort[inst_name])
-        return RTC.RTC_OK
+        return RTC_OK
     #
     #
     def getServicePtr(self, inst_name):
@@ -328,8 +328,14 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             type = tag.get('type')
 
             if type == 'rtcin' or type == 'rtcout' :
+                module=tag.get('datatype').split('.')
+                if len(module) > 1 and not module[0] in env:
+                    eval("import "+module[0], env)              
                 return self.createDataPort(name, tag.get('datatype') ,type)
             elif type == 'provider' or type == 'consumer' :
+                module=tag.get('class').split('.')
+                if len(module) > 1 and not module[0] in env:
+                    eval("import "+module[0], env)
                 return self.createServicePort(name, tag.get('interface'), eval(tag.get('class'), env), type, tag.get('dispname'))
             else:
                  return eSEAT_Core.createAdaptor(self, compname, tag)
@@ -574,7 +580,6 @@ def deamonize():
 #
 if __name__=='__main__':
     seatmgr = eSEATManager()
-    seat = seatmgr.comp
     seatmgr.start()
 
     print "...Terminate." 

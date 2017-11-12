@@ -21,6 +21,8 @@ import gc
 import time
 import uuid
 
+from eSEAT_Core import getGlobals
+
 #
 # Raw Socket Adaptor
 #
@@ -668,8 +670,7 @@ class CometReader(CommReader):
 	res={}
         try:
           if self.getServer().isInWhiteList(self.owner.host) :
-            globals()['seat'] = self.rtc
-            exec(data, globals())
+            exec(data, getGlobals())
           res["result"] = "OK"
 	except:
           res["result"] = "ERROR: in exec"
