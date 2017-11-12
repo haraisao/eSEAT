@@ -129,7 +129,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self.manager = None
         self.activated=False
         self._consumer = {}
-        self._ServicePort = {}
+        self._ConsumerPort = {}
+        self._ProviderPort = {}
 
     def exit(self):
         eSEAT_Core.exit(self)
@@ -277,35 +278,41 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         else:
             return False
         return True
-
+    #
+    # Create Provider
     def createProviderPort(self,inst_name, type_name, impl_class, disp_name=""):
         if not disp_name :
             disp_name = inst_name
-        self._ServicePort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
-        self._ServicePort[inst_name].registerProvider(inst_name, type_name, impl_class() )
-        self.addPort(self._ServicePort[inst_name])
+        self._ProviderPort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
+        self._ProviderPort[inst_name].registerProvider(inst_name, type_name, impl_class() )
+        self.addPort(self._ProviderPort[inst_name])
         return RTC.RTC_OK
-
+    #
+    # Create Consumer
     def createConsumerPort(self, inst_name, type_name, if_type, disp_name=""):
         if not disp_name :
             disp_name = inst_name
-        self._ServicePort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
+        self._ConsumerPort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
         self._consumer[inst_name] = OpenRTM_aist.CorbaConsumer(interfaceType=if_type)
-        self._ServicePort[inst_name].registerConsumer(inst_name, type_name, self._consumer[inst_name])
-        self.addPort(self._ServicePort[inst_name])
+        self._ConsumerPort[inst_name].registerConsumer(inst_name, type_name, self._consumer[inst_name])
+        self.addPort(self._ConsumerPort[inst_name])
         return RTC.RTC_OK
-
+    #
+    #
     def getServicePtr(self, inst_name):
         if inst_name in self._consumer:
             return self._consumer[inst_name]._ptr()
         else:
             return None
-
+    #
+    #
     def callServiceAsync(self, inst_name, func):
         async_call = OpenRTM_aist.Async_tInvoker(self.getServicePtr(inst_name), func)
         async_call.invoke()
         return async_call
-        
+    
+    #
+    #
     def callService(self, inst_name, m_name, *val):
         try:
             return self._consumer[inst_name]._ptr().__getattribute__(m_name)(*val)

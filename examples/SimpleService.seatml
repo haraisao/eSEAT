@@ -3,10 +3,14 @@
   <general name="SimpleService">
     <script>
 import SimpleService
+from MyService_Impl import *
     </script>
     <adaptor name="str_out" type="rtcout" datatype="TimedString" />
     <adaptor name="str_in" type="rtcin" datatype="TimedString" />
+    <!--
     <adaptor name="myservice0" type="consumer" interface="MyService" class="SimpleService.MyService"  />
+    -->
+    <adaptor name="myservice0" type="provider" interface="MyService" class="MyServiceSVC_impl"  />
   </general>
 
   <state name="main_mode">
@@ -32,7 +36,6 @@ seat.callService("myservice0", "echo", "Hello World")
       <script>
 retval = seat.callService("myservice0", "get_value")
 seat.appendText("main_mode:textOut", "==="+str(retval)+"===\n")
-
       </script>
     </button>
 
