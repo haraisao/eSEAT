@@ -40,7 +40,14 @@ if sys.platform == "win32":
             "py2exe": {
                 "includes": "xml.etree.ElementTree, lxml._elementpath, bs4, OpenRTM_aist, RTC, gzip, multiprocessing, eSEAT_Core, SeatmlParser, SocketAdaptor, utils, WebAdaptor",
 #                "bundle_files": 1,
-                "dll_excludes": [ "MSVCP90.dll"],
+                "dll_excludes": [ 
+                    "MSVCP90.dll",
+                    "api-ms-win-core-processthreads-l1-1-2.dll",
+                    "api-ms-win-core-sysinfo-l1-2-1.dll",
+                    "api-ms-win-core-errorhandling-l1-1-1.dll",
+                    "api-ms-win-core-profile-l1-1-0.dll",
+                    "api-ms-win-core-libraryloader-l1-2-0.dll",
+                ],
             }
         }
     }
