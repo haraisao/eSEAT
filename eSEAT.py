@@ -120,7 +120,6 @@ class RtcLogger:
 #
 #  Class eSEAT (RTC)
 #
-#
 class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     def __init__(self, manager):
         OpenRTM_aist.DataFlowComponentBase.__init__(self, manager)
@@ -574,7 +573,6 @@ def deamonize():
 #  os.close(sys.stdout.fileno())
 #  os.close(sys.stderr.fileno())
 
-  
 #########################################################################
 #
 #  M A I N 

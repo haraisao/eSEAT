@@ -21,7 +21,7 @@ import gc
 import time
 import uuid
 
-#
+#######################################
 # Raw Socket Adaptor
 #
 #   threading.Tread <--- SocketPort
@@ -207,8 +207,7 @@ class SocketPort(threading.Thread):
 
     self.close()
 
-#    print "Read thread terminated:",self.name
-
+  #    print "Read thread terminated:",self.name
   #
   #  close socket
   #
@@ -250,7 +249,7 @@ class SocketPort(threading.Thread):
       print msg
       self.close()
 
-#
+#######################################
 #  WebServer Adaptor
 #
 class WebSocketServer(SocketPort):
@@ -270,12 +269,11 @@ class WebSocketServer(SocketPort):
     self.cometManager = CometManager(self)
 
     self.bind_res = self.bind()
-#    if self.bind_res < 1:
-#      os._exit(1)
+    #if self.bind_res < 1:
+    #  os._exit(1)
     self.service_keys=[]
     self.host_list=["localhost"]
-#    self.appendWhiteList("127.0.0.1")
-
+    #self.appendWhiteList("127.0.0.1")
   #
   # 
   #
@@ -292,7 +290,7 @@ class WebSocketServer(SocketPort):
       return newadaptor
 
     except:
-#      print "ERROR in accept_service"
+      # print "ERROR in accept_service"
       pass
 
     return None
@@ -372,7 +370,7 @@ class WebSocketServer(SocketPort):
   def send(self, name, msg, encoding=None):
     self.pushMessage(msg)
 
-#
+######################################
 #  Service Adaptor
 #
 class SocketService(SocketPort):
@@ -396,7 +394,7 @@ class SocketService(SocketPort):
   def getServer(self):
     return self.server_adaptor
 
-#
+#######################################
 #  Commands 
 #
 CloseCodeNum={
@@ -426,7 +424,7 @@ Opcode={
      'PongFrame.':10,
 }
 
-#
+######################################
 #  Foundmental reader class 
 #
 class CommReader:
@@ -935,7 +933,6 @@ class CometManager:
       self.response(k, json_data, ctype)
 
 ############# Functoins
-#
 #
 #
 def get_file_contents(fname, dirname="."):

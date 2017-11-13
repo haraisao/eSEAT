@@ -28,15 +28,15 @@ from bs4  import BeautifulSoup
 #########
 #  GUI etc.
 from Tkinter import * 
-from ScrolledText import * 
+from ScrolledText import ScrolledText 
 
 #########
 #  WebAdaptor
-from SocketAdaptor import * 
+from SocketAdaptor import SocketAdaptor 
 
 #########
 #  WebAdaptor
-from WebAdaptor import * 
+from WebAdaptor import WebSocketServer,CometReader,parseData 
 
 ###############################################################
 #
@@ -48,7 +48,7 @@ from WebAdaptor import *
 #else:
 #    print "SeatmlParser.py not found"
 #    os._exit(1)
-from SeatmlParser import *
+from SeatmlParser import SEATML_Parser,convertDataType
 
 
 def getGlobals():
@@ -327,7 +327,7 @@ class eSEAT_Core:
                 ffname = utils.findfile(kond[0])
                 if ffname :
                     execfile(ffname, globals())
-#                execfile(kond[0], globals())
+                #execfile(kond[0], globals())
 
             if eval(kond[1].strip(), globals()):
                 for cmd in c[1]:
@@ -664,7 +664,6 @@ class eSEAT_Core:
 ###########################################################
 #   eSEAT_Gui
 #
-#
 class eSEAT_Gui:
     def __init__(self):
         self.gui_items = {}
@@ -728,8 +727,6 @@ class eSEAT_Gui:
         self.items[name].append(['space', n])
 
     ###################  CREATE GUI ITEMS ####################
-    #
-    #
     #################  B U T T O N ################### 
     ## Create Button Item
     def createButtonItem(self, frame, sname, name, fg="#000000", bg="#cccccc", cspan=1):
