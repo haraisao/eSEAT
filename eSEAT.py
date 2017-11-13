@@ -57,6 +57,7 @@ from RTC  import *
 
 #from eSEAT_Core  import *
 from eSEAT_Core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals
+import SeatmlParser
 
 ###############################################################
 #
@@ -404,7 +405,7 @@ class eSEATManager:
         self.manager.activateManager()
 
         instance_name = self.comp.getProperties().getProperty("naming.names")
-        instance_name = formatInstanceName(instance_name)
+        instance_name = SeatmlParser.formatInstanceName(instance_name)
 
         self.comp.setInstanceName(instance_name)
 

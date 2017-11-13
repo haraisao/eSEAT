@@ -50,6 +50,7 @@ from WebAdaptor import *
 #    os._exit(1)
 from SeatmlParser import *
 
+
 def getGlobals():
     return globals()
 

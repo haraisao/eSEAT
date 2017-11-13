@@ -25,7 +25,7 @@ from lxml import etree
 # utils
 import utils
 
-from eSEAT_Core import getGlobals,eSEAT_Gui
+import eSEAT_Core
 
 ###########################################
 #
@@ -83,7 +83,7 @@ class SEATML_Parser():
         try:
             name = str(tag.get('name'))
             type = tag.get('type')
-            return self.parent.createAdaptor(self.componentName, tag, getGlobals())
+            return self.parent.createAdaptor(self.componentName, tag, eSEAT_Core.getGlobals())
         except:
             self.logError(u"invalid parameters(1): " + type + ": " + name)
             return -1
@@ -159,9 +159,9 @@ class SEATML_Parser():
         if fname :
             ffname = utils.findfile(fname)
             if ffname :
-                execfile(ffname, getGlobals())
+                execfile(ffname, eSEAT_Core.getGlobals())
         if txt :
-            exec(txt, getGlobals())
+            exec(txt, eSEAT_Core.getGlobals())
 
     #
     # get attribute of the tag. If the attribute isnot found, set default value
@@ -183,7 +183,7 @@ class SEATML_Parser():
     #  Sub parser for GUI items
     #
     def parseGui(self, name, e):
-        if not isinstance(self.parent, eSEAT_Gui) : return
+        if not isinstance(self.parent, eSEAT_Core.eSEAT_Gui) : return
         commands = self.parseCommands(e)
 
         #
