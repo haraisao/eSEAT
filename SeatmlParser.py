@@ -161,6 +161,7 @@ class SEATML_Parser():
             if ffname :
                 execfile(ffname, eSEAT_Core.getGlobals())
         if txt :
+            sys.path.append('.')
             exec(txt, eSEAT_Core.getGlobals())
 
     #
