@@ -42,12 +42,6 @@ from WebAdaptor import WebSocketServer,CometReader,parseData
 #
 #  execute seatml parser files
 #
-#ffname = utils.findfile('SeatmlParser.py')
-#if ffname :
-#    execfile(ffname, globals())
-#else:
-#    print "SeatmlParser.py not found"
-#    os._exit(1)
 from SeatmlParser import SEATML_Parser,convertDataType
 
 
@@ -326,7 +320,7 @@ class eSEAT_Core:
             if kond[0] :
                 ffname = utils.findfile(kond[0])
                 if ffname :
-                    execfile(ffname, globals())
+                    exec_script_file(ffname, globals())
                 #execfile(kond[0], globals())
 
             if eval(kond[1].strip(), globals()):
@@ -550,7 +544,7 @@ class eSEAT_Core:
         if fname :
             ffname = utils.findfile(fname)
             if ffname :
-                execfile(ffname,globals())
+                exec_script_file(ffname,globals())
         try:
             if data :
                 exec(data, globals())

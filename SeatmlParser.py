@@ -160,7 +160,7 @@ class SEATML_Parser():
         if fname :
             ffname = utils.findfile(fname)
             if ffname :
-                execfile(ffname, eSEAT_Core.getGlobals())
+                utils.exec_script_file(ffname, eSEAT_Core.getGlobals())
         if txt :
             sys.path.append('.')
             exec(txt, eSEAT_Core.getGlobals())
