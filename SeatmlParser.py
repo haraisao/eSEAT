@@ -96,50 +96,53 @@ class SEATML_Parser():
     #
     def parseCommands(self, r):
         commands = []
+
+        for c in r.getchildren():
         #
         # <message>
-        for c in r.findall('message'): # end message
-            name     = c.get('sendto')
-            if not name : name = c.get('host')
-            encode   = c.get('encode')
-            input_id = c.get('input')
-            data     = c.text
-            commands.append(['c', name, data, encode, input_id])
+            if c.tag == 'message': # end message
+                name     = c.get('sendto')
+                if not name : name = c.get('host')
+                encode   = c.get('encode')
+                input_id = c.get('input')
+                data     = c.text
+                commands.append(['c', name, data, encode, input_id])
         #
         # <command>
-        for c in r.findall('command'): # get commands
-            name     = c.get('sendto')
-            if not name : name = c.get('host')
-            encode   = c.get('encode')
-            input_id = c.get('input')
-            data     = c.text
-            commands.append(['c', name, data, encode, input_id])
+            elif c.tag == 'command': # get commands
+                name     = c.get('sendto')
+                if not name : name = c.get('host')
+                encode   = c.get('encode')
+                input_id = c.get('input')
+                data     = c.text
+                commands.append(['c', name, data, encode, input_id])
         #
         # <statetransition>
-        for c in r.findall('statetransition'): # get statetransition
-            func = c.get('func')
-            data = c.text
-            commands.append(['t', func, data])
+            elif c.tag == in 'statetransition': # get statetransition
+                func = c.get('func')
+                data = c.text
+                commands.append(['t', func, data])
         #
         # <log>
-        for c in r.findall('log'): #  logging
-            data = c.text
-            commands.append(['l', data])
+            elif c.tag == 'log': #  logging
+                data = c.text
+                commands.append(['l', data])
         #
         # <shell>
-        for c in r.findall('shell'): # get shell
-            sendto = c.get('sendto')
-            if not sendto : sendto = c.get('host')
-            data = c.text
-            commands.append(['x', sendto, data])
+            elif c.tag == 'shell': # get shell
+                sendto = c.get('sendto')
+                if not sendto : sendto = c.get('host')
+                data = c.text
+                commands.append(['x', sendto, data])
         #
         # <script>
-        for c in r.findall('script'): # get script
-            sendto  = c.get('sendto')
-            if not sendto : sendto = c.get('host')
-            fname = c.get('execfile')
-            data = self.getScripts(c)
-            commands.append(['s', sendto, data, fname])
+            elif c.tag == 'script': # get script
+                sendto  = c.get('sendto')
+                if not sendto : sendto = c.get('host')
+                fname = c.get('execfile')
+                data = self.getScripts(c)
+                commands.append(['s', sendto, data, fname])
+                
         return commands
 
     #
