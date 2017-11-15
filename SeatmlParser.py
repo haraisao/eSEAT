@@ -118,7 +118,7 @@ class SEATML_Parser():
                 commands.append(['c', name, data, encode, input_id])
         #
         # <statetransition>
-            elif c.tag == in 'statetransition': # get statetransition
+            elif c.tag == 'statetransition': # get statetransition
                 func = c.get('func')
                 data = c.text
                 commands.append(['t', func, data])
@@ -142,7 +142,7 @@ class SEATML_Parser():
                 fname = c.get('execfile')
                 data = self.getScripts(c)
                 commands.append(['s', sendto, data, fname])
-                
+
         return commands
 
     #
