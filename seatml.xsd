@@ -58,15 +58,15 @@
       <xs:sequence>
         <xs:element minOccurs="0" maxOccurs="1" ref="onentry"/>
         <xs:element minOccurs="0" maxOccurs="1" ref="onexit"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="onexec"/>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="rule"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="label"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="button"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="input"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="text"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="brk"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="space"/>
-          <xs:element minOccurs="0" maxOccurs="unbounded" ref="rule"/>
-          <xs:element minOccurs="0" maxOccurs="1" ref="onexec"/>
         </xs:choice>
       </xs:sequence>
       <xs:attribute name="name" use="required" type="xs:string"/>
