@@ -13,7 +13,6 @@
     <xs:complexType>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="adaptor"/>
-          <xs:element minOccurs="0" maxOccurs="unbounded" ref="agent"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="var"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="onexec"/>
@@ -36,19 +35,10 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="agent">
-    <xs:complexType>
-      <xs:attribute name="name" use="required" type="xs:string"/>
-      <xs:attribute name="type" use="required" type="xs:string"/>
-      <xs:attribute name="datatype" use="optional" type="xs:string"/>
-      <xs:attribute name="host" use="optional" type="xs:string"/>
-      <xs:attribute name="port" use="optional" type="xs:string"/>
-      <xs:attribute name="dir" use="optional" type="xs:string"/>
-    </xs:complexType>
-  </xs:element>
-
   <xs:element name="var">
     <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="value" use="optional" type="xs:string"/>
     </xs:complexType>
   </xs:element>
 

@@ -356,7 +356,7 @@ class SEATML_Parser():
             for a in g.getchildren():
                 #
                 #  <adaptor><agent>
-                if a.tag == 'adaptor' or a.tag == 'agent':
+                if a.tag == 'adaptor':
                     self.createAdaptor(a)
                 #
                 #  <script>
@@ -366,6 +366,11 @@ class SEATML_Parser():
                 #  <onexec>
                 elif a.tag == 'onexec':
                     self.parseExec('all', a)
+                #
+                #
+                #  <var>
+                elif a.tag == 'var':
+                    eSEAT_Core.setGlobals(g.get('name'), g.get('value'))
         # 
         #  <state>
         for s in doc.findall('state'):
