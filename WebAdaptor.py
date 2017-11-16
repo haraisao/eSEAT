@@ -639,8 +639,8 @@ class CometReader(CommReader):
         self.cometTrigger(Data)
 
       elif fname == "/rtc_onData" :  # Process request from Web adaptor
-	res={}
-	if self.rtc:
+        res={}
+        if self.rtc:
           self.rtc.onData(self.getServer().name, data)
           res["result"] = "OK"
         else:
@@ -651,8 +651,8 @@ class CometReader(CommReader):
         self.sendResponse(response)
 
       elif fname == "/rtc_processResult" :
-	res={}
-	if self.rtc:
+        res={}
+        if self.rtc:
           self.rtc.processResult(self.getServer().name, data)
           res["result"] = "OK"
         else:
@@ -663,13 +663,13 @@ class CometReader(CommReader):
         self.sendResponse(response)
 
       elif fname == "/evalCommand" :
-	res={}
+        res={}
         try:
           if self.getServer().isInWhiteList(self.owner.host) :
             globals()['seat'] = self.rtc
             exec(data, globals())
           res["result"] = "OK"
-	except:
+        except:
           res["result"] = "ERROR: in exec"
 
         res["date"] = datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S JST")
@@ -677,7 +677,7 @@ class CometReader(CommReader):
         self.sendResponse(response)
 
       else:
-	  contents = "Hello, No such action defined"
+          contents = "Hello, No such action defined"
           response = self.parser.response200("text/plain", contents)
           self.sendResponse(response)
     else:
@@ -826,10 +826,10 @@ class HttpCommand(CommParser):
 
       if self.header.has_key("Content-Length") :
         contentLen = int(self.header["Content-Length"])
-	pos += contentLen
+        pos += contentLen
         if len(self.buffer) < contentLen:
            #print "ERROR to read message: %s, %d" % (self.buffer, contentLen)
-	   return 0
+           return 0
         self.data = self.buffer[:contentLen]
 
       return pos
@@ -920,7 +920,7 @@ class CometManager:
       try :
         json_data['result'] = reader.rtc.callComet()
       except:
-	json_data['result'] = ""
+        json_data['result'] = ""
 
       contents = json.dumps(json_data)
       responsemsg = reader.parser.response200(ctype, contents)
