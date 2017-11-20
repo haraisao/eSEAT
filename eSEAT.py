@@ -261,52 +261,48 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     # Service Port
     #
-    def createServicePort(self, name, type_name, klass, srv_type, disp_name=""):
+    def createServicePort(self, name, if_name, type_name, klass, srv_type):
         if srv_type == 'provider':
-            self.createProviderPort(name, type_name, klass, disp_name)
+            self.createProviderPort(name, if_name, type_name, klass)
         elif srv_type == 'consumer':
-            self.createConsumerPort(name, type_name, klass, disp_name)
+            self.createConsumerPort(name, if_name, type_name, klass)
         else:
             return False
         return True
     #
     # Create Provider
-    def createProviderPort(self,inst_name, type_name, impl_class, disp_name=""):
-        if not disp_name :
-            disp_name = inst_name
-        self._ProviderPort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
-        self._ProviderPort[inst_name].registerProvider(inst_name, type_name, impl_class() )
-        self.addPort(self._ProviderPort[inst_name])
+    def createProviderPort(self, name, if_name, type_name, impl_class):
+        self._ProviderPort[name] = OpenRTM_aist.CorbaPort(name)
+        self._ProviderPort[name].registerProvider(if_name, type_name, impl_class() )
+        self.addPort(self._ProviderPort[name])
         return RTC_OK
     #
     # Create Consumer
-    def createConsumerPort(self, inst_name, type_name, if_type, disp_name=""):
-        if not disp_name :
-            disp_name = inst_name
-        self._ConsumerPort[inst_name] = OpenRTM_aist.CorbaPort(disp_name)
-        self._consumer[inst_name] = OpenRTM_aist.CorbaConsumer(interfaceType=if_type)
-        self._ConsumerPort[inst_name].registerConsumer(inst_name, type_name, self._consumer[inst_name])
-        self.addPort(self._ConsumerPort[inst_name])
+    def createConsumerPort(self, name, if_name, type_name, if_type):
+        self._ConsumerPort[name] = OpenRTM_aist.CorbaPort(name)
+        self._consumer[name] = OpenRTM_aist.CorbaConsumer(interfaceType=if_type)
+        self._ConsumerPort[name].registerConsumer(if_name, type_name, self._consumer[name])
+        self.addPort(self._ConsumerPort[name])
         return RTC_OK
     #
     #
-    def getServicePtr(self, inst_name):
-        if inst_name in self._consumer:
-            return self._consumer[inst_name]._ptr()
+    def getServicePtr(self, name):
+        if name in self._consumer:
+            return self._consumer[name]._ptr()
         else:
             return None
     #
     #
-    def callServiceAsync(self, inst_name, func):
-        async_call = OpenRTM_aist.Async_tInvoker(self.getServicePtr(inst_name), func)
+    def callServiceAsync(self, name, func):
+        async_call = OpenRTM_aist.Async_tInvoker(self.getServicePtr(name), func)
         async_call.invoke()
         return async_call
     
     #
     #
-    def callService(self, inst_name, m_name, *val):
+    def callService(self, name, m_name, *val):
         try:
-            return self._consumer[inst_name]._ptr().__getattribute__(m_name)(*val)
+            return self._consumer[name]._ptr().__getattribute__(m_name)(*val)
         except:
             return None
         
@@ -324,10 +320,11 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                     exec("import "+module[0], env)              
                 return self.createDataPort(name, tag.get('datatype') ,type)
             elif type == 'provider' or type == 'consumer' :
-                module=tag.get('class').split('.')
+                module=tag.get('if_class').split('.')
                 if len(module) > 1 and not module[0] in env:
                     exec("import "+module[0], env)
-                return self.createServicePort(name, tag.get('interface'), eval(tag.get('class'), env), type, tag.get('dispname'))
+                if_name, if_type =tag.get('interface').split(':')
+                return self.createServicePort(name, if_name, if_type, eval(tag.get('if_class'), env), type)
             else:
                  return eSEAT_Core.createAdaptor(self, compname, tag)
         except:

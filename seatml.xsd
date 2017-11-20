@@ -30,8 +30,7 @@
       <xs:attribute name="port" use="optional" type="xs:string"/>
       <xs:attribute name="dir" use="optional" type="xs:string"/>
       <xs:attribute name="interface" use="optional" type="xs:string"/>
-      <xs:attribute name="class" use="optional" type="xs:string"/>
-      <xs:attribute name="dispname" use="optional" type="xs:string"/>
+      <xs:attribute name="if_class" use="optional" type="xs:string"/>
     </xs:complexType>
   </xs:element>
 
