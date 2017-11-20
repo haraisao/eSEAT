@@ -321,17 +321,18 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             if type == 'rtcin' or type == 'rtcout' :
                 module=tag.get('datatype').split('.')
                 if len(module) > 1 and not module[0] in env:
-                    eval("import "+module[0], env)              
+                    exec("import "+module[0], env)              
                 return self.createDataPort(name, tag.get('datatype') ,type)
             elif type == 'provider' or type == 'consumer' :
                 module=tag.get('class').split('.')
                 if len(module) > 1 and not module[0] in env:
-                    eval("import "+module[0], env)
+                    exec("import "+module[0], env)
                 return self.createServicePort(name, tag.get('interface'), eval(tag.get('class'), env), type, tag.get('dispname'))
             else:
                  return eSEAT_Core.createAdaptor(self, compname, tag)
         except:
             self._logger.error(u"invalid parameters: " + type + ": " + name)
+            print traceback.format_exc()
             return -1
 
         return 1
