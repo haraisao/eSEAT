@@ -259,8 +259,6 @@ class eSEAT_Core:
 
         #
         #
-        #for c in cmds:
-        #    self.activateCommand(c, s)
         cmds.execute(s)
         return True
 
@@ -276,11 +274,6 @@ class eSEAT_Core:
                 self._logger.info("no command found")
             return False
 
-        #
-        #
-        #for c in cmds:
-        #    self.activateCommand(c, '')
-        #
         #
         cmds.ececute('')
         return True
@@ -330,9 +323,6 @@ class eSEAT_Core:
                 #execfile(kond[0], globals())
 
             if eval(kond[1].strip(), globals()):
-                #for cmd in c[1]:
-                #    self.activateCommandEx(cmd, data)
-                #
                 tasks = c[1]
                 tasks.executeEx(data)
                 #
@@ -438,8 +428,6 @@ class eSEAT_Core:
     #
     def stateTransfer(self, newstate):
         try:
-            #for c in self.keys[self.currentstate+":::onexit"]:
-            #    self.activateCommand(c)
             tasks = self.keys[self.currentstate+":::onexit"]
             tasks.execute()
         except KeyError:
@@ -455,8 +443,6 @@ class eSEAT_Core:
         self.currentstate = newstate
 
         try:
-            #for c in self.keys[self.currentstate+":::onentry"]:
-            #    self.activateCommand(c)
             tasks = self.keys[self.currentstate+":::onentry"]
             tasks.execute()
         except KeyError:
@@ -581,23 +567,6 @@ class eSEAT_Core:
                    self._logger.error("no such adaptor:" + name)
                 else:
                    self._logger.error("no such adaptor: None")
-
-    ########################
-    #
-    #  Activate Lookuped Commands
-    #
-    def activateCommand(self, c, data=None):
-        if   c[0] == 'c': self.applyMessage(c)
-        elif c[0] == 'l': self.applyLog(c)
-        elif c[0] == 'x': self.applyShell(c)
-        elif c[0] == 's': self.applyScript(c, data)
-        elif c[0] == 't': self.applyTransition(c)
-
-    #
-    #
-    def activateCommandEx(self, c, data):
-        if c[0] == 'c': c[3] = None
-        self.activateCommand(c, data)
 
 
     ##############################
