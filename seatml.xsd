@@ -15,7 +15,8 @@
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="adaptor"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="var"/>
-          <xs:element minOccurs="0" maxOccurs="unbounded" ref="onexec"/>
+          <xs:element minOccurs="0" maxOccurs="1" ref="onexec"/>
+          <xs:element minOccurs="0" maxOccurs="1" ref="ontimeout"/>
         </xs:choice>
       <xs:attribute name="name" use="required" type="xs:string"/>
     </xs:complexType>
@@ -52,12 +53,29 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="ontimeout">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="cond"/>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="message"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="command"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="shell"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="log"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="timeout" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  
   <xs:element name="state">
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" maxOccurs="1" ref="onentry"/>
         <xs:element minOccurs="0" maxOccurs="1" ref="onexit"/>
         <xs:element minOccurs="0" maxOccurs="1" ref="onexec"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="ontimeout"/>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="rule"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="label"/>
@@ -224,6 +242,7 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+
 
   <xs:element name="message">
     <xs:complexType>

@@ -27,6 +27,7 @@ import utils
 ###########################################
 #
 import eSEAT_Core
+#from Task import State, TaskGroup, TaskMessage, TaskScript, TaskShell, TaskLog, TaskStatetransition
 import Task
 
 ###########################################
@@ -102,53 +103,33 @@ class SEATML_Parser():
         #
         # <message>
             if c.tag == 'message': # end message
-                name     = c.get('sendto')
-                if not name : name = c.get('host')
-                encode   = c.get('encode')
-                input_id = c.get('input')
-                data     = c.text
-
-                task = Task.TaskMessage(self.parent, name, data, encode, input_id)
-                tasks.addTask(task)
-        #
-        # <command>
-            elif c.tag == 'command': # get commands
-                name     = c.get('sendto')
-                if not name : name = c.get('host')
-                encode   = c.get('encode')
-                input_id = c.get('input')
-                data     = c.text
-                task = Task.TaskMessage(self.parent, name, data, encode, input_id)
+                sendto     = c.get('sendto')
+                if not sendto : sendto = c.get('host')
+                task = Task.TaskMessage(self.parent, sendto, c.text, c.get('encode'), c.get('input'))
                 tasks.addTask(task)
         #
         # <statetransition>
             elif c.tag == 'statetransition': # get statetransition
-                func = c.get('func')
-                data = c.text
-                task = Task.TaskStatetransition(self.parent, func, data)
+                task = Task.TaskStatetransition(self.parent, c.get('func'), c.text)
                 tasks.addTask(task)
         #
         # <log>
             elif c.tag == 'log': #  logging
-                data = c.text
-                task = Task.TaskLog(self.parent, data)
+                task = Task.TaskLog(self.parent, c.text)
                 tasks.addTask(task)
         #
         # <shell>
             elif c.tag == 'shell': # get shell
                 sendto = c.get('sendto')
                 if not sendto : sendto = c.get('host')
-                data = c.text
-                task = Task.TaskShell(self.parent, sendto, data)
+                task = Task.TaskShell(self.parent, sendto, c.text)
                 tasks.addTask(task)
         #
         # <script>
             elif c.tag == 'script': # get script
                 sendto  = c.get('sendto')
                 if not sendto : sendto = c.get('host')
-                fname = c.get('execfile')
-                data = self.getScripts(c)
-                task = Task.TaskScript(self.parent, sendto, data, fname)
+                task = Task.TaskScript(self.parent, sendto, self.getScripts(c), c.get('execfile'))
                 tasks.addTask(task)
         return tasks
 
@@ -218,7 +199,6 @@ class SEATML_Parser():
             self.parent.registerCommands(name+":gui:"+key, commands)
             self.parent.addButton(name, key, self.getAttribute(e, 'color'),
                  self.getAttribute(e, 'bg_color'), self.getAttribute(e, 'colspan', 1))
-
         #
         #  <input>
         elif e.tag == 'input':
@@ -329,6 +309,16 @@ class SEATML_Parser():
         self.parent.registerCommands(name+"::onexec", commands)
         self.logInfo(u"register <onexec> on " + name)
 
+    #
+    #   Sub parser for <exec>tag 
+    #
+    def parseTimeout(self, name, e):
+        tout = e.get('timeout')
+        commands = self.parseCommands(e)
+        commands.timeout = float(tout)
+        self.parent.registerCommands(name+"::ontimeout", commands)
+        self.logInfo(u"register <ontimeout> on " + name)
+
     #######################################################
     #   eSEAT Markup Language File loader
     #
@@ -365,7 +355,7 @@ class SEATML_Parser():
 
             for a in g.getchildren():
                 #
-                #  <adaptor><agent>
+                #  <adaptor>
                 if a.tag == 'adaptor':
                     self.createAdaptor(a)
                 #
@@ -377,10 +367,15 @@ class SEATML_Parser():
                 elif a.tag == 'onexec':
                     self.parseExec('all', a)
                 #
-                #
                 #  <var>
                 elif a.tag == 'var':
                     eSEAT_Core.setGlobals(g.get('name'), g.get('value'))
+                #
+                #  <timoute>
+                elif a.tag == 'ontimeout':
+                    tout = a.get('timeout')
+                    self.parseTimeout('all', a)
+        # 
         # 
         #  <state>
         for s in doc.findall('state'):

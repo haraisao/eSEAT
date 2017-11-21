@@ -16,12 +16,12 @@ Copyright (C) 2017
 import sys
 import os
 import subprocess
-#from eSEAT_Core import getGlobals, setGlobals
-import eSEAT_Core
+
 import utils
 import re
 import traceback
 
+from eSEAT_Core import getGlobals, setGlobals
 '''
 State:
   - name(string), rules([TaskGroup,]), onentry(TaskGroup), onexit(TaskGroup)
@@ -121,25 +121,25 @@ class TaskScript(Task):
         return
 
     def execute(self, data):
-        eSEAT_Core.setGlobals('rtc_result', None)
-        eSEAT_Core.setGlobals('rtc_in_data', data)
-        eSEAT_Core.setGlobals('web_in_data', data)
+        setGlobals('rtc_result', None)
+        setGlobals('rtc_in_data', data)
+        setGlobals('web_in_data', data)
         #
         #   execute script or script file
         if self.fname :
             ffname = utils.findfile(self.fname)
             if ffname :
-                exec_script_file(ffname, eSEAT_Core.getGlobals())
+                exec_script_file(ffname, getGlobals())
         try:
             if self.data :
-                exec(self.data, eSEAT_Core.getGlobals())
+                exec(self.data, getGlobals())
         except:
             self._logger.error("Error:" + self.data)
             print traceback.format_exc()
             return False
         # 
         #  Call 'send' method of Adaptor to send the result...
-        rtc_result = eSEAT_Core.getGlobals()['rtc_result'] 
+        rtc_result = getGlobals()['rtc_result'] 
         if rtc_result != None :
             try:
                 ad = self.seat.adaptors[self.sendto]
@@ -196,6 +196,7 @@ class TaskGroup():
         self.taskseq=[]
         self.keys=[]
         self.patterns=[]
+        self.timeout = -1
 
     def execute(self, data=None):
         for cmd in self.taskseq:
@@ -206,7 +207,6 @@ class TaskGroup():
             if isinstance(cmd, TaskMessage):
                 cmd.encoding = None
             cmd.execute(data)
-
 
     def addTask(self, task):
         self.taskseq.append(task)

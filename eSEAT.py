@@ -181,10 +181,9 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     def onExecute(self, ec_id):
         OpenRTM_aist.DataFlowComponentBase.onExecute(self, ec_id)
-        if self._on_timeout > 0 and time.time() - self.self.last_on_data > self._on_timeout :
+        if self.isTimeout() :
             res=self.processTimeout()
             if res :
-                self.resetTimet()
                 return RTC_OK
             else:
                 self._on_timeout = -1

@@ -12,6 +12,8 @@ Copyright (C) 2009-2014
   http://www.opensource.org/licenses/MIT
 '''
 
+
+
 ############### import libraries
 import sys
 import os
@@ -30,6 +32,15 @@ from bs4  import BeautifulSoup
 from Tkinter import * 
 from ScrolledText import ScrolledText 
 
+###############################################################
+#  Global Variables
+#
+def getGlobals():
+    return globals()
+
+def setGlobals(name, val):
+    globals()[name] = val
+
 #########
 #  WebAdaptor
 from SocketAdaptor import SocketAdaptor 
@@ -38,20 +49,13 @@ from SocketAdaptor import SocketAdaptor
 #  WebAdaptor
 from WebAdaptor import WebSocketServer,CometReader,parseData
 
-import Task
+from Task import State, TaskGroup
 
 ###############################################################
 #
 #  execute seatml parser files
 #
 from SeatmlParser import SEATML_Parser,convertDataType
-
-
-def getGlobals():
-    return globals()
-
-def setGlobals(name, val):
-    globals()[name] = val
 
 ###############################################################
 #
@@ -224,6 +228,7 @@ class eSEAT_Core:
     #  onData: this method called in comming data
     #
     def onData(self, name, data):
+        self.resetTimer()
         try:
             if isinstance(data, str):
                 if data :
@@ -237,7 +242,8 @@ class eSEAT_Core:
                 self.processOnDataIn(name, data)
         except:
             self._logger.error(traceback.format_exc())
-    #
+
+    ############################################
     #   main event process 
     #
     def processResult(self, name, s):
@@ -258,15 +264,14 @@ class eSEAT_Core:
         if not cmds:
             self._logger.info("no command found")
             return False
-
         #
         #
         cmds.execute(s)
+        self.resetTimer()
         return True
 
-    #
+    #####################################
     # process for the cyclic execution
-    #
     def processExec(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
         cmds = self.lookupWithDefault(sname, '', 'onexec', False)
@@ -277,28 +282,34 @@ class eSEAT_Core:
             return False
 
         #
-        cmds.ececute('')
+        cmds.execute('')
         return True
-    #
-    # process for the cyclic execution
-    #
+
+    ##############################
+    # process for timeout
     def processTimeout(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
         cmds = self.lookupWithDefault(sname, '', 'ontimeout', False)
-
         if not cmds :
             if flag :
                 self._logger.info("no command found")
             return False
         #
-        cmds.ececute('')
+        cmds.execute('')
+        self.setTimeout(cmds.timeout)
         self.resetTimer()
         return True
 
     def resetTimer(self):
         self.last_on_data = time.time()
 
-    #
+    def setTimeout(self, sec):
+        self._on_timeout = sec
+
+    def isTimeout(self):
+       return ( self._on_timeout > 0 and time.time() - self.last_on_data > self._on_timeout )
+
+    #################################
     # Event process for Julius
     def processJuliusResult(self, name, s):
         doc = BeautifulSoup(s)
@@ -321,7 +332,7 @@ class eSEAT_Core:
                 self._logger.info("[rejected] no matching phrases")
         return None
 
-    #
+    ######################################
     #  Event process for data-in-event
     def processOnDataIn(self, name, data):
         self._logger.info("got input from %s" %  (name,))
@@ -348,7 +359,7 @@ class eSEAT_Core:
                 #
         return True
 
-    #
+    ####################################################################################
     #  Lookup Registered Commands with default
     #
     def lookupWithDefault(self, state, name, s, flag=True):
@@ -463,130 +474,12 @@ class eSEAT_Core:
         self.currentstate = newstate
 
         try:
+            cmds = self.lookupWithDefault(newstate, '', 'ontimeout', False)
+            if cmds: self.setTimeout(cmds.timeout)
             tasks = self.keys[self.currentstate+":::onentry"]
             tasks.execute()
         except KeyError:
             pass
-
-    ############ T A G Operations
-    #
-    #  Execute <message>
-    #
-    def applyMessage(self, c):
-        name = c[1]
-        data = c[2]
-        encoding = c[3]
-        input_id = c[4]
-
-        try:
-            ad = self.adaptors[name]
-            if input_id :
-                if self.inputvar.has_key(input_id) :
-                    data = self.inputvar[input_id].get()
-                elif self.stext.has_key(input_id) :
-                    data = self.getLastLine(input_id, 1)
-
-            #
-            #  Call 'send' method of Adaptor
-            #
-            if not encoding :
-                ad.send(name, data)
-            else :
-                ad.send(name, data, encoding)
-                #ad.send(host, data.encode(c[3]))
-
-        except KeyError:
-            if name :
-                self._logger.error("no such adaptor:" + name)
-            else :
-                self._logger.error("no such adaptor: None")
-
-    #
-    #  Execute <statetransition>
-    #
-    def applyTransition(self, c):
-        func,data = c[1:]
-
-        if (func == "push"):
-            self.statestack.append(self.currentstate)
-            self.stateTransfer(data)
-
-        elif (func == "pop"):
-            if self.statestack.__len__() == 0:
-                self._logger.warn("state buffer is empty")
-                return
-            self.stateTransfer(self.statestack.pop())
-
-        else:
-            self._logger.info("state transition from "+self.currentstate+" to "+data)
-            self.stateTransfer(data)
-
-    #
-    #  Execute <log>
-    #
-    def applyLog(self, c):
-        data = c[1]
-        self._logger.info(data)
-
-    #
-    #  Execute <shell>
-    #
-    def applyShell(self, c):
-        name ,data = c[1:]
-        #
-        # execute shell command with subprocess
-        res = subprocess.Popen(data, shell=True)
-        self.popen.append(res)
-
-        #
-        #  Call 'send' method of Adaptor
-        try:
-            ad = self.adaptors[name]
-            ad.send(name, res)
-        except KeyError:
-            if name :
-               self._logger.error("no such adaptor:" + name)
-            else:
-               self._logger.error("no such adaptor: None")
-
-    #
-    #  Execute <script>
-    #
-    def applyScript(self, c, indata=None):
-        name,data,fname = c[1:]
-
-        globals()['rtc_result'] = None
-        globals()['rtc_in_data'] = indata
-        globals()['web_in_data'] = indata
-
-        #
-        #   execute script or script file
-        if fname :
-            ffname = utils.findfile(fname)
-            if ffname :
-                exec_script_file(ffname,globals())
-        try:
-            if data :
-                exec(data, globals())
-        except:
-            print "ERROR..."
-            print data
-            #self._logger.error("Fail to execute script:" + name)
-   
-        # 
-        #  Call 'send' method of Adaptor to send the result...
-        rtc_result = globals()['rtc_result'] 
-        if rtc_result == None :
-            pass
-        else:
-            try:
-                ad = self.adaptors[name]
-                ad.send(name, rtc_result)
-            except KeyError:
-                if name :
-                   self._logger.error("no such adaptor:" + name)
-                else:
-                   self._logger.error("no such adaptor: None")
 
 
     ##############################
