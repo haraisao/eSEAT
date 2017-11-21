@@ -122,6 +122,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._consumer = {}
         self._ConsumerPort = {}
         self._ProviderPort = {}
+        self._on_timeout = -1
+
 
     def exit(self):
         eSEAT_Core.exit(self)
@@ -147,6 +149,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     def onActivated(self, ec_id):
         self.activated = True
+        self.resetTimer()
         return RTC_OK
 
     #
@@ -178,6 +181,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     def onExecute(self, ec_id):
         OpenRTM_aist.DataFlowComponentBase.onExecute(self, ec_id)
+        if self._on_timeout > 0 and time.time() - self.self.last_on_data > self._on_timeout :
+            self.processTimeout() 
         self.processExec()
         self.processExec('all')
         return RTC_OK
@@ -188,6 +193,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     def onData(self, name, data):
         if self.activated :
+            self.resetTimer()
             try:
                 if isinstance(data, TimedString):
                     data.data = data.data.decode('utf-8')
@@ -203,6 +209,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                 self._logger.error(traceback.format_exc())
         else:
             pass
+
+
 
     ##############################################
     #

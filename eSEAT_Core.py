@@ -105,6 +105,8 @@ class eSEAT_Core:
         self.webServer = None
         self.root = None
 
+        self.last_on_data = 0
+
         self._logger = SeatLogger("eSEAT")
 
         globals()['seat'] = self
@@ -277,6 +279,24 @@ class eSEAT_Core:
         #
         cmds.ececute('')
         return True
+    #
+    # process for the cyclic execution
+    #
+    def processTimeout(self, sname=None, flag=False):
+        if sname is None : sname = self.currentstate
+        cmds = self.lookupWithDefault(sname, '', 'ontimeout', False)
+
+        if not cmds :
+            if flag :
+                self._logger.info("no command found")
+            return False
+        #
+        cmds.ececute('')
+        self.resetTimer()
+        return True
+
+    def resetTimer(self):
+        self.last_on_data = time.time()
 
     #
     # Event process for Julius
