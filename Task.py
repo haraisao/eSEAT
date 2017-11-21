@@ -18,151 +18,174 @@ import os
 import subprocess
 from eSEAT_Core import getGlobals, setGlobals
 import utils
+import re
 
+'''
+State:
+  - name(string), rules([TaskGroup,]), onentry(TaskGroup), onexit(TaskGroup)
+
+TaskGroup: <-- <rule>
+  - keys([string,]), patterns([reg,]), taskseq([Task,])
+
+ Task: <- <message>, <shell>, <script>, <log>, <statetransition>
+   +- TaskMessage: <message>
+        - sendto, encode, input
+   +- TaskShell: <shell>
+        - sendto
+   +- TaskScript: <sciptt>
+        - execfile, sendto
+   +- TaskLog: <log>
+        - 
+   +- TaskStateTransision: <statetransition>
+        - func[push, pop]
+
+'''
 ###########################################
 #
 #  Class Task for eSEAT
 #
 class Task():
-    def __init__(self, rtc, typ, cmd):
+    def __init__(self, rtc):
         self.seat = rtc
-        self.commads=[cmd]
-        self.type = typ
         self._logger = rtc._logger
-
-    def addCommand(self, cmd):
-        self.commands.append(cmd)
-
-    def clearCommand(self):
-        self.commands=[]
         
     def execute(self):
-        if self.type == 'message': return self.applyMessage()
-        elif self.type == 'shell': return self.applyShell()
-        elif self.type == 'script': return self.applyScript()
-        else self.type == 'log': return self.applyLog()
-        else self.type == 'transition': return self.applyTransition()
-        return False
+        return True
 
-    ############ T A G Operations
-    #
-    #  Execute <message>
-    #
-    def applyMessage(self):
-        name = self.commands[0]
-        data = self.commands[1]
-        encoding = self.commands[2]
-        input_id = self.commands[3]
+class TaskMessage(Task):
+    def __init__(self, rtc, sndto, data, encode, input_id):
+        Task.__init__(self, rtc)
+        self.sendto=sndto
+        self.data = data
+        self.encoding = encode
+        self.input_id=input_id
+        return
 
+    def execute(self):
+        data = self.data
         try:
-            ad = self.seat.adaptors[name]
-            if input_id :
-                if self.seat.inputvar.has_key(input_id) :
-                    data = self.seat.inputvar[input_id].get()
-                elif self.seat.stext.has_key(input_id) :
-                    data = self.seat.getLastLine(input_id, 1)
+            ad = self.seat.adaptors[self.sendto]
+            if self.input_id :
+                if self.seat.inputvar.has_key(self.input_id) :
+                    data = self.seat.inputvar[self.input_id].get()
+                elif self.seat.stext.has_key(self.input_id) :
+                    data = self.seat.getLastLine(self.input_id, 1)
             #
             #  Call 'send' method of Adaptor
             #
-            if not encoding :
-                ad.send(name, data)
+            if not self.encoding :
+                ad.send(self.sendto, data)
             else :
-                ad.send(name, data, encoding)
+                ad.send(self.sendto, data, self.encoding)
             return True
 
         except KeyError:
-            if name :
-                self._logger.error("no such adaptor:" + name)
+            if self.sendto :
+                self._logger.error("no such adaptor:" + self.sendto)
             else :
                 self._logger.error("no such adaptor: None")
             return False
-    #
-    #  Execute <statetransition>
-    #
-    def applyTransition(self):
-        try:
-            func = self.commands[0]
-            data = self.commands[1]
 
-            if (func == "push"):
-                self.seat.statestack.append(self.currentstate)
-                self.seat.stateTransfer(data)
+class TaskShell(Task):
+    def __init__(self, rtc, sendto, data):
+        Task.__init__(self, rtc)
+        self.sendto = sendto
+        self.data = data
+        return
 
-            elif (func == "pop"):
-                if self.seat.statestack.__len__() == 0:
-                    self._logger.warn("state buffer is empty")
-                    return False
-                self.seat.stateTransfer(self.statestack.pop())
-            else:
-                self._logger.info("state transition from "+self.currentstate+" to "+data)
-                self.seat.stateTransfer(data)
-            return True
-        except:
-            return False
-    #
-    #  Execute <log>
-    #
-    def applyLog(self):
-        self._logger.info(' '.join(self.commands))
-        return True
-    #
-    #  Execute <shell>
-    #
-    def applyShell(self):
-        name = self.commands[0]
-        data = self.commands[1]
+    def execute(self):
         #
         # execute shell command with subprocess
-        res = subprocess.Popen(data, shell=True)
+        res = subprocess.Popen(self.data, shell=True)
         self.popen.append(res)
         #
         #  Call 'send' method of Adaptor
         try:
-            ad = self.seat.adaptors[name]
-            ad.send(name, res)
+            ad = self.seat.adaptors[self.sendto]
+            ad.send(self.sendto, res)
         except KeyError:
             if name :
-               self._logger.error("no such adaptor:" + name)
+               self._logger.error("no such adaptor:" + self.sendto)
             else:
                self._logger.error("no such adaptor: None")
-    #
-    #  Execute <script>
-    #
-    def applyScript(self):
-        name,data,fname, indata = self.commands
 
+class TaskScript(Task):
+    def __init__(self, rtc, sendto, data, fname):
+        Task.__init__(self, rtc)
+        self.sendto = sendto
+        self.data = data
+        self.fname = fname
+        self.indata = None
+        return
+
+    def setIndata(self, data):
+        self.indata = data
+
+    def execute(self):
         setGlobals('rtc_result', None)
-        setGlobals('rtc_in_data', indata)
-        setGlobals('web_in_data', indata)
+        setGlobals('rtc_in_data', self.indata)
+        setGlobals('web_in_data', self.indata)
         #
         #   execute script or script file
-        if fname :
-            ffname = utils.findfile(fname)
+        if self.fname :
+            ffname = utils.findfile(self.fname)
             if ffname :
                 exec_script_file(ffname, getGlobals())
         try:
-            if data :
+            if self.data :
                 exec(data, getGlobals())
         except:
-            self._logger.error("Error:" + data)
+            self._logger.error("Error:" + self.data)
             return False
         # 
         #  Call 'send' method of Adaptor to send the result...
         rtc_result = getGlobals()['rtc_result'] 
-        if rtc_result == None :
-            pass
-        else:
+        if rtc_result != None :
             try:
-                ad = self.seat.adaptors[name]
-                ad.send(name, rtc_result)
+                ad = self.seat.adaptors[self.sendto]
+                ad.send(self.sendto, rtc_result)
             except KeyError:
-                if name :
-                   self._logger.error("no such adaptor:" + name)
+                if self.sendto :
+                   self._logger.error("no such adaptor:" + self.sendto)
                 else:
                    self._logger.error("no such adaptor: None")
                 return False
-
         return True
+
+class TaskLog(Task):
+    def __init__(self, rtc, data):
+        Task.__init__(self, rtc)
+        self.info = data
+        return
+    def execute(self):
+        self._logger.info(self.info)
+        return True
+
+class TaskStatetransition(Task):
+    def __init__(self, rtc, func, data):
+        Task.__init__(self, rtc)
+        self.func = func
+        self.data = data
+        return
+
+    def execute(self):
+        try:
+            if (self.func == "push"):
+                self.seat.statestack.append(self.seat.currentstate)
+                self.seat.stateTransfer(self.data)
+
+            elif (self.func == "pop"):
+                if self.seat.statestack.__len__() == 0:
+                    self._logger.warn("state buffer is empty")
+                    return False
+                self.seat.stateTransfer(self.seat.statestack.pop())
+            else:
+                self._logger.info("state transition from "+self.seat.currentstate+" to "+self.data)
+                self.seat.stateTransfer(self.data)
+            return True
+        except:
+            return False
+
 
 #############################
 #  TaskGroup Class for eSEAT:
@@ -170,18 +193,32 @@ class Task():
 #
 class TaskGroup():
     def __init__(self, cmdlist=[]):
-        self.tasklist=cmdlist
+        self.taskseq=cmdlist
+        self.keys=[]
+        self.patterns=[]
 
     def execute(self):
-        for self.list as cmd:
+        for cmd in self.taskseq:
             cmd.execute()
 
     def addTask(self, task):
-        self.tasklist.append(task)
+        self.taskseq.append(task)
 
     def clearTasks(self):
-        self.tasklist=[]
+        self.taskseq=[]
 
+    def addPattern(self, pat):
+        self.patterns.append(re.compile(pat))
+
+    def addKey(self, key):
+        self.keys.append(key)
+
+    def match(self, msg):
+        for x in self.keys:
+            if x == msg : return True
+        for x in self.patterns:
+            if x.match(msg) : return True
+        return False
     
 #####################
 #  State
@@ -190,4 +227,4 @@ class State():
         self.name = name
         self.onentry = None
         self.onexit = None
-        self.tasks = None
+        self.rules = []

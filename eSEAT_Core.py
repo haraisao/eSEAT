@@ -36,7 +36,9 @@ from SocketAdaptor import SocketAdaptor
 
 #########
 #  WebAdaptor
-from WebAdaptor import WebSocketServer,CometReader,parseData 
+from WebAdaptor import WebSocketServer,CometReader,parseData
+
+import Task
 
 ###############################################################
 #
