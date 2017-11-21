@@ -16,9 +16,11 @@ Copyright (C) 2017
 import sys
 import os
 import subprocess
-from eSEAT_Core import getGlobals, setGlobals
+#from eSEAT_Core import getGlobals, setGlobals
+import eSEAT_Core
 import utils
 import re
+import traceback
 
 '''
 State:
@@ -49,7 +51,7 @@ class Task():
         self.seat = rtc
         self._logger = rtc._logger
         
-    def execute(self):
+    def execute(self,data):
         return True
 
 class TaskMessage(Task):
@@ -59,9 +61,10 @@ class TaskMessage(Task):
         self.data = data
         self.encoding = encode
         self.input_id=input_id
+        
         return
 
-    def execute(self):
+    def execute(self, s):
         data = self.data
         try:
             ad = self.seat.adaptors[self.sendto]
@@ -93,7 +96,7 @@ class TaskShell(Task):
         self.data = data
         return
 
-    def execute(self):
+    def execute(self, data):
         #
         # execute shell command with subprocess
         res = subprocess.Popen(self.data, shell=True)
@@ -115,31 +118,28 @@ class TaskScript(Task):
         self.sendto = sendto
         self.data = data
         self.fname = fname
-        self.indata = None
         return
 
-    def setIndata(self, data):
-        self.indata = data
-
-    def execute(self):
-        setGlobals('rtc_result', None)
-        setGlobals('rtc_in_data', self.indata)
-        setGlobals('web_in_data', self.indata)
+    def execute(self, data):
+        eSEAT_Core.setGlobals('rtc_result', None)
+        eSEAT_Core.setGlobals('rtc_in_data', data)
+        eSEAT_Core.setGlobals('web_in_data', data)
         #
         #   execute script or script file
         if self.fname :
             ffname = utils.findfile(self.fname)
             if ffname :
-                exec_script_file(ffname, getGlobals())
+                exec_script_file(ffname, eSEAT_Core.getGlobals())
         try:
             if self.data :
-                exec(data, getGlobals())
+                exec(self.data, eSEAT_Core.getGlobals())
         except:
             self._logger.error("Error:" + self.data)
+            print traceback.format_exc()
             return False
         # 
         #  Call 'send' method of Adaptor to send the result...
-        rtc_result = getGlobals()['rtc_result'] 
+        rtc_result = eSEAT_Core.getGlobals()['rtc_result'] 
         if rtc_result != None :
             try:
                 ad = self.seat.adaptors[self.sendto]
@@ -157,7 +157,7 @@ class TaskLog(Task):
         Task.__init__(self, rtc)
         self.info = data
         return
-    def execute(self):
+    def execute(self, data):
         self._logger.info(self.info)
         return True
 
@@ -168,7 +168,7 @@ class TaskStatetransition(Task):
         self.data = data
         return
 
-    def execute(self):
+    def execute(self, data):
         try:
             if (self.func == "push"):
                 self.seat.statestack.append(self.seat.currentstate)
@@ -192,14 +192,21 @@ class TaskStatetransition(Task):
 #      TaskGroup neary equal State....
 #
 class TaskGroup():
-    def __init__(self, cmdlist=[]):
-        self.taskseq=cmdlist
+    def __init__(self):
+        self.taskseq=[]
         self.keys=[]
         self.patterns=[]
 
-    def execute(self):
+    def execute(self, data=None):
         for cmd in self.taskseq:
-            cmd.execute()
+            cmd.execute(data)
+
+    def executeEx(self, data=None):
+        for cmd in self.taskseq:
+            if isinstance(cmd, TaskMessage):
+                cmd.encoding = None
+            cmd.execute(data)
+
 
     def addTask(self, task):
         self.taskseq.append(task)

@@ -27,6 +27,7 @@ import utils
 ###########################################
 #
 import eSEAT_Core
+import Task
 
 ###########################################
 #
@@ -95,7 +96,7 @@ class SEATML_Parser():
     #   Sub parser <message><command><statetransition><log><shell><script>
     #
     def parseCommands(self, r):
-        commands = []
+        #commands = []
         tasks=Task.TaskGroup()
 
         for c in r.getchildren():
@@ -107,8 +108,8 @@ class SEATML_Parser():
                 encode   = c.get('encode')
                 input_id = c.get('input')
                 data     = c.text
-                commands.append(['c', name, data, encode, input_id])
-                task = Task.TaskMessage(self, name, data, encode, input_id)
+                #commands.append(['c', name, data, encode, input_id])
+                task = Task.TaskMessage(self.parent, name, data, encode, input_id)
                 tasks.addTask(task)
         #
         # <command>
@@ -118,23 +119,23 @@ class SEATML_Parser():
                 encode   = c.get('encode')
                 input_id = c.get('input')
                 data     = c.text
-                commands.append(['c', name, data, encode, input_id])
-                task = Task.TaskMessage(self, name, data, encode, input_id)
+                #commands.append(['c', name, data, encode, input_id])
+                task = Task.TaskMessage(self.parent, name, data, encode, input_id)
                 tasks.addTask(task)
         #
         # <statetransition>
             elif c.tag == 'statetransition': # get statetransition
                 func = c.get('func')
                 data = c.text
-                commands.append(['t', func, data])
-                task = Task.TaskStatetransition(self, func, data)
+                #commands.append(['t', func, data])
+                task = Task.TaskStatetransition(self.parent, func, data)
                 tasks.addTask(task)
         #
         # <log>
             elif c.tag == 'log': #  logging
                 data = c.text
-                commands.append(['l', data])
-                task = Task.TaskLog(self, data)
+                #commands.append(['l', data])
+                task = Task.TaskLog(self.parent, data)
                 tasks.addTask(task)
         #
         # <shell>
@@ -142,8 +143,8 @@ class SEATML_Parser():
                 sendto = c.get('sendto')
                 if not sendto : sendto = c.get('host')
                 data = c.text
-                commands.append(['x', sendto, data])
-                task = Task.TaskShell(self, sendto, data)
+                #commands.append(['x', sendto, data])
+                task = Task.TaskShell(self.parent, sendto, data)
                 tasks.addTask(task)
         #
         # <script>
@@ -152,11 +153,11 @@ class SEATML_Parser():
                 if not sendto : sendto = c.get('host')
                 fname = c.get('execfile')
                 data = self.getScripts(c)
-                commands.append(['s', sendto, data, fname])
-                task = Task.TaskScript(self, sendto, data, fname)
+                #commands.append(['s', sendto, data, fname])
+                task = Task.TaskScript(self.parent, sendto, data, fname)
                 tasks.addTask(task)
-
-        return commands
+        return tasks
+        #return commands
 
     #
     #   delete spaces at the begining of the lines for python script

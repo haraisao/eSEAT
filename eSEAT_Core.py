@@ -259,8 +259,9 @@ class eSEAT_Core:
 
         #
         #
-        for c in cmds:
-            self.activateCommand(c, s)
+        #for c in cmds:
+        #    self.activateCommand(c, s)
+        cmds.execute(s)
         return True
 
     #
@@ -277,8 +278,11 @@ class eSEAT_Core:
 
         #
         #
-        for c in cmds:
-            self.activateCommand(c, '')
+        #for c in cmds:
+        #    self.activateCommand(c, '')
+        #
+        #
+        cmds.ececute('')
         return True
 
     #
@@ -326,8 +330,12 @@ class eSEAT_Core:
                 #execfile(kond[0], globals())
 
             if eval(kond[1].strip(), globals()):
-                for cmd in c[1]:
-                    self.activateCommandEx(cmd, data)
+                #for cmd in c[1]:
+                #    self.activateCommandEx(cmd, data)
+                #
+                tasks = c[1]
+                tasks.executeEx(data)
+                #
         return True
 
     #
@@ -430,8 +438,10 @@ class eSEAT_Core:
     #
     def stateTransfer(self, newstate):
         try:
-            for c in self.keys[self.currentstate+":::onexit"]:
-                self.activateCommand(c)
+            #for c in self.keys[self.currentstate+":::onexit"]:
+            #    self.activateCommand(c)
+            tasks = self.keys[self.currentstate+":::onexit"]
+            tasks.execute()
         except KeyError:
             pass
   
@@ -445,8 +455,10 @@ class eSEAT_Core:
         self.currentstate = newstate
 
         try:
-            for c in self.keys[self.currentstate+":::onentry"]:
-                self.activateCommand(c)
+            #for c in self.keys[self.currentstate+":::onentry"]:
+            #    self.activateCommand(c)
+            tasks = self.keys[self.currentstate+":::onentry"]
+            tasks.execute()
         except KeyError:
             pass
 
