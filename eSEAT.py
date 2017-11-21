@@ -281,7 +281,9 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     # Create Provider
     def createProviderPort(self, name, if_name, type_name, impl_class):
         self._ProviderPort[name] = OpenRTM_aist.CorbaPort(name)
-        self._ProviderPort[name].registerProvider(if_name, type_name, impl_class() )
+        service = impl_class()
+        service._seat = self
+        self._ProviderPort[name].registerProvider(if_name, type_name, service )
         self.addPort(self._ProviderPort[name])
         return RTC_OK
     #
