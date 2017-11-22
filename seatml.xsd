@@ -46,7 +46,6 @@
     <xs:complexType>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="message"/>
-          <xs:element minOccurs="0" maxOccurs="unbounded" ref="command"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="shell"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
         </xs:choice>
@@ -56,19 +55,18 @@
   <xs:element name="ontimeout">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" maxOccurs="1" ref="cond"/>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="message"/>
-          <xs:element minOccurs="0" maxOccurs="unbounded" ref="command"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="shell"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="log"/>
+          <xs:element minOccurs="0" maxOccurs="1" ref="statetransition"/>
         </xs:choice>
       </xs:sequence>
       <xs:attribute name="timeout" use="required" type="xs:string"/>
     </xs:complexType>
   </xs:element>
-  
+
   <xs:element name="state">
     <xs:complexType>
       <xs:sequence>
@@ -180,7 +178,6 @@
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="key"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="message"/>
-          <xs:element minOccurs="0" maxOccurs="unbounded" ref="command"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="shell"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
           <xs:element minOccurs="0" maxOccurs="1" ref="statetransition"/>
@@ -219,7 +216,6 @@
         <xs:element minOccurs="0" maxOccurs="1" ref="cond"/>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="message"/>
-          <xs:element minOccurs="0" maxOccurs="unbounded" ref="command"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="shell"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="log"/>
@@ -234,7 +230,6 @@
         <xs:element minOccurs="0" maxOccurs="1" ref="cond"/>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="message"/>
-          <xs:element minOccurs="0" maxOccurs="unbounded" ref="command"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="shell"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="log"/>
@@ -249,18 +244,6 @@
       <xs:simpleContent>
         <xs:extension base="xs:string">
           <xs:attribute name="sendto" use="required" type="xs:string"/>
-          <xs:attribute name="encode" use="optional" type="xs:string"/>
-          <xs:attribute name="input" use="optional" type="xs:string"/>
-        </xs:extension>
-      </xs:simpleContent>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="command">
-    <xs:complexType>
-      <xs:simpleContent>
-        <xs:extension base="xs:string">
-          <xs:attribute name="host" use="required" type="xs:string"/>
           <xs:attribute name="encode" use="optional" type="xs:string"/>
           <xs:attribute name="input" use="optional" type="xs:string"/>
         </xs:extension>
