@@ -373,7 +373,6 @@ class SEATML_Parser():
                 #
                 #  <timoute>
                 elif a.tag == 'ontimeout':
-                    tout = a.get('timeout')
                     self.parseTimeout('all', a)
         # 
         # 
@@ -383,11 +382,17 @@ class SEATML_Parser():
             self.parent.create_state(name)
 
             for e in list(s):
+               
                 #
                 #  <onentry><onexit>
                 if e.tag == 'onentry' or e.tag == 'onexit':
                     commands = self.parseCommands(e)
                     self.parent.registerCommands(name+":::"+e.tag , commands)
+
+                #
+                #  <timoute>
+                elif e.tag == 'ontimeout':
+                    self.parseTimeout(name, e)
                 #
                 #  <rule>
                 elif e.tag == 'rule':
