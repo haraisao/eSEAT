@@ -54,6 +54,12 @@ class Task():
     def execute(self,data):
         return True
 
+    def error(self, msg, val):
+        if not val: val="None"
+        self._logger.error(msg +": "+ val)
+        self._logger.error( traceback.format_exc() )
+        return
+
 class TaskMessage(Task):
     def __init__(self, rtc, sndto, data, encode, input_id):
         Task.__init__(self, rtc)
@@ -83,11 +89,9 @@ class TaskMessage(Task):
             return True
 
         except KeyError:
-            if self.sendto :
-                self._logger.error("no such adaptor:" + self.sendto)
-            else :
-                self._logger.error("no such adaptor: None")
+            self.error("no such adaptor", self.sendto)
             return False
+        return True
 
 class TaskShell(Task):
     def __init__(self, rtc, sendto, data):
@@ -107,10 +111,9 @@ class TaskShell(Task):
             ad = self.seat.adaptors[self.sendto]
             ad.send(self.sendto, res)
         except KeyError:
-            if name :
-               self._logger.error("no such adaptor:" + self.sendto)
-            else:
-               self._logger.error("no such adaptor: None")
+            self.error("no such adaptor", self.sendto)
+        return True
+
 
 class TaskScript(Task):
     def __init__(self, rtc, sendto, data, fname):
@@ -134,8 +137,7 @@ class TaskScript(Task):
             if self.data :
                 exec(self.data, getGlobals())
         except:
-            self._logger.error("Error:" + self.data)
-            print traceback.format_exc()
+            self.error("Error in script", self.data)
             return False
         # 
         #  Call 'send' method of Adaptor to send the result...
@@ -145,11 +147,8 @@ class TaskScript(Task):
                 ad = self.seat.adaptors[self.sendto]
                 ad.send(self.sendto, rtc_result)
             except KeyError:
-                if self.sendto :
-                   self._logger.error("no such adaptor:" + self.sendto)
-                else:
-                   self._logger.error("no such adaptor: None")
-                return False
+                self.error("no such adaptor:" + self.sendto)
+
         return True
 
 class TaskLog(Task):
@@ -168,7 +167,7 @@ class TaskStatetransition(Task):
         self.data = data
         return
 
-    def execute(self, data):
+    def execute(self, d):
         try:
             if (self.func == "push"):
                 self.seat.statestack.append(self.seat.currentstate)
@@ -184,6 +183,7 @@ class TaskStatetransition(Task):
                 self.seat.stateTransfer(self.data)
             return True
         except:
+            self.error("Error in state transision", self.data)
             return False
 
 
