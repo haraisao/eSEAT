@@ -47,7 +47,7 @@ from SocketAdaptor import SocketAdaptor
 
 #########
 #  WebAdaptor
-from WebAdaptor import WebSocketServer,CometReader,parseData
+from WebAdaptor import WebSocketServer,CometReader,parseQueryString
 
 from Task import State, TaskGroup
 
@@ -232,7 +232,7 @@ class eSEAT_Core:
         try:
             if isinstance(data, str):
                 if data :
-                    data2 = parseData(data)
+                    data2 = parseQueryString(data)
                     if data2 :
                         self.processOnDataIn(name, data2)
                     else :

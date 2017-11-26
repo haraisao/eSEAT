@@ -631,11 +631,11 @@ class CometReader(CommReader):
         return
 
       if fname == "/comet_request" :
-        Data = parseData(data)
+        Data = parseQueryString(data)
         self.cometRequest(Data)
 
       elif fname == "/comet_event" :
-        Data = parseData(data)
+        Data = parseQueryString(data)
         self.cometTrigger(Data)
 
       elif fname == "/rtc_onData" :  # Process request from Web adaptor
@@ -972,7 +972,7 @@ def get_content_type(fname):
     pass
   return ctype
 
-def parseData(data):
+def parseQueryString(data):
   res = {}
   try:
     ar = data.split("&")
