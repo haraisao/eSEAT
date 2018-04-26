@@ -158,11 +158,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #  onDeactivated
     #
     def onDeactivated(self, ec_id):
-        print "========"
         self.processDeactivated()
-        print "========"
         self.processDeactivated('all')
-        print "========"
         self.activated = False
         return RTC_OK
 
