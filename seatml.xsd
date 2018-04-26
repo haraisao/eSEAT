@@ -16,6 +16,8 @@
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="var"/>
           <xs:element minOccurs="0" maxOccurs="1" ref="onexec"/>
+          <xs:element minOccurs="0" maxOccurs="1" ref="onactivated"/>
+          <xs:element minOccurs="0" maxOccurs="1" ref="ondeactivated"/>
           <xs:element minOccurs="0" maxOccurs="1" ref="ontimeout"/>
         </xs:choice>
       <xs:attribute name="name" use="required" type="xs:string"/>
@@ -52,6 +54,30 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="onactivated">
+    <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="message"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="shell"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
+          <xs:element minOccurs="0" maxOccurs="1" ref="statetransition"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="log"/>
+        </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ondeactivated">
+    <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="message"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="shell"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="script"/>
+          <xs:element minOccurs="0" maxOccurs="1" ref="statetransition"/>
+          <xs:element minOccurs="0" maxOccurs="unbounded" ref="log"/>
+        </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="ontimeout">
     <xs:complexType>
       <xs:sequence>
@@ -73,6 +99,7 @@
         <xs:element minOccurs="0" maxOccurs="1" ref="onentry"/>
         <xs:element minOccurs="0" maxOccurs="1" ref="onexit"/>
         <xs:element minOccurs="0" maxOccurs="1" ref="onexec"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="ondeactivated"/>
         <xs:element minOccurs="0" maxOccurs="1" ref="ontimeout"/>
         <xs:choice minOccurs="0" maxOccurs="unbounded">
           <xs:element minOccurs="0" maxOccurs="unbounded" ref="rule"/>

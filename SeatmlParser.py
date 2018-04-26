@@ -310,6 +310,22 @@ class SEATML_Parser():
         self.logInfo(u"register <onexec> on " + name)
 
     #
+    #   Sub parser for <activated>tag 
+    #
+    def parseActivated(self, e):
+        commands = self.parseCommands(e)
+        self.parent.registerCommands("all::onactivated", commands)
+        self.logInfo(u"register <onactivated> on all")
+
+    #
+    #   Sub parser for <deactivated>tag 
+    #
+    def parseDeactivated(self, name, e):
+        commands = self.parseCommands(e)
+        self.parent.registerCommands(name+"::ondeactivated", commands)
+        self.logInfo(u"register <ondeactivaetd> on " + name)
+
+    #
     #   Sub parser for <exec>tag 
     #
     def parseTimeout(self, name, e):
@@ -367,6 +383,14 @@ class SEATML_Parser():
                 elif a.tag == 'onexec':
                     self.parseExec('all', a)
                 #
+                #  <onactivated>
+                elif a.tag == 'onactivated':
+                    self.parseActivated(a)
+                #
+                #  <ondeactivated>
+                elif a.tag == 'ondeactivated':
+                    self.parseDeactivated('all', a)
+                #
                 #  <var>
                 elif a.tag == 'var':
                     eSEAT_Core.setGlobals(g.get('name'), g.get('value'))
@@ -403,6 +427,11 @@ class SEATML_Parser():
                 #  <onexec>
                 elif e.tag == 'onexec':
                     self.parseExec(name, e)
+
+                #
+                #  <ondeactivated>
+                elif e.tag == 'ondeactivated':
+                    self.parseDeactivated(name, e)
 
                 else:
                 #

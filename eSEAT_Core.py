@@ -274,7 +274,7 @@ class eSEAT_Core:
     # process for the cyclic execution
     def processExec(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
-        cmds = self.lookupWithDefault(sname, '', 'onexec', False)
+        cmds = self.lookupCommand(sname, '', 'onexec')
 
         if not cmds :
             if flag :
@@ -284,6 +284,36 @@ class eSEAT_Core:
         #
         cmds.execute('')
         return True
+
+    #####################################
+    # process for onActivated
+    def processActivated(self, flag=False):
+        cmds = self.lookupCommand('all', '', 'onactivated')
+
+        if not cmds :
+            if flag :
+                self._logger.info("no command found")
+            return False
+
+        #
+        cmds.execute('')
+        return True
+
+    #####################################
+    # process for onDectivated
+    def processDeactivated(self, sname=None, flag=False):
+        if sname is None : sname = self.currentstate
+        cmds = self.lookupCommand(sname, '', 'ondeactivated')
+
+        if not cmds :
+            if flag :
+                self._logger.info("no command found")
+            return False
+
+        #
+        cmds.execute('')
+        return True
+
 
     ##############################
     # process for timeout
