@@ -1,5 +1,5 @@
 #! python.exe
-
+from __future__ import print_function
 import cgi
 import subprocess
 import sys
@@ -665,7 +665,7 @@ def getConnectionInfo(name1, name2):
     connections2 = p2['PortInfo']['Connections']
 
   except:
-    print >>sys.stderr, "ERROR in getConnectionInfo"
+    print ("ERROR in getConnectionInfo", file=sys.stderr)
     return result
 
   for con1 in  connections1 :
@@ -935,7 +935,7 @@ def delete_all_zombies(hosts='localhost'):
       return name
     except Exception, e:
       traceback.print_exc()
-      print >>sys.stderr, '{0}: {1}'.format(sys.argv[0], e)
+      print ('{0}: {1}'.format(sys.argv[0], e), file=sys.stderr)
 
   return tree.iterate(del_zombie, filter=['is_zombie'])
 
@@ -953,7 +953,7 @@ def getRtcConfigurationList(name):
 #  result =  '{"name": "error", "config": "", "msg" : "Invalid Component name!!"}'
 
   conf_sets = comp.conf_sets
-  print conf_sets.keys()
+  print (conf_sets.keys())
 
   active_conf = comp.active_conf_set_name 
 
@@ -966,7 +966,7 @@ def getRtcConfigurationList(name):
       result = conf_sets[set_name].data
       params = conf_sets[set_name].data.keys()
       for param in params:
-        print """ %s   %s """ % (param, conf_sets[set_name].data[param])
+        print (""" %s   %s """ % (param, conf_sets[set_name].data[param]))
 
   return result
 
@@ -997,7 +997,7 @@ def setRtcConfiguration(name, conf_name, val, setname=None):
   comp.set_conf_set_value(active_conf, conf_name, val)
   comp.activate_conf_set(active_conf)
 
-  print >> sys.stderr, "Config: %s: %s = %s" % (active_conf, conf_name, val)
+  print ("Config: %s: %s = %s" % (active_conf, conf_name, val), file=sys.stderr)
   result = """ {"ConfigName" : "%s", "Value": "%s" }""" % (conf_name, val)
   return result
 
@@ -1058,9 +1058,9 @@ def getValue(form, val, n_arg):
 """
 def printResult(result, isCGI=1):
   if isCGI == 1 :
-    print "Content-type: text/html;charset=utf-8"
-    print ""
-    print result
+    print ("Content-type: text/html;charset=utf-8")
+    print ("")
+    print (result)
   else:
     printJSON(result)
 
@@ -1069,6 +1069,6 @@ def printResult(result, isCGI=1):
 def printJSON(result):
   try:
     res = json.loads(result)
-    print json.dumps(res, indent=2)
+    print (json.dumps(res, indent=2))
   except:
-    print result
+    print (result)

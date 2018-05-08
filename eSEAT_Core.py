@@ -15,6 +15,7 @@ Copyright (C) 2009-2014
 
 
 ############### import libraries
+from __future__ import print_function
 import sys
 import os
 import traceback
@@ -71,13 +72,13 @@ class SeatLogger:
 
     def info(self, msg):
         if self._flag :
-            print "INFO:"+self._name+" "+msg
+            print ("INFO:"+self._name+" "+msg)
 
     def error(self, msg):
-        print "ERROR:"+self._name+" "+msg >> sys.stderr
+        print ("ERROR:"+self._name+" "+msg, file=sys.stderr)
 
     def warn(self, msg):
-        print "WARN:"+self._name+" "+msg >> sys.stderr
+        print ("WARN:"+self._name+" "+msg, file=sys.stderr)
 
 
 #########################################################################
@@ -118,7 +119,7 @@ class eSEAT_Core:
     #
     #
     def exit(self):
-        print  "Call eSEAT_Core.exit"
+        print ("Call eSEAT_Core.exit")
         if self.webServer :
             self.webServer.terminate()
             time.sleep( 1 )
@@ -138,7 +139,7 @@ class eSEAT_Core:
         if self.webServer  is None:
             self.adaptors[name] = WebSocketServer(CometReader(self,dirname), name, "", port, index)
             if self.adaptors[name].bind_res != 1 :
-                print "=== Bind ERROR ==="
+                print ("=== Bind ERROR ===")
                 os._exit(1)
 
             self.adaptors[name].start()
@@ -658,7 +659,7 @@ class eSEAT_Gui:
         try:
             self.buttons[eid].config(**cfg)
         except:
-            print "ERROR"
+            print ("ERROR")
             pass
 
     #################  L I N E I N P U T ################### 
@@ -834,7 +835,7 @@ class eSEAT_Gui:
         try:
             self.labels[eid].configure(**cfg)
         except:
-            print "ERROR"
+            print ("ERROR")
             pass
 
     #########  LAYOUT ITEMS ON A FRAME ############

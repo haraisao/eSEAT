@@ -2,7 +2,7 @@ import omniORB
 import json
 import types
 from RTC import *
-
+from __future__ import print_function
 
 def getTypeDesc(x):
   if(type(x) == tuple) : repId = x[2]
@@ -77,9 +77,9 @@ def printTypeInfo(typ, idx=0):
     vars = typ[4:]
     for x in range(len(vars)/2) :
       if type(vars[x * 2 +1]) == int:
-        print " "*idx, vars[x * 2], vars[x * 2 +1]
+        print (" "*idx, vars[x * 2], vars[x * 2 +1])
       else:
-        print " "*idx, vars[x * 2]
+        print (" "*idx, vars[x * 2])
 	printTypeInfo( vars[x * 2 +1], idx+1 )
 
 def instantiateDataType(dtype):

@@ -13,6 +13,7 @@ Licensed under the Eclipse Public License -v 1.0 (EPL)
 http://www.opensource.org/licenses/eclipse-1.0.txt
 '''
 
+from __future__ import print_function
 import sys
 import os
 import platform
@@ -168,7 +169,7 @@ def array_flatten(ar):
 def findfile(fname, path=sys.path):
   for f in path:
    ff = os.path.join(f,fname)
-   if debug: print ff
+   if debug: print (ff)
    if os.path.exists(ff):
      if os.path.isfile(ff):
        return ff

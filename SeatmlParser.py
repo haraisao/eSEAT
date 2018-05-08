@@ -13,6 +13,7 @@ Copyright (C) 2009-2014
 '''
 
 ############### import libraries
+from __future__ import print_function
 import sys
 import os
 
@@ -47,9 +48,9 @@ class SEATML_Parser():
 
         if xsd_file:
             self.setXsd(xsd_file)
-            print "XSD file '"+xsd+"' = '"+xsd_file+"'."
+            print ("XSD file '"+xsd+"' = '"+xsd_file+"'.")
         else:
-            print "ERROR:XSD file '"+xsd+"' not found."
+            print ("ERROR:XSD file '"+xsd+"' not found.")
 
         self.include_rules = []
         self.seatml_base_dir = ""

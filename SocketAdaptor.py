@@ -6,6 +6,7 @@
 #   Release under the MIT License.
 #
 
+from __future__ import print_function
 import sys
 import os
 import socket
@@ -46,10 +47,10 @@ class SocketAdaptor(threading.Thread):
                     self.socket.settimeout(1)
                     self.connected = True
                 except socket.error:
-                    print "reconnect error"
+                    print( "reconnect error" )
                     time.sleep(1)
                 except:
-                    print traceback.format_exc()
+                    print (traceback.format_exc())
 
             if self.connected == True:
                 try:
@@ -59,11 +60,11 @@ class SocketAdaptor(threading.Thread):
                 except socket.timeout:
                     pass
                 except socket.error:
-                    print traceback.format_exc()
+                    print (traceback.format_exc())
                     self.socket.close()
                     self.connected = False
                 except:
-                    print traceback.format_exc()
+                    print (traceback.format_exc())
 
     #
     #  Stop background job
@@ -82,15 +83,15 @@ class SocketAdaptor(threading.Thread):
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.host, self.port))
                 self.connected = True
-                print "connect socket"
+                print ("connect socket")
             except socket.error:
-                print "cannot connect"
+                print ("cannot connect")
 
         if self.connected == True:
             try:
                 self.socket.sendall(msg+"\n")
             except socket.error:
-                print traceback.format_exc()
+                print (traceback.format_exc())
                 self.socket.close()
                 self.connected = False
 

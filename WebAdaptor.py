@@ -6,6 +6,7 @@
 #   Release under the MIT License.
 #
 
+from __future__ import print_function
 import sys
 import os
 import socket
@@ -82,12 +83,12 @@ class SocketPort(threading.Thread):
       self.socket.bind((self.host, self.port))
 
     except socket.error:
-      print "Bind error"
+      print ("Bind error")
       self.close()
       return 0
 
     except:
-      print "Error in bind " , self.host, self.port
+      print ("Error in bind " , self.host, self.port)
       self.close()
       return -1
 
@@ -106,17 +107,17 @@ class SocketPort(threading.Thread):
       self.socket.connect((self.host, self.port))
 
     except socket.error:
-      print "Connection error"
+      print ("Connection error")
       self.close()
       return 0
 
     except:
-      print "Error in connect " , self.host, self.port
+      print ("Error in connect " , self.host, self.port)
       self.close()
       return -1
 
     if async :
-      print "Start read thread ",self.name
+      print ("Start read thread ",self.name)
       self.start()
 
     return 1
@@ -148,7 +149,7 @@ class SocketPort(threading.Thread):
           return  -1
 
     except socket.error:
-      print "socket.error in receive_data"
+      print ("socket.error in receive_data")
       self.terminate()
 
     except:
@@ -179,7 +180,7 @@ class SocketPort(threading.Thread):
   #
   #
   def accept_service_loop(self, lno=5, timeout=1.0):
-    print "No accept_service_loop defined"
+    print ("No accept_service_loop defined")
     self.close()
     return 
 
@@ -200,8 +201,8 @@ class SocketPort(threading.Thread):
         pass
 
       else :
-        print "Umm...:",self.name
-        print data
+        print ("Umm...:",self.name)
+        print (data)
 
       time.sleep(0.01) 
 
@@ -238,15 +239,15 @@ class SocketPort(threading.Thread):
   #
   def send(self, msg, name=None):
     if not self.socket :
-      print msg
-      print "Error: Not connected"
+      print (msg)
+      print ("Error: Not connected")
       return None
     try:
       self.socket.sendall(msg)
 
     except socket.error:
-      print "Socket error in send"
-      print msg
+      print ("Socket error in send")
+      print (msg)
       self.close()
 
 #######################################
@@ -296,7 +297,7 @@ class WebSocketServer(SocketPort):
     return None
 
   def accept_service_loop(self, lno=5, timeout=1.0):
-    print "Wait for accept: %s(%s:%d)" % (self.name, self.host, self.port)
+    print ("Wait for accept: %s(%s:%d)" % (self.name, self.host, self.port))
     self.socket.listen(lno)
     while self.mainloop:
       res = self.wait_for_read(timeout) 
@@ -308,7 +309,7 @@ class WebSocketServer(SocketPort):
         pass
       time.sleep(0.01) 
     
-    print "Terminate all service %s(%s:%d)" % (self.name, self.host, self.port)
+    print ("Terminate all service %s(%s:%d)" % (self.name, self.host, self.port))
     self.close_service()
     self.close()
     return 
@@ -445,7 +446,7 @@ class CommReader:
   #
   def parse(self, data):
     if self.debug:
-      print data
+      print (data)
 
     self.appendBuffer( data )
     self.checkBuffer()
@@ -505,7 +506,7 @@ class CommReader:
         self.buffer = buffer
         self.current = 0
     except:
-      print "ERR in checkBuffer"
+      print ("ERR in checkBuffer")
       self.buffer=""
       pass
 
@@ -518,7 +519,7 @@ class CommReader:
     if self.owner :
       self.owner.send(self.response)
     else:
-      print "No owner"
+      print ("No owner")
 
     if flag:
       self.owner.close()
@@ -606,7 +607,7 @@ class CometReader(CommReader):
           try:
             self.getServer().addKey(eseatkey)
           except:
-            print "ERROR in add"
+            print ("ERROR in add")
           contents=contents.replace("My_eSEAT_Key", eseatkey)
 
         elif fname in ["/rtc_comet.js"] :
@@ -614,7 +615,7 @@ class CometReader(CommReader):
           try:
             self.getServer().addKey(eseatkey)
           except:
-            print "ERROR in add"
+            print ("ERROR in add")
           contents=contents.replace("My_eSEAT_Key", eseatkey)
 
         response = self.parser.response200(ctype, contents)
@@ -625,7 +626,7 @@ class CometReader(CommReader):
     # COMET Operations
     elif cmd == "POST":
       if not self.getServer().isInKey(key):
-        print "ERROR : invalid key = "+key
+        print ("ERROR : invalid key = "+key)
         response = self.parser.response400()
         self.sendResponse(response)
         return
@@ -760,7 +761,7 @@ class CommParser:
   #  skip buffer, but not implemented....
   #
   def skipBuffer(self):
-      print "call skipBuffer"
+      print ("call skipBuffer")
       return 
   #
   #  check message format (cmd encoded_args)

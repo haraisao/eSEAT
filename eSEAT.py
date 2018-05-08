@@ -13,6 +13,7 @@ Copyright (C) 2009-2014
 '''
 
 ############### import libraries
+from __future__ import print_function
 import sys
 import os
 import getopt
@@ -346,7 +347,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                  return eSEAT_Core.createAdaptor(self, compname, tag)
         except:
             self._logger.error(u"invalid parameters: " + type + ": " + name)
-            print traceback.format_exc()
+            print( traceback.format_exc() )
             return -1
 
         return 1
@@ -436,7 +437,7 @@ class eSEATManager:
 
         try:
             opts, args = parser.parse_args()
-        except optparse.OptionError, e:
+        except (optparse.OptionError, e):
             print >>sys.stderr, 'OptionError:', e
             sys.exit(1)
 
@@ -497,7 +498,7 @@ class eSEATManager:
     def exit(self):
         self.comp.exit()
         self.manager.shutdown()
-        print "....eSEAT Manager shutdown"
+        print( "....eSEAT Manager shutdown" )
         if self.run_as_daemon:
           os._exit(1)
         else:
@@ -556,7 +557,7 @@ def deamonize():
   try:
     pid=os.fork()
   except:
-    print "ERROR in fork1"
+    print( "ERROR in fork1" )
 
   if pid > 0:
     os._exit(0)
@@ -564,13 +565,12 @@ def deamonize():
   try:
     os.setsid()
   except:
-    print "ERROR in setsid"
+    print( "ERROR in setsid" )
 
   try:
     pid=os.fork()
   except:
-    print "ERROR in fork2"
-
+    print( "ERROR in fork2" )
   if pid > 0:
     os._exit(0)
 
@@ -587,7 +587,7 @@ if __name__=='__main__':
     seatmgr = eSEATManager()
     seatmgr.start()
 
-    print "...Terminate." 
+    print ( "...Terminate." )
     if seatmgr.run_as_daemon:
       os._exit(1)
     else:

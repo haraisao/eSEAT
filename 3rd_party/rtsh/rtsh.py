@@ -1,5 +1,6 @@
 #! python.exe
 
+from __future__ import print_function
 import cgi
 import subprocess
 import sys
@@ -56,14 +57,14 @@ if __name__ == '__main__':
   elif cmd == 'rtcat2' :
     cwd = getValue(form, 'cwd', 1)
     name = getValue(form, 'name', 2)
-    print  >> sys.stderr, cwd, name
+    print (cwd, name, file=sys.stderr)
     result = ""
     result = catComponent2(cwd, name)
     result = json.dumps(result)
 
   elif cmd == 'rtcat' :
     name = getValue(form, 'name', 1 )
-    print >> sys.stderr, "rtcat "+name
+    print ("rtcat "+name, file=sys.stderr)
     result = catComponent(name)
     result = json.dumps(result)
 
@@ -90,7 +91,7 @@ if __name__ == '__main__':
 
   elif cmd == 'rtdisall' :
     name1 = getValue(form, 'name1', 1)
-    print name1
+    print (name1)
     code, result = disconnectAll(name1)
 
   elif cmd == 'rtconf_list' :
