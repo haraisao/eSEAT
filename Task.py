@@ -13,6 +13,7 @@ Copyright (C) 2017
 '''
 
 ############### import libraries
+from __future__ import print_function
 import sys
 import os
 import subprocess
@@ -50,6 +51,7 @@ class Task():
     def __init__(self, rtc):
         self.seat = rtc
         self._logger = rtc._logger
+        self.condition = True
         
     def execute(self,data):
         return True
@@ -124,9 +126,11 @@ class TaskScript(Task):
         return
 
     def execute(self, data):
+        retval = True
         setGlobals('rtc_result', None)
         setGlobals('rtc_in_data', data)
         setGlobals('web_in_data', data)
+        setGlobals('__retval__', retval)
         #
         #   execute script or script file
         if self.fname :
@@ -136,20 +140,20 @@ class TaskScript(Task):
         try:
             if self.data :
                 exec(self.data, getGlobals())
+                retval=getGlobals()['__retval__']
         except:
             self.error("Error in script", self.data)
             return False
         # 
         #  Call 'send' method of Adaptor to send the result...
         rtc_result = getGlobals()['rtc_result'] 
-        if rtc_result != None :
+        if rtc_result != None and retval:
             try:
                 ad = self.seat.adaptors[self.sendto]
                 ad.send(self.sendto, rtc_result)
             except KeyError:
                 self.error("no such adaptor:" + self.sendto)
-
-        return True
+        return retval
 
 class TaskLog(Task):
     def __init__(self, rtc, data):
@@ -181,7 +185,7 @@ class TaskStatetransition(Task):
             else:
                 self._logger.info("state transition from "+self.seat.currentstate+" to "+self.data)
                 self.seat.stateTransfer(self.data)
-            return True
+            return False
         except:
             self.error("Error in state transision", self.data)
             return False
@@ -197,16 +201,30 @@ class TaskGroup():
         self.keys=[]
         self.patterns=[]
         self.timeout = -1
+        self.condition = True
 
     def execute(self, data=None):
         for cmd in self.taskseq:
-            cmd.execute(data)
+            if isinstance(cmd.condition, str) : cond = eval(cmd.condition)
+            else: cond = cmd.condition
+            if cond :
+                retval=cmd.execute(data)
+                if not retval: return retval
+        return True
 
     def executeEx(self, data=None):
         for cmd in self.taskseq:
-            if isinstance(cmd, TaskMessage):
-                cmd.encoding = None
-            cmd.execute(data)
+            if isinstance(cmd.condition, str) : cond = eval(cmd.condition)
+            else: cond = cmd.condition
+            if cond :
+                if isinstance(cmd, TaskMessage):
+                    cmd.encoding = None
+                retval=cmd.execute(data)
+                if not retval: return retval
+        return True
+
+    def setCondition(self, cond_str):
+        self.condition=cond_str
 
     def addTask(self, task):
         self.taskseq.append(task)
