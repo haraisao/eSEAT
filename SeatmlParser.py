@@ -39,6 +39,7 @@ class SEATML_Parser():
     def __init__(self, parent, xsd='seatml.xsd', logger=None):
         self.parent = parent
         self.componentName = "eSEAT"
+         self._xmlschema = None
         if logger:
             self._logger = parent._logger
         else:
@@ -50,7 +51,7 @@ class SEATML_Parser():
             self.setXsd(xsd_file)
             print ("XSD file '"+xsd+"' = '"+xsd_file+"'.")
         else:
-            print ("ERROR:XSD file '"+xsd+"' not found.")
+            print ("Warining:XSD file '"+xsd+"' not found.")
 
         self.include_rules = []
         self.seatml_base_dir = ""
@@ -237,7 +238,8 @@ class SEATML_Parser():
             return 1
 
         try:
-            self._xmlschema.assert_(doc)
+            if self._xmlschema :
+                self._xmlschema.assert_(doc)
         except AssertionError, b:
             self.logError(u"invalid script file: " + f + " (loadRuleFile): " + unicode(b))
             return 1
@@ -255,6 +257,8 @@ class SEATML_Parser():
     #   Sub parser for <rule>tag 
     #
     def parseRule(self, name, e):
+        #
+        # Check attribute 'file'
         if e.get('file'):
             loadfile = os.path.join(self.seatml_base_dir, e.get('file'))
             if loadfile in self.include_rules :
@@ -355,8 +359,10 @@ class SEATML_Parser():
             self.logError(u"unable to open file " + f + ": " + unicode(e))
             return 1
 
+
         try:
-            self._xmlschema.assert_(doc)
+            if self._xmlschema :
+                self._xmlschema.assert_(doc)
         except AssertionError, b:
             self.logError(u"invalid script file: " + f + ": " + unicode(b))
             return 1
@@ -418,11 +424,6 @@ class SEATML_Parser():
                 #  <timoute>
                 elif e.tag == 'ontimeout':
                     self.parseTimeout(name, e)
-                #
-                #  <rule>
-                elif e.tag == 'rule':
-                    self.include_rules = [ f.replace("\\\\", "\\")] 
-                    self.parseRule(name, e)
 
                 #
                 #  <onexec>
@@ -433,6 +434,11 @@ class SEATML_Parser():
                 #  <ondeactivated>
                 elif e.tag == 'ondeactivated':
                     self.parseDeactivated(name, e)
+                #
+                #  <rule>
+                elif e.tag == 'rule':
+                    self.include_rules = [ f.replace("\\\\", "\\")] 
+                    self.parseRule(name, e)
 
                 else:
                 #

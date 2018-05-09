@@ -480,7 +480,7 @@ class eSEAT_Core:
     # create the named state
     #
     def create_state(self, name):
-        self.items[name] = []
+        #self.items[name] = []
         if self.init_state == None:
             self.init_state = name
         return 
