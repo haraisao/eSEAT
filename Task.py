@@ -252,4 +252,35 @@ class State():
         self.name = name
         self.onentry = None
         self.onexit = None
-        self.rules = []
+        self.onexec = None
+        self.keys = []
+        self.rules = {}
+
+    def updateKeys(self):
+        self.keys = self.rules.keys()
+        return
+
+    def registerRule(self, key, tasks):
+        self.rules[key] = tasks
+        self.updateKeys()
+
+    def removeRule(self, key):
+        try:
+            del self.rules[key]
+        except:
+            pass
+        self.updateKeys()
+        return 
+
+    def matchkey(self, key):
+        for x in self.keys:
+            if re.match(key, x) not None:
+                return self.rules[x]
+        return None
+
+     def searchkey(self, key):
+        for x in self.keys:
+            if re.search(key, x) not None:
+                return self.rules[x]
+        return None
+
