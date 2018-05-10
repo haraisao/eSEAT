@@ -183,4 +183,4 @@ def exec_script_file(fname, gls=globals()):
             code = f.read()
             exec(code, gls)
     else:
-        execfile(fname)
+        execfile(fname, gls)
