@@ -12,8 +12,6 @@ Copyright (C) 2009-2014
   http://www.opensource.org/licenses/MIT
 '''
 
-
-
 ############### import libraries
 from __future__ import print_function
 import sys
@@ -63,36 +61,44 @@ from SeatmlParser import SEATML_Parser,convertDataType
 # Dummy logger
 #
 class SeatLogger:
+    #
+    #
     def __init__(self, name):
         self._name = name
         self._flag = True
-
+    #
+    #
     def setFlag(self, b):
         self._flag = b
-
+    #
+    #
     def info(self, msg):
         if self._flag :
             print ("INFO:"+self._name+" "+msg)
-
+    #
+    #
     def error(self, msg):
         print ("ERROR:"+self._name+" "+msg, file=sys.stderr)
-
+    #
+    #
     def warn(self, msg):
         print ("WARN:"+self._name+" "+msg, file=sys.stderr)
 
 
-#########################################################################
+##################################################################
 #
 #  Class eSEAT_Core
 #
 class eSEAT_Core:
+    #
+    #
     def __init__(self):
         if hasattr(sys, "frozen"):
             self._basedir = os.path.dirname(unicode(sys.executable, sys.getfilesystemencoding()))
         else:
             self._basedir = os.path.dirname(__file__)
         self.parser = SEATML_Parser(self)
-        self.states = []
+        self.states = {}
         self.keys = {}
         self.regkeys = {}
         self.statestack = []
@@ -273,6 +279,7 @@ class eSEAT_Core:
 
     #####################################
     # process for the cyclic execution
+    #
     def processExec(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
         cmds = self.lookupCommand(sname, '', 'onexec')
@@ -288,6 +295,7 @@ class eSEAT_Core:
 
     #####################################
     # process for onActivated
+    #
     def processActivated(self, flag=False):
         cmds = self.lookupCommand('all', '', 'onactivated')
 
@@ -302,6 +310,7 @@ class eSEAT_Core:
 
     #####################################
     # process for onDectivated
+    #
     def processDeactivated(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
         cmds = self.lookupCommand(sname, '', 'ondeactivated')
@@ -318,6 +327,7 @@ class eSEAT_Core:
 
     ##############################
     # process for timeout
+    #
     def processTimeout(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
         cmds = self.lookupWithDefault(sname, '', 'ontimeout', False)
@@ -342,6 +352,7 @@ class eSEAT_Core:
 
     #################################
     # Event process for Julius
+    #
     def processJuliusResult(self, name, s):
         doc = BeautifulSoup(s)
 
@@ -365,6 +376,7 @@ class eSEAT_Core:
 
     ######################################
     #  Event process for data-in-event
+    #
     def processOnDataIn(self, name, data):
         self._logger.info("got input from %s" %  (name,))
         cmds = self.lookupWithDefault(self.currentstate, name, "ondata")
@@ -450,38 +462,40 @@ class eSEAT_Core:
     #  Count the number of states 
     #
     def countStates(self):
-        return len(self.states)
+        return (len(self.states) - 1)
 
     #
     #  check the named state
     #
     def inStates(self, name):
-        return ( self.states.count(name) > 0 )
+        return self.states.has_key(name)
 
     #
     #  append the named state
     #
-    def appendState(self, name):
-        self.states.extend([name])
-        return
+    #def appendState(self, name):
+    #    self.states.extend([name])
+    #    return
 
     #
     #  initilaize the begining state
     #
     def initStartState(self, name):
         self.startstate = None
-        if self.states.count(name) > 0 :
+        if self.states.has_key(name) :
             self.startstate = name
         else:
-            self.startstate = self.states[0]
+            self.startstate = self.states.keys()[0]
         self.stateTransfer(self.startstate)
         self._logger.info("current state " + self.currentstate)
     #
     # create the named state
     #
     def create_state(self, name):
-        #self.items[name] = []
-        if self.init_state == None:
+        self.items[name] = []
+        if not self.states.has_key(name):
+            self.states[name] = State(name)
+        if self.init_state == None or self.init_state == 'all':
             self.init_state = name
         return 
 

@@ -272,15 +272,15 @@ class State():
         self.updateKeys()
         return 
 
-    def matchkey(self, key):
+    def matchkey(self, val):
         for x in self.keys:
-            if re.match(key, x) not None:
+            if re.match(x[1], val) is not None:
                 return self.rules[x]
         return None
 
-     def searchkey(self, key):
+    def searchkey(self, val):
         for x in self.keys:
-            if re.search(key, x) not None:
+            if re.search(x[1], val) is not None:
                 return self.rules[x]
         return None
 

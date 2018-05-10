@@ -39,7 +39,7 @@ class SEATML_Parser():
     def __init__(self, parent, xsd='seatml.xsd', logger=None):
         self.parent = parent
         self.componentName = "eSEAT"
-         self._xmlschema = None
+        self._xmlschema = None
         if logger:
             self._logger = parent._logger
         else:
@@ -199,6 +199,7 @@ class SEATML_Parser():
         elif e.tag == 'button':
             key = self.getAttribute(e, 'label')
             self.parent.registerCommands(name+":gui:"+key, commands)
+            self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addButton(name, key, self.getAttribute(e, 'color'),
                  self.getAttribute(e, 'bg_color'), self.getAttribute(e, 'colspan', 1))
         #
@@ -206,6 +207,7 @@ class SEATML_Parser():
         elif e.tag == 'input':
             key = self.getAttribute(e, 'id')
             self.parent.registerCommands(name+":gui:"+key, commands)
+            self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addEntry(name, key, self.getAttribute(e, 'width', '20'),
                  self.getAttribute(e, 'colspan', 1), self.getText(e))
         #
@@ -213,6 +215,7 @@ class SEATML_Parser():
         elif e.tag == 'text':
             key = self.getAttribute(e, 'id')
             self.parent.registerCommands(name+":gui:"+key, commands)
+            self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addText(name, key, self.getAttribute(e, 'width', '20'),
                  self.getAttribute(e, 'height', '3'), self.getAttribute(e, 'colspan', 1),
                  self.getAttribute(e, 'rowspan', 1), self.getText(e))
@@ -292,6 +295,7 @@ class SEATML_Parser():
                         #
                         for w in word:
                             self.parent.registerCommands(name+":"+adaptor+":"+w, commands)
+                            self.parent.states[name].registerRule((adaptor, w), commands)
                 else :
                    #
                    #
@@ -305,6 +309,7 @@ class SEATML_Parser():
                 #
                 for w in word:
                     self.parent.registerCommands(name+":"+source+":"+w, commands)
+                    self.parent.states[name].registerRule((source, w), commands)
 
     #
     #   Sub parser for <exec>tag 
@@ -312,7 +317,9 @@ class SEATML_Parser():
     def parseExec(self, name, e):
         commands = self.parseCommands(e)
         self.parent.registerCommands(name+"::onexec", commands)
+        self.parent.states[name].onexec = commands
         self.logInfo(u"register <onexec> on " + name)
+        return commands
 
     #
     #   Sub parser for <activated>tag 
@@ -320,7 +327,9 @@ class SEATML_Parser():
     def parseActivated(self, e):
         commands = self.parseCommands(e)
         self.parent.registerCommands("all::onactivated", commands)
+        self.parent.states['all'].registerRule('onactivated', commands)
         self.logInfo(u"register <onactivated> on all")
+        return commands
 
     #
     #   Sub parser for <deactivated>tag 
@@ -328,7 +337,9 @@ class SEATML_Parser():
     def parseDeactivated(self, name, e):
         commands = self.parseCommands(e)
         self.parent.registerCommands(name+"::ondeactivated", commands)
+        self.parent.states[name].registerRule('ondeactivated', commands)
         self.logInfo(u"register <ondeactivaetd> on " + name)
+        return commands
 
     #
     #   Sub parser for <exec>tag 
@@ -338,7 +349,9 @@ class SEATML_Parser():
         commands = self.parseCommands(e)
         commands.timeout = float(tout)
         self.parent.registerCommands(name+"::ontimeout", commands)
+        self.parent.states[name].registerRule('ontimeout', commands)
         self.logInfo(u"register <ontimeout> on " + name)
+        return commands
 
     #######################################################
     #   eSEAT Markup Language File loader
@@ -374,6 +387,9 @@ class SEATML_Parser():
         #
         #  <general>
         for g in doc.findall('general'):
+            #self.parent.states['all'] = Task.State('all')
+            self.parent.create_state('all')
+
             if g.get('name') : self.componentName = g.get('name')
 
             for a in g.getchildren():
@@ -413,23 +429,23 @@ class SEATML_Parser():
             self.parent.create_state(name)
 
             for e in list(s):
-               
                 #
                 #  <onentry><onexit>
                 if e.tag == 'onentry' or e.tag == 'onexit':
                     commands = self.parseCommands(e)
                     self.parent.registerCommands(name+":::"+e.tag , commands)
-
+                    if e.tag == 'onentry': 
+                        self.parent.states[name].onentry = commands
+                    if e.tag == 'onexit': 
+                        self.parent.states[name].onexit = commands
                 #
                 #  <timoute>
                 elif e.tag == 'ontimeout':
                     self.parseTimeout(name, e)
-
                 #
                 #  <onexec>
                 elif e.tag == 'onexec':
                     self.parseExec(name, e)
-
                 #
                 #  <ondeactivated>
                 elif e.tag == 'ondeactivated':
@@ -445,7 +461,7 @@ class SEATML_Parser():
                 # GUI tags
                     self.parseGui(name, e)
 
-            self.parent.appendState(name)
+            #self.parent.appendState(name)
 
         ############################################
         #  initialize
