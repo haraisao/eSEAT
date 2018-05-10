@@ -438,7 +438,7 @@ class eSEATManager:
         try:
             opts, args = parser.parse_args()
         except (optparse.OptionError, e):
-            print >>sys.stderr, 'OptionError:', e
+            print ('OptionError:', e, file=sys.stderr)
             sys.exit(1)
 
         self._scriptfile = None
