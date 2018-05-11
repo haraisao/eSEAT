@@ -99,7 +99,7 @@ class eSEAT_Core:
             self._basedir = os.path.dirname(__file__)
         self.parser = SEATML_Parser(self)
         self.states = {}
-        self.keys = {}
+        #self.keys = {}
         self.regkeys = {}
         self.statestack = []
         self.currentstate = "start"
@@ -305,8 +305,6 @@ class eSEAT_Core:
             if flag :
                 self._logger.info("no command found")
             return False
-
-        #
         cmds.execute('')
         return True
 
@@ -322,8 +320,6 @@ class eSEAT_Core:
             if flag :
                 self._logger.info("no command found")
             return False
-
-        #
         cmds.execute('')
         return True
 
@@ -512,8 +508,10 @@ class eSEAT_Core:
     #
     def stateTransfer(self, newstate):
         try:
-            tasks = self.keys[self.currentstate+":::onexit"]
-            tasks.execute()
+            #tasks = self.keys[self.currentstate+":::onexit"]
+            tasks = self.states[self.currentstate].onexit
+            if tasks:
+                tasks.execute()
         except KeyError:
             pass
   
@@ -529,8 +527,10 @@ class eSEAT_Core:
         try:
             cmds = self.lookupWithDefault(newstate, '', 'ontimeout', False)
             if cmds: self.setTimeout(cmds.timeout)
-            tasks = self.keys[self.currentstate+":::onentry"]
-            tasks.execute()
+            #tasks = self.keys[self.currentstate+":::onentry"]
+            tasks = self.states[self.currentstate].onentry
+            if tasks:
+                tasks.execute()
         except KeyError:
             pass
 

@@ -476,13 +476,12 @@ class SEATML_Parser():
 
         return 0
 
-#
+#############################################
 # Functions
 #
 #
-# Parse Key String
+# Parse Key String: already not needed
 # 
-#
 def decompString(strs):
     ret = []
     nstrs = strs
