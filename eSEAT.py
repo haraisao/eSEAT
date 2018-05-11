@@ -243,8 +243,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._data[name] = instantiateDataType(type)
         self._port[name] = OpenRTM_aist.InPort(name, self._data[name])
         self._port[name].addConnectorDataListener(
-                                  OpenRTM_aist.ConnectorDataListenerType.ON_BUFFER_WRITE,
-                               eSEATDataListener(name, type, self))
+                            OpenRTM_aist.ConnectorDataListenerType.ON_BUFFER_WRITE,
+                            eSEATDataListener(name, type, self))
         self.registerInPort(name, self._port[name])
 
     #

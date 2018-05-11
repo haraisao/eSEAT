@@ -313,4 +313,3 @@ class State():
 
     def has_rule(self, port, word):
         return self.rules.has_key((port, word))
-
