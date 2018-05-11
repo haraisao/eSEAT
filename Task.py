@@ -262,8 +262,6 @@ class State():
 
     def updateKeys(self):
         self.keys = self.rules.keys()
-        print (self.rules)
-        print (self.keys)
         return
 
     def registerRule(self, key, tasks):

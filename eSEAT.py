@@ -152,6 +152,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self.activated = True
         self.processActivated()
         self.resetTimer()
+        print (self.currentstate)
         return RTC_OK
 
     #
@@ -205,12 +206,12 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             try:
                 if isinstance(data, TimedString):
                     data.data = data.data.decode('utf-8')
-                    if not self.processResult(name, data.data) :
-                        self.processOnDataIn(name, data)
+                    self.processResult(name, data.data)
+                    self.processOnDataIn(name, data)
                 elif isinstance(data, TimedWString):
                     data.data = data.data
-                    if not self.processResult(name, data.data) :
-                        self.processOnDataIn(name, data)
+                    self.processResult(name, data.data)
+                    self.processOnDataIn(name, data)
                 else:
                     eSEAT_Core.onData(self, name, data)
             except:

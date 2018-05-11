@@ -22,6 +22,7 @@ import subprocess
 import time
 import utils
 
+from collections import OrderedDict
 ########
 # XML Parser of Julius result
 from bs4  import BeautifulSoup
@@ -98,7 +99,7 @@ class eSEAT_Core:
         else:
             self._basedir = os.path.dirname(__file__)
         self.parser = SEATML_Parser(self)
-        self.states = {}
+        self.states = OrderedDict()
         #self.keys = {}
         self.regkeys = {}
         self.statestack = []
@@ -290,7 +291,6 @@ class eSEAT_Core:
                 self._logger.info("no command found")
             return False
 
-        #
         cmds.execute('')
         return True
 
@@ -380,7 +380,7 @@ class eSEAT_Core:
     def processOnDataIn(self, name, data):
         self._logger.info("got input from %s" %  (name,))
         cmds = self.lookupWithDefault(self.currentstate, name, "ondata")
-
+        print (cmds)
         if not cmds:
             self._logger.info("no command found")
             return False
@@ -681,7 +681,7 @@ class eSEAT_Gui:
         try:
             self.buttons[eid].config(**cfg)
         except:
-            print ("ERROR")
+            print ("ERROR in ButtonConfig")
             pass
 
     #################  L I N E I N P U T ################### 
@@ -858,7 +858,7 @@ class eSEAT_Gui:
         try:
             self.labels[eid].configure(**cfg)
         except:
-            print ("ERROR")
+            print ("ERROR in setLabelConfig")
             pass
 
     #########  LAYOUT ITEMS ON A FRAME ############
