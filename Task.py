@@ -63,6 +63,10 @@ class Task():
         self._logger.error( traceback.format_exc() )
         return
 
+    def checkCondition(self):
+        return True
+#
+#
 class TaskMessage(Task):
     def __init__(self, rtc, sndto, data, encode, input_id):
         Task.__init__(self, rtc)
@@ -95,7 +99,8 @@ class TaskMessage(Task):
             self.error("no such adaptor", self.sendto)
             return False
         return True
-
+#
+#
 class TaskShell(Task):
     def __init__(self, rtc, sendto, data):
         Task.__init__(self, rtc)
@@ -116,8 +121,8 @@ class TaskShell(Task):
         except KeyError:
             self.error("no such adaptor", self.sendto)
         return True
-
-
+#
+#
 class TaskScript(Task):
     def __init__(self, rtc, sendto, data, fname):
         Task.__init__(self, rtc)
@@ -137,7 +142,7 @@ class TaskScript(Task):
         if self.fname :
             ffname = utils.findfile(self.fname)
             if ffname :
-                exec_script_file(ffname, getGlobals())
+                utils.exec_script_file(ffname, getGlobals())
         try:
             if self.data :
                 exec(self.data, getGlobals())
@@ -155,7 +160,8 @@ class TaskScript(Task):
             except KeyError:
                 self.error("no such adaptor:" + self.sendto)
         return retval
-
+#
+#
 class TaskLog(Task):
     def __init__(self, rtc, data):
         Task.__init__(self, rtc)
@@ -164,7 +170,8 @@ class TaskLog(Task):
     def execute(self, data):
         self._logger.info(self.info)
         return True
-
+#
+#
 class TaskStatetransition(Task):
     def __init__(self, rtc, func, data):
         Task.__init__(self, rtc)
@@ -191,7 +198,6 @@ class TaskStatetransition(Task):
             self.error("Error in state transision", self.data)
             return False
 
-
 #############################
 #  TaskGroup Class for eSEAT:
 #      TaskGroup neary equal State....
@@ -203,29 +209,32 @@ class TaskGroup():
         self.patterns=[]
         self.timeout = -1
         self.condition = True
+        self.pre_script = None
 
     def execute(self, data=None):
-        for cmd in self.taskseq:
-            if isinstance(cmd.condition, str) : cond = eval(cmd.condition)
-            else: cond = cmd.condition
-            if cond :
-                retval=cmd.execute(data)
-                if not retval: return retval
+        if self.checkCondition():
+            for cmd in self.taskseq:
+                if cmd.checkCondition() :
+                    retval = cmd.execute(data)
+                    if not retval: return retval
         return True
 
     def executeEx(self, data=None):
-        for cmd in self.taskseq:
-            if isinstance(cmd.condition, str) : cond = eval(cmd.condition)
-            else: cond = cmd.condition
-            if cond :
-                if isinstance(cmd, TaskMessage):
-                    cmd.encoding = None
-                retval=cmd.execute(data)
-                if not retval: return retval
+        if self.checkCondition():
+            for cmd in self.taskseq:
+                if cmd.checkCondition() :
+                    if isinstance(cmd, TaskMessage):  cmd.encoding = None
+                    retval = cmd.execute(data)
+                    if not retval: return retval
         return True
 
     def setCondition(self, cond_str):
         self.condition=cond_str
+
+    def checkCondition(self):
+        if isinstance(self.condition, str): cond = eval(self.condition.strip(), getGlobals())
+        else: cond = self.condition
+        return cond
 
     def addTask(self, task):
         self.taskseq.append(task)
@@ -246,6 +255,13 @@ class TaskGroup():
             if x.match(msg) : return True
         return False
     
+    def execute_pre_script(self):
+        print (self.pre_script)
+        if self.pre_script :
+            ffname = utils.findfile(self.pre_script)
+            if ffname :
+                utils.exec_script_file(ffname, getGlobals())
+                
 #####################
 #  State
 class State():

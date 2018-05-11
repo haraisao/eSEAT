@@ -121,7 +121,7 @@ class eSEAT_Core:
 
         self._logger = SeatLogger("eSEAT")
 
-        globals()['seat'] = self
+        setGlobals('seat', self)
 
     #
     #
@@ -283,7 +283,6 @@ class eSEAT_Core:
     #
     def processExec(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
-        #cmds = self.lookupCommand(sname, '', 'onexec')
         cmds = self.states[sname].onexec
 
         if not cmds :
@@ -298,7 +297,6 @@ class eSEAT_Core:
     # process for onActivated
     #
     def processActivated(self, flag=False):
-        #cmds = self.lookupCommand('all', '', 'onactivated')
         cmds = self.states['all'].onactivated
 
         if not cmds :
@@ -313,7 +311,6 @@ class eSEAT_Core:
     #
     def processDeactivated(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
-        #cmds = self.lookupCommand(sname, '', 'ondeactivated')
         cmds = self.states[sname].ondeactivated
 
         if not cmds :
@@ -329,7 +326,6 @@ class eSEAT_Core:
     #
     def processTimeout(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
-        #cmds = self.lookupWithDefault(sname, '', 'ontimeout', False)
         cmds = self.states[sname].ontimeout
         if not cmds :
             if flag :
@@ -368,7 +364,7 @@ class eSEAT_Core:
 
             cmds = self.lookupWithDefault(self.currentstate, name, text)
             if cmds:
-                globals()['julius_result'] = {'rank': rank, 'score': score, 'text': text, 'stext': text.split(' ')}
+                setGlobals('julius_result',  {'rank': rank, 'score': score, 'text': text, 'stext': text.split(' ')})
                 return cmds
             else:
                 self._logger.info("[rejected] no matching phrases")
@@ -377,26 +373,25 @@ class eSEAT_Core:
     ######################################
     #  Event process for data-in-event
     #
+    def initDataIn(self, data):
+        setGlobals('seat', self)
+        setGlobals('rtc_in_data', data)
+        setGlobals('julius_result', None)
+        return
+
     def processOnDataIn(self, name, data):
         self._logger.info("got input from %s" %  (name,))
         cmds = self.lookupWithDefault(self.currentstate, name, "ondata")
-        print (cmds)
+
         if not cmds:
             self._logger.info("no command found")
             return False
 
-        for c in cmds:
-            kond = c[0]
-            globals()['seat'] = self
-            globals()['rtc_in_data'] = data
-            globals()['julius_result'] = None
-            if kond[0] :
-                ffname = utils.findfile(kond[0])
-                if ffname :
-                    exec_script_file(ffname, globals())
-            if eval(kond[1].strip(), globals()):
-                tasks = c[1]
-                tasks.executeEx(data)
+        for cmd in cmds:
+            self.initDataIn(data)
+            cmd.execute_pre_script()
+            cmd.executeEx(data)
+
         return True
 
     ####################################################################################

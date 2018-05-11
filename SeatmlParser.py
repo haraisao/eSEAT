@@ -282,34 +282,31 @@ class SEATML_Parser():
             #  <key>
             keys = e.findall('key')
             if adaptor :
-                kond = [None, "True"]
+                kond = None
                 #
                 #  <cond>
-                kn = e.find('cond')
-                if kn is not None : kond = [kn.get("execfile"), kn.text]
+                knd = e.find('cond')
+                if knd is not None :
+                    commands.pre_script = knd.get("execfile")
+                    print (knd.get("execfile"))
+                    print (commands.pre_script)
+                    commands.condition = knd.text
 
                 if keys :
                     for k in keys:
                         word = decompString([k.text])
-                        #
-                        #
+
                         for w in word:
-                            #self.parent.registerCommands(name+":"+adaptor+":"+w, commands)
                             self.parent.states[name].registerRule((adaptor, w), commands)
                 else :
-                    #
-                    #
-                    #self.parent.registerCommandArray(name+":"+adaptor+":ondata", [kond, commands])
-                    self.parent.states[name].registerRuleArray((adaptor, 'ondata'), [kond, commands])
+                    self.parent.states[name].registerRuleArray((adaptor, 'ondata'), commands)
 
             for k in keys:
                 source = k.get('source')
                 if source is None: source = "default" 
                 word = decompString([k.text])
-                #
-                #
+
                 for w in word:
-                    #self.parent.registerCommands(name+":"+source+":"+w, commands)
                     self.parent.states[name].registerRule((source, w), commands)
 
     #
@@ -317,7 +314,6 @@ class SEATML_Parser():
     #
     def parseExec(self, name, e):
         commands = self.parseCommands(e)
-        #self.parent.registerCommands(name+"::onexec", commands)
         self.parent.states[name].onexec = commands
         self.logInfo(u"register <onexec> on " + name)
         return commands
@@ -327,7 +323,6 @@ class SEATML_Parser():
     #
     def parseActivated(self, e):
         commands = self.parseCommands(e)
-        #self.parent.registerCommands("all::onactivated", commands)
         self.parent.states['all'].onactivated = commands
         self.logInfo(u"register <onactivated> on all")
         return commands
@@ -337,7 +332,6 @@ class SEATML_Parser():
     #
     def parseDeactivated(self, name, e):
         commands = self.parseCommands(e)
-        #self.parent.registerCommands(name+"::ondeactivated", commands)
         self.parent.states[name].ondeactivated = commands
         self.logInfo(u"register <ondeactivaetd> on " + name)
         return commands
@@ -349,7 +343,6 @@ class SEATML_Parser():
         tout = e.get('timeout')
         commands = self.parseCommands(e)
         commands.timeout = float(tout)
-        #self.parent.registerCommands(name+"::ontimeout", commands)
         self.parent.states[name].ontimeout = commands
         self.logInfo(u"register <ontimeout> on " + name)
         return commands
@@ -388,7 +381,6 @@ class SEATML_Parser():
         #
         #  <general>
         for g in doc.findall('general'):
-            #self.parent.states['all'] = Task.State('all')
             self.parent.create_state('all')
 
             if g.get('name') : self.componentName = g.get('name')
@@ -434,7 +426,6 @@ class SEATML_Parser():
                 #  <onentry><onexit>
                 if e.tag == 'onentry' or e.tag == 'onexit':
                     commands = self.parseCommands(e)
-                    #self.parent.registerCommands(name+":::"+e.tag , commands)
                     if e.tag == 'onentry': 
                         self.parent.states[name].onentry = commands
                     if e.tag == 'onexit': 
