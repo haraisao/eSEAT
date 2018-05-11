@@ -17,6 +17,7 @@ from __future__ import print_function
 import sys
 import os
 import subprocess
+from collections import OrderedDict
 
 import utils
 import re
@@ -253,16 +254,28 @@ class State():
         self.onentry = None
         self.onexit = None
         self.onexec = None
+        self.ontimeout = None
+        self.onactivated = None
+        self.ondeactivated = None
         self.keys = []
-        self.rules = {}
+        self.rules = OrderedDict()
 
     def updateKeys(self):
         self.keys = self.rules.keys()
+        print (self.rules)
+        print (self.keys)
         return
 
     def registerRule(self, key, tasks):
         self.rules[key] = tasks
         self.updateKeys()
+
+    def registerRuleArray(self, key, tasks):
+        if self.rules.has_key(key) :
+            self.rules[key].append(tasks)
+        else:
+            self.rules[key] = [tasks]
+            self.updateKeys()
 
     def removeRule(self, key):
         try:
@@ -272,15 +285,18 @@ class State():
         self.updateKeys()
         return 
 
-    def matchkey(self, val):
+    def matchkey(self, port, word):
         for x in self.keys:
-            if re.match(x[1], val) is not None:
+            if x[0] == port and re.match(x[1], word) is not None:
                 return self.rules[x]
         return None
 
-    def searchkey(self, val):
+    def searchkey(self, port, word):
         for x in self.keys:
-            if re.search(x[1], val) is not None:
+            if x[0] == port and re.search(x[1], word) is not None:
                 return self.rules[x]
         return None
+
+    def has_rule(self, port, word):
+        return self.rules.has_key((port, word))
 

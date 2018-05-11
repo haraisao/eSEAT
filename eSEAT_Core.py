@@ -282,7 +282,8 @@ class eSEAT_Core:
     #
     def processExec(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
-        cmds = self.lookupCommand(sname, '', 'onexec')
+        #cmds = self.lookupCommand(sname, '', 'onexec')
+        cmds = self.states[sname].onexec
 
         if not cmds :
             if flag :
@@ -297,7 +298,8 @@ class eSEAT_Core:
     # process for onActivated
     #
     def processActivated(self, flag=False):
-        cmds = self.lookupCommand('all', '', 'onactivated')
+        #cmds = self.lookupCommand('all', '', 'onactivated')
+        cmds = self.states['all'].onactivated
 
         if not cmds :
             if flag :
@@ -313,7 +315,8 @@ class eSEAT_Core:
     #
     def processDeactivated(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
-        cmds = self.lookupCommand(sname, '', 'ondeactivated')
+        #cmds = self.lookupCommand(sname, '', 'ondeactivated')
+        cmds = self.states[sname].ondeactivated
 
         if not cmds :
             if flag :
@@ -330,7 +333,8 @@ class eSEAT_Core:
     #
     def processTimeout(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
-        cmds = self.lookupWithDefault(sname, '', 'ontimeout', False)
+        #cmds = self.lookupWithDefault(sname, '', 'ontimeout', False)
+        cmds = self.states[sname].ontimeout
         if not cmds :
             if flag :
                 self._logger.info("no command found")
@@ -426,23 +430,27 @@ class eSEAT_Core:
     #  Lookup Registered Commands
     #
     def lookupCommand(self, state, name, s):
-        cmds = []
-        regkeys = []
-        try:
-            cmds = self.keys[state+":"+name+":"+s]
-        except KeyError:
-            try:
-                regkeys = self.regkeys[state+":"+name]
-            except KeyError:
-                return None
-
-            for r in regkeys:
-                if r[0].match(s):
-                    cmds = r[1]
-                    break
-            return None
+        cmds = self.states[state].matchkey(name, s)
         return cmds
-
+        
+    #def lookupCommand_old(self, state, name, s):
+    #    cmds = []
+    #    regkeys = []
+    #    try:
+    #        k = state+":"+name+":"+s
+    #        cmds = self.keys[k]
+    #    except KeyError:
+    #        try:
+    #            regkeys = self.regkeys[state+":"+name]
+    #        except KeyError:
+    #            return None
+    #
+    #        for r in regkeys:
+    #            if r[0].match(s):
+    #                cmds = r[1]
+    #                break
+    #        return None
+    #    return cmds
     #############################
     #  For STATE of eSEAT
     #
@@ -485,7 +493,7 @@ class eSEAT_Core:
         if self.states.has_key(name) :
             self.startstate = name
         else:
-            self.startstate = self.states.keys()[0]
+            self.startstate = self.states.keys()[1]
         self.stateTransfer(self.startstate)
         self._logger.info("current state " + self.currentstate)
     #
@@ -541,19 +549,19 @@ class eSEAT_Core:
     #
     #  register commands into self.keys
     #
-    def registerCommands(self, key, cmds):
-        self._logger.info("register key="+key)
-        self.keys[key] = cmds
-
-    def appendCommands(self, key, cmds):
-        self._logger.info(" append key="+key)
-        self.keys[key].append(cmds) 
-
-    def registerCommandArray(self, tag, cmds):
-        if self.keys.keys().count(tag) == 0 :
-            self.registerCommands(tag, [cmds])
-        else :
-            self.appendCommands(tag, cmds)
+    #def registerCommands(self, key, cmds):
+    #    self._logger.info("register key="+key)
+    #    self.keys[key] = cmds
+    #
+    #def appendCommands(self, key, cmds):
+    #    self._logger.info(" append key="+key)
+    #    self.keys[key].append(cmds) 
+    #
+    #def registerCommandArray(self, tag, cmds):
+    #    if self.keys.keys().count(tag) == 0 :
+    #        self.registerCommands(tag, [cmds])
+    #    else :
+    #        self.appendCommands(tag, cmds)
 
     ##############################################
     #  Callback function for WebAdaptor
@@ -687,11 +695,12 @@ class eSEAT_Gui:
 
         return [enty, cspan]
 
-    def bind_commands_to_entry(self, enty, name, eid):
+    def bind_commands_to_entry(self, entry, name, eid):
         key = name+":gui:"+eid
-        if self.keys[key] :
+        #if self.keys[key] :
+        if self.states[name].has_rule('gui', eid) :
             self._logger.info("Register Entry callback")
-            enty.bind('<Return>', self.mkinputcallback(eid))
+            entry.bind('<Return>', self.mkinputcallback(eid))
         return 
 
     def getEntry(self, eid):
