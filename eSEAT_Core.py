@@ -243,8 +243,8 @@ class eSEAT_Core:
                     if data2 :
                         self.processOnDataIn(name, data2)
                     else :
-                        if not self.processResult(name, data) :
-                            self.processOnDataIn(name, data)
+                        self.processResult(name, data)
+                        self.processOnDataIn(name, data)
             else:
                 self.processOnDataIn(name, data)
         except:
@@ -398,12 +398,9 @@ class eSEAT_Core:
                 ffname = utils.findfile(kond[0])
                 if ffname :
                     exec_script_file(ffname, globals())
-                #execfile(kond[0], globals())
-
             if eval(kond[1].strip(), globals()):
                 tasks = c[1]
                 tasks.executeEx(data)
-                #
         return True
 
     ####################################################################################
@@ -430,7 +427,10 @@ class eSEAT_Core:
     #  Lookup Registered Commands
     #
     def lookupCommand(self, state, name, s):
-        cmds = self.states[state].matchkey(name, s)
+        try:
+            cmds = self.states[state].matchkey(name, s)
+        except:
+            cmds = None
         return cmds
         
     #def lookupCommand_old(self, state, name, s):
