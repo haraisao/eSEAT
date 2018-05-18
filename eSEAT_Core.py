@@ -125,7 +125,7 @@ class eSEAT_Core:
 
     #
     #
-    def exit(self):
+    def exit_comp(self):
         print ("Call eSEAT_Core.exit")
         if self.webServer :
             self.webServer.terminate()

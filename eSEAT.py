@@ -127,8 +127,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
 
 
     def exit(self):
-        eSEAT_Core.exit(self)
-        OpenRTM_aist.DataFlowComponentBase.exit(self)
+        eSEAT_Core.exit_comp(self)
+        return OpenRTM_aist.DataFlowComponentBase.exit(self)
 
     ##########################################################
     #  E v e n t   H a n d l e r 
@@ -170,8 +170,11 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #  onFinalize
     #
     def onFinalize(self):
-        OpenRTM_aist.DataFlowComponentBase.onFinalize(self)
-        self.finalizeSEAT()
+        try:
+            OpenRTM_aist.DataFlowComponentBase.onFinalize(self)
+            self.finalizeSEAT()
+        except:
+            pass
         return RTC_OK
 
     #
@@ -498,7 +501,7 @@ class eSEATManager:
     #
     #
     def exit(self):
-        self.comp.exit()
+        self.comp.exit_comp()
         self.manager.shutdown()
         print( "....eSEAT Manager shutdown" )
         if self.run_as_daemon:
