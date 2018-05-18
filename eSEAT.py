@@ -128,7 +128,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
 
     def exit(self):
         eSEAT_Core.exit(self)
-        OpenRTM_aist.DataFlowComponentBase.exit(self)
+        return OpenRTM_aist.DataFlowComponentBase.exit(self)
 
     ##########################################################
     #  E v e n t   H a n d l e r 
