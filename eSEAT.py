@@ -411,11 +411,6 @@ class eSEATManager:
         self.manager.setModuleInitProc(self.moduleInit)
         self.manager.activateManager()
 
-        instance_name = self.comp.getProperties().getProperty("naming.names")
-        instance_name = SeatmlParser.formatInstanceName(instance_name)
-
-        self.comp.setInstanceName(instance_name)
-
     #
     #  Parse command line option...
     def parseArgs(self):
@@ -439,7 +434,7 @@ class eSEATManager:
         try:
             opts, args = parser.parse_args()
         except (optparse.OptionError, e):
-            print >>sys.stderr, 'OptionError:', e
+            print('OptionError:', e, file=sys.stderr)
             sys.exit(1)
 
         self._scriptfile = None
@@ -467,9 +462,15 @@ class eSEATManager:
         manager.registerFactory(profile, eSEAT, OpenRTM_aist.Delete)
         self.comp = manager.createComponent("eSEAT")
         self.comp.manager = manager
+        manager.unregisterComponent(self.comp)
 
         if self._scriptfile :
             ret = self.comp.loadSEATML(self._scriptfile)
+
+        naming_formats = self.comp.getProperties().getProperty("naming.formats")
+        naming_names = manager.formatString(naming_formats, self.comp.getProperties())
+        self.comp.getProperties().setProperty("naming.names",naming_names)
+        manager.registerComponent(self.comp)
 
     #
     #  Start Manager

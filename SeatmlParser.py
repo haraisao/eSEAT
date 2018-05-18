@@ -156,6 +156,7 @@ class SEATML_Parser():
                 utils.exec_script_file(ffname, eSEAT_Core.getGlobals())
         if txt :
             sys.path.append('.')
+            print(txt)
             exec(txt, eSEAT_Core.getGlobals())
 
     #
@@ -383,7 +384,9 @@ class SEATML_Parser():
         for g in doc.findall('general'):
             self.parent.create_state('all')
 
-            if g.get('name') : self.componentName = g.get('name')
+            if g.get('name') :
+                self.componentName = g.get('name')
+                self.parent.setInstanceName(self.componentName)
 
             for a in g.getchildren():
                 #
