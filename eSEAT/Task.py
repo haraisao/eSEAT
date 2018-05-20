@@ -23,7 +23,7 @@ import utils
 import re
 import traceback
 
-from eSEAT_Core import getGlobals, setGlobals
+from core import getGlobals, setGlobals
 '''
 State:
   - name(string), rules([TaskGroup,]), onentry(TaskGroup), onexit(TaskGroup)

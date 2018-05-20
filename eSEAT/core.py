@@ -539,7 +539,8 @@ class eSEAT_Core:
         if res == 1 : 
             self._logger.error("===> SEATML Parser error")
             if self.manager : self.manager.shutdown()
-            sys.exit(1)
+            #sys.exit(1)
+        return res
 
     #
     #  register commands into self.keys

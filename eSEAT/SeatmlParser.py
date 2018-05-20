@@ -27,8 +27,7 @@ from lxml import etree
 import utils
 ###########################################
 #
-import eSEAT_Core
-#from Task import State, TaskGroup, TaskMessage, TaskScript, TaskShell, TaskLog, TaskStatetransition
+import core as eSEAT_Core
 import Task
 
 ###########################################
