@@ -406,7 +406,7 @@ class eSEATManager:
         if mlfile is None:
             argv = self.parseArgs()
             if argv == -1:
-                raise Exception
+                raise Exception("Error in __init__")
         else:
             argv = []
             self._scriptfile = mlfile
@@ -483,7 +483,7 @@ class eSEATManager:
 
         if self._scriptfile :
             ret = self.comp.loadSEATML(self._scriptfile)
-            if ret : raise Exception
+            if ret : raise Exception("Error in moduleInit")
 
         naming_formats = self.comp.getProperties().getProperty("naming.formats")
         naming_names = manager.formatString(naming_formats, self.comp.getProperties())
