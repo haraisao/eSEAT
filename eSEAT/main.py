@@ -426,6 +426,11 @@ class eSEATManager:
         self.manager.setModuleInitProc(self.moduleInit)
         self.manager.activateManager()
 
+        instance_name = self.comp.getProperties().getProperty("naming.names")
+        instance_name = SeatmlParser.formatInstanceName(instance_name)
+
+        self.comp.setInstanceName(instance_name)
+
     #
     #  Parse command line option...
     def parseArgs(self):
