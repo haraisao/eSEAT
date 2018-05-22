@@ -28,6 +28,8 @@ import threading
 import subprocess
 import utils
 
+from viewer import OutViewer
+
 if os.getenv('SEAT_ROOT') :
   rootdir=os.getenv('SEAT_ROOT')
 else:
@@ -126,7 +128,6 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._ConsumerPort = {}
         self._ProviderPort = {}
         self._on_timeout = -1
-
 
     def exit(self):
         eSEAT_Core.exit_comp(self)
@@ -397,18 +398,18 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
 #
 class eSEATManager:
     def __init__(self, mlfile=None):
-        global opts
-        opts = None
         self.comp = None
         self.run_as_daemon = False
         self.naming_format = ""
+        self.viewer = None
 
         if mlfile is None:
-            argv = self.parseArgs()
+            opts, argv = self.parseArgs()
             if argv == -1:
                 raise Exception("Error in __init__")
         else:
             argv = []
+            opts = None
             self._scriptfile = mlfile
 
         if opts:
@@ -423,18 +424,26 @@ class eSEATManager:
         if self.naming_format:
             self.manager._config.setProperty("naming.formats", self.naming_format)
 
+        #
+        # create Component
         self.manager.setModuleInitProc(self.moduleInit)
         self.manager.activateManager()
 
+        #
+        #  set Instance Name
         instance_name = self.comp.getProperties().getProperty("naming.names")
         instance_name = SeatmlParser.formatInstanceName(instance_name)
-
         self.comp.setInstanceName(instance_name)
+
+        #
+        # Gui stdout
+        if opts and opts.run_out_viewer:
+            print ("CreateViewer")
+            self.viewer = OutViewer()
 
     #
     #  Parse command line option...
     def parseArgs(self):
-        global opts
         encoding = locale.getpreferredencoding()
         sys.stdout = codecs.getwriter(encoding)(sys.stdout, errors = "replace")
         sys.stderr = codecs.getwriter(encoding)(sys.stderr, errors = "replace")
@@ -451,12 +460,15 @@ class eSEATManager:
         parser.add_option('-d', '--daemon', dest='run_as_daemon', action="store_true",
                             help='run as daemon' )
 
+        parser.add_option('-v', '--viewer', dest='run_out_viewer', action="store_true",
+                            help='create output window' )
+
         try:
             opts, args = parser.parse_args()
         except (optparse.OptionError, e):
             print('OptionError:', e, file=sys.stderr)
             #sys.exit(1)
-            return -1
+            return [None, -1]
 
         self._scriptfile = None
         if(len(args) > 0):
@@ -469,12 +481,15 @@ class eSEATManager:
         if opts.run_as_daemon:
            sys.argv.remove('-d')
 
+        if opts.run_out_viewer:
+           sys.argv.remove('-v')
+
         if len(args) == 0:
             parser.error("wrong number of arguments")
             #sys.exit(1)
-            return -1
+            return [None, -1]
         
-        return sys.argv
+        return [opts, sys.argv]
 
     #
     #  Initialize the eSEAT-RTC
@@ -499,11 +514,11 @@ class eSEATManager:
     #  Start Manager
     #
     def start(self):
-        if isinstance(self.comp, eSEAT_Gui) and self.comp.hasGUI() :
+        if (isinstance(self.comp, eSEAT_Gui) and self.comp.hasGUI() ) or self.viewer :
             self.manager.runManager(True)
 
             # GUI part
-            res = self.comp.startGuiLoop()
+            res = self.comp.startGuiLoop(self.viewer)
             if res == 0:
               self.comp.disconnectAll()
 
@@ -512,7 +527,8 @@ class eSEATManager:
                  self.manager.shutdown()
               except:
                  pass 
-              sys.exit(1)
+              #sys.exit(1)
+              return
             else:
               self.manager.runManager()
         else:
@@ -521,13 +537,16 @@ class eSEATManager:
     #
     #
     def exit(self):
-        self.comp.exit_comp()
-        self.manager.shutdown()
+        try:
+            self.comp.exit_comp()
+            self.manager.shutdown()
+        except:
+            pass
         print( "....eSEAT Manager shutdown" )
         if self.run_as_daemon:
           os._exit(1)
-        else:
-          sys.exit(1)
+        #else:
+        #  sys.exit(1)
 
 
 #########################################################################
@@ -605,8 +624,11 @@ def deamonize():
 #  os.close(sys.stderr.fileno())
 
 def main(mlfile=None):
-    seatmgr = eSEATManager(mlfile)
-    seatmgr.start()
+    try:
+        seatmgr = eSEATManager(mlfile)
+        seatmgr.start()
+    except:
+        pass
 
     print ( "...Terminate." )
     if seatmgr.run_as_daemon:

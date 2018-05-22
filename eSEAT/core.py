@@ -23,6 +23,7 @@ import time
 import utils
 
 from collections import OrderedDict
+
 ########
 # XML Parser of Julius result
 from bs4  import BeautifulSoup
@@ -605,6 +606,7 @@ class eSEAT_Core:
 #
 class eSEAT_Gui:
     def __init__(self):
+        self.root = None
         self.gui_items = {}
         self.frames = {}
         self.max_columns = 20
@@ -947,19 +949,25 @@ class eSEAT_Gui:
     #
     #   Event loop for GUI
     #
-    def startGuiLoop(self):
+    def startGuiLoop(self, viewer):
         try:
           self.root = Tk()
         except:
           return 1
-        for st in self.states:
-            self.newFrame(st)
-            self.createGuiPanel(st)
 
-        self.showFrame(self.init_state)
-        self.frames[self.init_state].pack()
+        if self.hasGUI() : 
+            for st in self.states:
+                self.newFrame(st)
+                self.createGuiPanel(st)
 
-        self.root.bind("<<state_transfer>>", self.stateChanged)
-        self.setTitle(self.getInstanceName())
+            self.showFrame(self.init_state)
+            self.frames[self.init_state].pack()
+
+            self.root.bind("<<state_transfer>>", self.stateChanged)
+            self.setTitle(self.getInstanceName())
+
+        if viewer:
+            viewer.createViewer(self.root, self.hasGUI())
+
         self.root.mainloop()
         return 0
