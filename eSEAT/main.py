@@ -130,8 +130,11 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._on_timeout = -1
 
     def exit(self):
-        eSEAT_Core.exit_comp(self)
-        return OpenRTM_aist.DataFlowComponentBase.exit(self)
+        try:
+            eSEAT_Core.exit_comp(self)
+            return OpenRTM_aist.DataFlowComponentBase.exit(self)
+        except:
+            return RTC_OK
 
     ##########################################################
     #  E v e n t   H a n d l e r 
