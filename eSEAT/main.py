@@ -441,7 +441,7 @@ class eSEATManager:
         #
         # Gui stdout
         if opts and opts.run_out_viewer:
-            print ("CreateViewer")
+            #print ("CreateViewer")
             self.viewer = OutViewer()
 
     #
