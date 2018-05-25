@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
 import sys
-import Tkinter as tk
 import threading
 
-import ScrolledText
+try:
+    import Tkinter as tk
+    import ScrolledText
+except:
+    import tkinter as tk
+    import tkinter.scrolledtext as ScrolledText
 
 #
 #

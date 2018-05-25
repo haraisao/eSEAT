@@ -30,9 +30,13 @@ from bs4  import BeautifulSoup
 
 #########
 #  GUI etc.
-from Tkinter import * 
-from ScrolledText import ScrolledText 
-
+try:
+    from Tkinter import * 
+    from ScrolledText import ScrolledText 
+except:
+    from tkinter import *
+    from tkinter.scrolledtext import ScrolledText
+ 
 ###############################################################
 #  Global Variables
 #
