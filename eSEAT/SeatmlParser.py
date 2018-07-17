@@ -155,7 +155,6 @@ class SEATML_Parser():
                 utils.exec_script_file(ffname, eSEAT_Core.getGlobals())
         if txt :
             sys.path.append('.')
-            print(txt)
             exec(txt, eSEAT_Core.getGlobals())
 
     #

@@ -330,8 +330,11 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     def callService(self, name, m_name, *val):
         try:
-            return self._consumer[name]._ptr().__getattribute__(m_name)(*val)
+            objref=self._consumer[name]._ptr()
+            return eval('objref.'+m_name)(*val)
+            #return self._consumer[name]._ptr().__getattribute__(m_name)(*val)
         except:
+            traceback.print_exc()
             return None
         
     #
@@ -634,9 +637,12 @@ def main(mlfile=None):
         pass
 
     print ( "...Terminate." )
-    if seatmgr.run_as_daemon:
-      os._exit(1)
-    else:
+    try:
+      if seatmgr.run_as_daemon:
+        os._exit(1)
+      else:
+        sys.exit(1)
+    except:
       sys.exit(1)
 
 
