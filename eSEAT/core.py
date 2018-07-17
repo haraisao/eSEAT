@@ -653,8 +653,8 @@ class eSEAT_Gui:
         if self.root : self.root.title(name)
 
     #  Called by SEATML Parser
-    def addButton(self, name, txt, fg, bg, cspan):
-        self.items[name].append(['button', txt, fg, bg, cspan])
+    def addButton(self, name, txt, fg, bg, cspan, w):
+        self.items[name].append(['button', txt, fg, bg, cspan, w])
 
     def addEntry(self, name, txt, w, cspan, val=''):
         self.items[name].append(['entry', txt, w, cspan, val])
@@ -674,8 +674,12 @@ class eSEAT_Gui:
     ###################  CREATE GUI ITEMS ####################
     #################  B U T T O N ################### 
     ## Create Button Item
-    def createButtonItem(self, frame, sname, name, fg="#000000", bg="#cccccc", cspan=1):
-        btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg)
+    def createButtonItem(self, frame, sname, name, fg="#000000", bg="#cccccc", cspan=1, w=None):
+        #btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg)
+        if w :
+            btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg, width=int(w))
+        else:
+            btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg)
         self.buttons[sname+":"+name] = btn
         return [btn, cspan]
     
@@ -905,7 +909,7 @@ class eSEAT_Gui:
                elif itm[0] == 'button':
                    self.gui_items[name].append(
                        self.createButtonItem(self.frames[name], name,
-                                itm[1], itm[2], itm[3], int(itm[4]))
+                                itm[1], itm[2], itm[3], int(itm[4]), itm[5])
                        )
 
                elif itm[0] == 'entry':

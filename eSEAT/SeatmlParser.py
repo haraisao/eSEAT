@@ -200,7 +200,7 @@ class SEATML_Parser():
             #self.parent.registerCommands(name+":gui:"+key, commands)
             self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addButton(name, key, self.getAttribute(e, 'color'),
-                 self.getAttribute(e, 'bg_color'), self.getAttribute(e, 'colspan', 1))
+                 self.getAttribute(e, 'bg_color'), self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'width'))
         #
         #  <input>
         elif e.tag == 'input':
