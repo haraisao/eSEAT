@@ -414,8 +414,9 @@ class eSEATManager:
             if argv == -1:
                 raise Exception("Error in __init__")
         else:
-            argv = []
-            opts = None
+            #argv = []
+            #opts = None
+            opts, argv = self.parseArgs(False)
             self._scriptfile = mlfile
 
         if opts:
@@ -449,7 +450,7 @@ class eSEATManager:
 
     #
     #  Parse command line option...
-    def parseArgs(self):
+    def parseArgs(self, flag=True):
         encoding = locale.getpreferredencoding()
         sys.stdout = codecs.getwriter(encoding)(sys.stdout, errors = "replace")
         sys.stderr = codecs.getwriter(encoding)(sys.stderr, errors = "replace")
@@ -490,7 +491,7 @@ class eSEATManager:
         if opts.run_out_viewer:
            sys.argv.remove('-v')
 
-        if len(args) == 0:
+        if len(args) == 0 and flag:
             parser.error("wrong number of arguments")
             #sys.exit(1)
             return [None, -1]
