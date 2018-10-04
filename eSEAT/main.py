@@ -424,7 +424,7 @@ class eSEATManager:
             self.naming_format = opts.naming_format
 
         if self.run_as_daemon :
-            deamonize()
+            daemonize()
 
         self.manager = OpenRTM_aist.Manager.init(argv)
 
@@ -604,7 +604,7 @@ def instantiateDataType(dtype):
         return desc[1](*arg)
     return None
 
-def deamonize():
+def daemonize():
   try:
     pid=os.fork()
   except:
@@ -630,8 +630,9 @@ def deamonize():
 #  os.close(sys.stdout.fileno())
 #  os.close(sys.stderr.fileno())
 
-def main(mlfile=None):
+def main(mlfile=None, daemon=False):
     try:
+        if daemon : daemonize()
         seatmgr = eSEATManager(mlfile)
         seatmgr.start()
     except:

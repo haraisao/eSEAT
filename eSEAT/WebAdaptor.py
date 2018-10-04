@@ -22,6 +22,10 @@ import gc
 import time
 import uuid
 
+import string
+import traceback
+import subprocess
+
 #######################################
 # Raw Socket Adaptor
 #
@@ -507,6 +511,7 @@ class CommReader:
         self.current = 0
     except:
       print ("ERR in checkBuffer")
+      traceback.print_exc()
       self.buffer=""
       pass
 
@@ -596,13 +601,14 @@ class CometReader(CommReader):
     #
     # return HTML files
     if cmd == "GET":
+      #print (fname, self.dirname)
       contents = get_file_contents(fname, self.dirname)
       ctype = get_content_type(fname)
 
       if contents is None:
         response = self.parser.response404()
       else:
-        if fname in ["/comet.js"]  :
+        if fname in ["/comet.js", "/rtse/js/rtse.js"]  :
           eseatkey = str(uuid.uuid1())
           try:
             self.getServer().addKey(eseatkey)
@@ -626,7 +632,7 @@ class CometReader(CommReader):
     # COMET Operations
     elif cmd == "POST":
       if not self.getServer().isInKey(key):
-        print ("ERROR : invalid key = "+key)
+        print ("ERROR : invalid key = "+str(key))
         response = self.parser.response400()
         self.sendResponse(response)
         return
@@ -676,6 +682,13 @@ class CometReader(CommReader):
         res["date"] = datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S JST")
         response = self.parser.response200("application/json", json.dumps(res))
         self.sendResponse(response)
+
+      elif fname.find("/cgi-bin/") == 0 :
+          Data = parseQueryString(data)
+          cmd=self.dirname+fname +' "'+str(Data)+'"'
+          contents = subprocess.check_output([cmd], shell=True)
+          response = self.parser.response200("text/html;charset=utf-8", contents)
+          self.sendResponse(response)
 
       else:
           contents = "Hello, No such action defined"
@@ -851,6 +864,8 @@ class HttpCommand(CommParser):
   # Generate response message
   #
   def response200(self, ctype, contents):
+    if ctype == 'text/plain':
+      print("respose200", contents)
     date = datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S JST")
     res  = "HTTP/1.0 200 OK\r\n"
     res += "Date: "+date+"\r\n"
@@ -866,7 +881,7 @@ class HttpCommand(CommParser):
     res  = "HTTP/1.0 404 Not Found\r\n"
     res += "Date: "+date+"\r\n"
     res += "\r\n"
-    res  = "ERROR 404\r\n"
+    res  = "ERROR 404 in eSEAT\r\n"
     return res
 
   def response400(self):
@@ -979,8 +994,11 @@ def parseQueryString(data):
     ar = data.split("&")
     for a in ar:
       key, val = a.split("=")
-      res[key.strip()] = val.strip()
+      val = val.strip()
+      val = val.replace('%2F','/')
+      res[key.strip()] = val
   except:
+    traceback.print_exc()
     pass
   return res
 
