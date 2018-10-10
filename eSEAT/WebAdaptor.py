@@ -22,6 +22,9 @@ import gc
 import time
 import uuid
 
+from rtc_handle import *
+from rtc_handle_tool import *
+
 #######################################
 # Raw Socket Adaptor
 #
@@ -506,6 +509,7 @@ class CommReader:
         self.buffer = buffer
         self.current = 0
     except:
+      traceback.print_exc()
       print ("ERR in checkBuffer")
       self.buffer=""
       pass
@@ -580,6 +584,10 @@ class CometReader(CommReader):
     CommReader.__init__(self, None, HttpCommand(dirname, '', self))
     self.rtc = rtc
     self.dirname = dirname
+    if rtc:
+      self.orb = rtc.manager._orb
+      #self.namespace = NameSpace(rtc.manager._orb, "localhost")
+      #self.namespace.list_obj()
 
   def getRtc(self):
     return self.rtc
@@ -602,7 +610,7 @@ class CometReader(CommReader):
       if contents is None:
         response = self.parser.response404()
       else:
-        if fname in ["/comet.js"]  :
+        if fname in ["/comet.js", "/rtse/js/rtse.js" ]  :
           eseatkey = str(uuid.uuid1())
           try:
             self.getServer().addKey(eseatkey)
@@ -626,7 +634,7 @@ class CometReader(CommReader):
     # COMET Operations
     elif cmd == "POST":
       if not self.getServer().isInKey(key):
-        print ("ERROR : invalid key = "+key)
+        print ("ERROR : invalid key = "+str(key))
         response = self.parser.response400()
         self.sendResponse(response)
         return
@@ -677,10 +685,25 @@ class CometReader(CommReader):
         response = self.parser.response200("application/json", json.dumps(res))
         self.sendResponse(response)
 
+      elif fname.find("rtsh") >= 0 :
+        Data = parseQueryString(data)
+        cmd = Data['cmd']
+        if cmd == 'rtlist':
+          res=get_handle_list(self.orb,Data['host'])
+          print (res)
+        else:
+          res={}
+        #print(self.namespace.list_obj())
+
+        response = self.parser.response200("application/json", json.dumps(res))
+        #response = self.parser.response200("text/plain", contents)
+        self.sendResponse(response)
+
       else:
-          contents = "Hello, No such action defined"
-          response = self.parser.response200("text/plain", contents)
-          self.sendResponse(response)
+        print (fname)
+        contents = "Hello, No such action defined"
+        response = self.parser.response200("text/plain", contents)
+        self.sendResponse(response)
     else:
       response = self.parser.response400()
       self.sendResponse(response)

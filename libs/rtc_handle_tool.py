@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 #execfile("rtc_handle.py")
+from rtc_handle import *
 
 def initNS(hostname="localhost"):
   global rtm
@@ -17,14 +18,11 @@ def initSeatNS(hostname="localhost"):
   ns.list_obj()
   return ns
 
-def get_handle_list(hostname="localhost"):
-  global NS
-  try:
-    NS = initSeatNS(hostname)
-  except:
-    NS = initNS(hostname)
+def get_handle_list(orb, hostname="localhost"):
+  ns=NameSpace(orb, hostname)
+  ns.list_obj()
 
-  hdls_names = NS.rtc_handles.keys()
+  hdls_names = ns.rtc_handles.keys()
   n=1
   res=[]
   for name in hdls_names:
@@ -32,6 +30,35 @@ def get_handle_list(hostname="localhost"):
     res.append(name)
     n += 1
   return res
+
+
+def format_nsview_json(nodes):
+  result = ""
+  res = []
+  try:
+    chnode = node.children
+    count = 0
+    for x in chnode :
+      if count > 0:
+        result += ","
+      path, port = rtctree.path.parse_path(x.full_path_str)
+      res.append(x)
+      if tree.is_directory(path) :
+        val = format_context(x)
+        val2 = format_nsview_json(tree,x)
+        result += """{ %s, "components" : [ %s]}""" % (val, val2)
+      else:
+        flag = 0
+        if tree.is_zombie(path) : flag = 1
+        if tree.is_unknown(path) : flag = 2
+        val = format_node(x, flag)
+        result += val
+      count += 1
+  except:
+    pass
+
+  return result
+
 
 def get_handle(name, ns=None):
   global NS
@@ -148,7 +175,7 @@ def find_connection(path1, path2):
   cnames = create_connection_name(path1, path2)
 
   if not cnames:
-    print "Invalid Path: %s, %s" % (path1, path2)
+    print( "Invalid Path: %s, %s" % (path1, path2))
 
   if cnames[0] in connections:
       return [cnames[0], connections[cnames[0]] ]

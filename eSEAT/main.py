@@ -528,7 +528,6 @@ class eSEATManager:
             res = self.comp.startGuiLoop(self.viewer)
             if res == 0:
               self.comp.disconnectAll()
-
               # Shutdown Component
               try:
                  self.manager.shutdown()

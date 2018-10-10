@@ -4,6 +4,7 @@
     <adaptor name="vel_out" type="rtcout" datatype="TimedVelocity2D" />
     <adaptor name="str_out" type="rtcout" datatype="TimedString" />
     <adaptor name="str_in" type="rtcin" datatype="TimedString" />
+    <adaptor name="/turtle1/cmd_vel" type="ros_pub" datatype="geometry_msgs/Twist" size="1" />
     <adaptor name="web" type="web"  port="8080" />
   </general>
 
@@ -21,10 +22,21 @@
     <label text="Info Text:" />
     <text id="textOut" width="50" height="5" colspan="2" >
     </text>
+
     <brk />
+
     <button label="Clear">
       <script>
         seat.clearText("main_mode:textOut")
+      </script>
+    </button>
+
+    <button label="Move">
+      <script>
+        val=geometry_msgs.Twist()
+        val.linear.x=2.0
+        val.angular.z=1.8
+        seat.ros_publish("/turtle1/cmd_vel" , val)
       </script>
     </button>
 

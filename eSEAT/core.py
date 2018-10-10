@@ -43,6 +43,15 @@ except:
     from tkinter import *
     from tkinter.scrolledtext import ScrolledText
  
+####### for ROS
+try:
+   import rospy
+   import std_msgs.msg as std_msgs
+   import geometry_msgs.msg as geometry_msgs
+
+except:
+   rospy=None
+
 ###############################################################
 #  Global Variables
 #
@@ -134,13 +143,18 @@ class eSEAT_Core:
 
         setGlobals('seat', self)
 
+        self.name="eSEAT"
+        self.ros_node=None
+
     #
     #
     def exit_comp(self):
         print ("Call eSEAT_Core.exit")
         if self.webServer :
             self.webServer.terminate()
+            print ("Call terminate()")
             time.sleep( 1 )
+        print ("Call eSEAT_Core.exit.. done")
         return
 
     ##### Other Adaptors
@@ -171,13 +185,45 @@ class eSEAT_Core:
             self._logger.info(u"Failed to create Webadaptor:" + name + " already exists")
 
     #
+    #
+    #   for ROS
+    def initRosNode(self):
+      if rospy and not self.ros_node:
+        hostname = os.uname()[1]
+        os.environ['ROS_MASTER_URI'] = 'http://%s:11311' % hostname
+        #os.environ['ROS_IP'] = hostname
+        os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
+        self.ros_node=rospy.init_node(self.name, anonymous=True)
+      return
+
+    def createRosPublisher(self, name, datatype, size):
+      if rospy:
+        self.initRosNode()
+        
+        self.adaptors[name]=rospy.Publisher(name, eval(datatype.replace('/','.')), queue_size=size)
+
+      return
+
+    def ros_publish(self, name, val):
+      try:
+        self.adaptors[name].publish(val)
+      except:
+        pass
+
+    def createRosSubscriber(self, name, datatype, callback):
+      if rospy:
+        self.initRosNode()
+        self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), eval(callback))
+      return 
+
+    #
     #  Create Adaptor called by SEATML_Parser
     #
     def createAdaptor(self, compname, tag, env=globals()):
         try:
             name = str(tag.get('name'))
             type = tag.get('type')
-            self._logger.info(u"createAdaptor: " + type + ": " + name)
+            self._logger.info(u"!createAdaptor: " + type + ": " + name)
 
             if type == 'web' :
                 dirname = tag.get('dir')
@@ -188,11 +234,18 @@ class eSEAT_Core:
 
             elif type == 'socket' :
                 self.createSocketPort(name, tag.get('host'), int(tag.get('port')))
+            elif type == 'ros_pub' :
+                self.createRosPublisher(name, tag.get('datatype'),int(tag.get('size')))
+
+            elif type == 'ros_sub' :
+                self.createRosSubscriber(name, tag.get('datatype'),tag.get('callback'))
+
             else:
                 self._logger.warn(u"invalid type: " + type + ": " + name)
                 return -1
         except:
             self._logger.error(u"invalid parameters: " + type + ": " + name)
+            traceback.print_exc()
             return -1
 
         return 1

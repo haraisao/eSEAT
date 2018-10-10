@@ -1,5 +1,5 @@
 #/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 iuuuuu-*-
 # -*- Python -*-
 
 from __future__ import print_function
@@ -7,7 +7,10 @@ import sys
 from omniORB import CORBA, URI
 # from omniORB import any
 from omniORB import any, cdrMarshal, cdrUnmarshal, findType, findTypeCode
+from omniORB import setClientConnectTimeout
 #import omniORB 
+
+setClientConnectTimeout(1000)
 
 import OpenRTM_aist
 import RTC
