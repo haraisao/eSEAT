@@ -189,18 +189,23 @@ class eSEAT_Core:
     #   for ROS
     def initRosNode(self):
       if rospy and not self.ros_node:
-        hostname = os.uname()[1]
-        os.environ['ROS_MASTER_URI'] = 'http://%s:11311' % hostname
-        #os.environ['ROS_IP'] = hostname
-        os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
-        self.ros_node=rospy.init_node(self.name, anonymous=True)
+        try:
+          hostname = os.uname()[1]
+          os.environ['ROS_MASTER_URI'] = 'http://%s:11311' % hostname
+          os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
+          rospy.init_node(self.name, anonymous=True)
+          self.ros_node=self.name
+        except:
+          print("Fail to ros_init")
+          self.ros_node=None
+
       return
 
     def createRosPublisher(self, name, datatype, size):
       if rospy:
         self.initRosNode()
-        
-        self.adaptors[name]=rospy.Publisher(name, eval(datatype.replace('/','.')), queue_size=size)
+        if self.ros_node:
+          self.adaptors[name]=rospy.Publisher(name, eval(datatype.replace('/','.')), queue_size=size)
 
       return
 
@@ -213,7 +218,8 @@ class eSEAT_Core:
     def createRosSubscriber(self, name, datatype, callback):
       if rospy:
         self.initRosNode()
-        self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), eval(callback))
+        if self.ros_node:
+          self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), eval(callback))
       return 
 
     #
