@@ -33,10 +33,7 @@
 
     <button label="Move">
       <script>
-        val=geometry_msgs.Twist()
-        val.linear.x=2.0
-        val.angular.z=1.8
-        seat.ros_publish("/turtle1/cmd_vel" , val)
+        seat.ros_publish("/turtle1/cmd_vel" , [[2.0,0,0],[0,0,1.8]])
       </script>
     </button>
 

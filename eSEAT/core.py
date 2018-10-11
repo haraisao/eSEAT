@@ -46,6 +46,8 @@ except:
 ####### for ROS
 try:
    import rospy
+   import roslib
+   import roslib.message
    import std_msgs.msg as std_msgs
    import geometry_msgs.msg as geometry_msgs
 
@@ -211,7 +213,9 @@ class eSEAT_Core:
 
     def ros_publish(self, name, val):
       try:
-        self.adaptors[name].publish(val)
+        msg=self.adaptors[name].data_class()
+        roslib.message.fill_message_args(msg, val)
+        self.adaptors[name].publish(msg)
       except:
         pass
 
@@ -219,8 +223,13 @@ class eSEAT_Core:
       if rospy:
         self.initRosNode()
         if self.ros_node:
-          self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), eval(callback))
+          if not callback:
+            callback=(lambda data: self.onData(name, data))
+            self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), callback)
+          else:
+            self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), eval(callback))
       return 
+
 
     #
     #  Create Adaptor called by SEATML_Parser
