@@ -51,6 +51,7 @@ try:
    import roslib.message
    import std_msgs.msg as std_msgs
    import geometry_msgs.msg as geometry_msgs
+   import sensor_msgs.msg as sensor_msgs
 
 except:
    rospy=None
