@@ -197,7 +197,8 @@ class eSEAT_Core:
           os.environ['ROS_MASTER_URI'] = 'http://%s:11311' % hostname
           os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
           rospy.init_node(self.name, anonymous=True)
-          self.ros_node=self.name
+          self.ros_node=rospy.get_name()
+          if self.ros_node == '/unnamed': self.ros_node=None
         except:
           print("Fail to ros_init")
           self.ros_node=None
@@ -235,12 +236,11 @@ class eSEAT_Core:
         self.initRosNode()
         if self.ros_node:
           if not callback:
-            callback=(lambda data: self.onData(name, data))
+            callback=lambda x: eSEAT_Core.onData(self,name, x)
             self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), callback)
           else:
             self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), eval(callback))
       return 
-
 
     #
     #  Create Adaptor called by SEATML_Parser
@@ -264,6 +264,9 @@ class eSEAT_Core:
                 self.createRosPublisher(name, tag.get('datatype'),int(tag.get('size')))
 
             elif type == 'ros_sub' :
+                fname=tag.get('file')
+                if fname:
+                  utils.exec_script_file(fname, globals())
                 self.createRosSubscriber(name, tag.get('datatype'),tag.get('callback'))
 
             else:

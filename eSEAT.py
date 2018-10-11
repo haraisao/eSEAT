@@ -1,4 +1,4 @@
-#
+#!/usr/bin/python
 #
 from eSEAT import eSEAT_main
 
