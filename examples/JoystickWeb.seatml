@@ -33,7 +33,7 @@
 
     <button label="Move">
       <script>
-        seat.ros_publish("/turtle1/cmd_vel" , [[2.0,0,0],[0,0,1.8]])
+        seat.ros_publish("/turtle1/cmd_vel" , '[[2.0,0,0], [0,0,1.8]]')
       </script>
     </button>
 

@@ -21,6 +21,7 @@ import subprocess
 
 import time
 import utils
+import yaml
 
 from collections import OrderedDict
 
@@ -214,9 +215,19 @@ class eSEAT_Core:
     def ros_publish(self, name, val):
       try:
         msg=self.adaptors[name].data_class()
-        roslib.message.fill_message_args(msg, val)
+        if type(val) == str:
+          val = yaml.load(val)
+        args=[]
+        for x in val:
+         if type(x) == str:
+           args.append(yaml.load(x)) 
+         else:
+           args.append(x) 
+        
+        roslib.message.fill_message_args(msg, args)
         self.adaptors[name].publish(msg)
       except:
+        traceback.print_exc()
         pass
 
     def createRosSubscriber(self, name, datatype, callback):
