@@ -52,6 +52,7 @@ try:
    import std_msgs.msg as std_msgs
    import geometry_msgs.msg as geometry_msgs
    import sensor_msgs.msg as sensor_msgs
+   sys.path.append(os.path.realpath('ros/lib/site-packages'))
 
 except:
    rospy=None
