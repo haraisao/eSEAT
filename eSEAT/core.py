@@ -340,6 +340,9 @@ class eSEAT_Core:
                     else :
                         self.processResult(name, data)
                         self.processOnDataIn(name, data)
+            elif isinstance(data, std_msgs.String):
+                self.processResult(name, data.data)
+                self.processOnDataIn(name, data.data)
             else:
                 self.processOnDataIn(name, data)
         except:

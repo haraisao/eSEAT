@@ -49,7 +49,9 @@
 
     <button label="Move">
       <script>
+<!--
         seat.ros_publish("/turtle1/cmd_vel" , '[[2.0,0,0], [0,0,1.8]]')
+-->
       </script>
     </button>
 
@@ -68,6 +70,7 @@
 
     <rule source="/joy">
       <script>
+<!--
        #seat.appendText("main_mode:textOut", str(rtc_in_data.buttons)+"\n")
        if rtc_in_data.axes[1] != 0:
          lv=rtc_in_data.axes[1]
@@ -79,7 +82,7 @@
          rv=0
 
        seat.ros_publish("/turtle1/cmd_vel" , [[lv,0,0], [0,0,rv]])
-        
+-->        
       </script>
     </rule>
 
