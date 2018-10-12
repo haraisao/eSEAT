@@ -37,6 +37,12 @@
       </script>
     </button>
 
+    <button label="Back" >
+      <script sendto="/turtle1/cmd_vel">
+        rtc_result = '[[-2.0,0,0], [0,0,1.8]]'
+      </script>
+    </button>
+
     <!--- onData -->
     <rule source="str_in">
       <script>
@@ -69,6 +75,15 @@
       <script sendto="str_out">
         rtc_result = web_in_data
       </script>
+
+      <script sendto="/turtle1/cmd_vel">
+        data = web_in_data.split(',')
+        if len(data) == 3:
+          v = max(min(float(data[1].strip())/1000,1), -1)
+          vth = max(min(float(data[2].strip())/100,1), -1)
+          rtc_result = [[-v*2,0,0], [0,0,-vth*2]]
+      </script>
+
 
     </rule>
 

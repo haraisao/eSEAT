@@ -999,10 +999,11 @@ def parseQueryString(data):
   try:
     ar = data.split("&")
     for a in ar:
-      key, val = a.split("=")
-      val = val.strip()
-      val = val.replace('%2F','/')
-      res[key.strip()] = val
+      if a.find('=') >0:
+        key, val = a.split("=")
+        val = val.strip()
+        val = val.replace('%2F','/')
+        res[key.strip()] = val
   except:
     traceback.print_exc()
     pass

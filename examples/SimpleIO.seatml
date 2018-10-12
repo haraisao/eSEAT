@@ -5,11 +5,11 @@
     <adaptor name="str_in" type="rtcin" datatype="TimedString" />
     <adaptor name="/turtle1/cmd_vel" type="ros_pub" datatype="geometry_msgs/Twist" size="1" />
 
-<!--
     <adaptor name="/chatter" type="ros_sub" datatype="std_msgs/String" file="aho.py"  callback="aho"/>
--->
 
+<!--
     <adaptor name="/chatter" type="ros_sub" datatype="std_msgs/String" />
+-->
 
     <adaptor name="/joy" type="ros_sub" datatype="sensor_msgs/Joy" />
 
@@ -55,16 +55,23 @@
       </script>
     </button>
 
- 
     <rule source="str_in">
       <script>
        seat.appendText("main_mode:textOut", rtc_in_data.data+"\n")
       </script>
     </rule>
 
+<!--
     <rule source="/chatter">
       <script>
-       seat.appendText("main_mode:textOut", rtc_in_data.data+"\n")
+       seat.appendText("main_mode:textOut", rtc_in_data+"\n")
+      </script>
+    </rule>
+-->
+    <rule>
+      <key>hello</key>
+      <script>
+       seat.appendText("main_mode:textOut", rtc_in_data+"\n")
       </script>
     </rule>
 

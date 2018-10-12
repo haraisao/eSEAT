@@ -46,16 +46,10 @@ except:
  
 ####### for ROS
 try:
-   import rospy
-   import roslib
-   import roslib.message
-   import std_msgs.msg as std_msgs
-   import geometry_msgs.msg as geometry_msgs
-   import sensor_msgs.msg as sensor_msgs
-   sys.path.append(os.path.realpath('ros/lib/site-packages'))
-
+  from RosAdaptor import *
 except:
-   rospy=None
+  rospy=None
+
 
 ###############################################################
 #  Global Variables
@@ -193,56 +187,41 @@ class eSEAT_Core:
     #
     #   for ROS
     def initRosNode(self):
-      if rospy and not self.ros_node:
-        try:
-          hostname = os.uname()[1]
-          os.environ['ROS_MASTER_URI'] = 'http://%s:11311' % hostname
-          os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
-          rospy.init_node(self.name, anonymous=True)
-          self.ros_node=rospy.get_name()
-          if self.ros_node == '/unnamed': self.ros_node=None
-        except:
-          print("Fail to ros_init")
-          self.ros_node=None
+      if rospy:
+        self.ros_node=initRosNode(self.name)
+      else:
+        print("Unsupport rospy")
 
-      return
-
+    #
+    #
     def createRosPublisher(self, name, datatype, size):
       if rospy:
         self.initRosNode()
         if self.ros_node:
-          self.adaptors[name]=rospy.Publisher(name, eval(datatype.replace('/','.')), queue_size=size)
+          self.adaptors[name]=RosAdaptor(name, 'Publisher')
+          self.adaptors[name].create(name, datatype, size)
 
-      return
-
+    #
+    #
     def ros_publish(self, name, val):
       try:
-        msg=self.adaptors[name].data_class()
-        if type(val) == str:
-          val = yaml.load(val)
-        args=[]
-        for x in val:
-         if type(x) == str:
-           args.append(yaml.load(x)) 
-         else:
-           args.append(x) 
-        
-        roslib.message.fill_message_args(msg, args)
-        self.adaptors[name].publish(msg)
+        self.adaptors[name].publish(val)
       except:
-        traceback.print_exc()
-        pass
+        print("Fail to ros_publish %s" % name)
 
+    #
+    #
     def createRosSubscriber(self, name, datatype, callback):
       if rospy:
         self.initRosNode()
         if self.ros_node:
+          self.adaptors[name]=RosAdaptor(name, 'Subscriber')
           if not callback:
             callback=lambda x: eSEAT_Core.onData(self,name, x)
-            self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), callback)
-          else:
-            self.adaptors[name]=rospy.Subscriber(name, eval(datatype.replace('/','.')), eval(callback))
-      return 
+          elif type(callback) == str:
+            callback=eval(callback)
+
+          self.adaptors[name].create(name, datatype, callback)
 
     #
     #  Create Adaptor called by SEATML_Parser
