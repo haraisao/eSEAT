@@ -301,6 +301,10 @@ class State():
 
     def matchkey(self, port, word):
         for x in self.keys:
+            if x[0] == port and x[1] == word:
+                return self.rules[x]
+
+        for x in self.keys:
             if x[0] == port and re.match(x[1], word) is not None:
                 return self.rules[x]
         return None

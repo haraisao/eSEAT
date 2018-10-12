@@ -30,7 +30,7 @@
       </script>
     </button>
 
-    <button label="Command">
+    <button label="add_two2">
       <script>
         retval=seat.callRosService("myservice1", 13, 20)
         seat.appendText("main_mode:textOut", "==="+str(retval)+"===\n")
