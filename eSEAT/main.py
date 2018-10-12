@@ -350,6 +350,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                 if len(module) > 1 and not module[0] in env:
                     exec("import "+module[0], env)              
                 return self.createDataPort(name, tag.get('datatype') ,type)
+
             elif type == 'provider' or type == 'consumer' :
                 module=tag.get('if_class').split('.')
                 if len(module) > 1 and not module[0] in env:

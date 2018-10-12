@@ -223,6 +223,37 @@ class eSEAT_Core:
 
           self.adaptors[name].create(name, datatype, callback)
 
+    def createRosServer(self, name, srv_name, srv_type, srv_impl, fname):
+      if rospy:
+        self.initRosNode()
+        if srv_type.find('.') > 0:
+            pkgname,srv = srv_type.split('.',1)
+        exec_str="import %s.srv as %s" % (pkgname, pkgname)
+        exec(exec_str, globals())
+
+        if fname:
+            utils.exec_script_file(fname, globals())
+
+        resfunc=eval(srv_type+"Response")
+        srv_func=lambda x :  resfunc(eval(srv_impl)(x))
+        self.adaptors[name]=rospy.Service(srv_name, eval(srv_type), eval(srv_impl)) 
+        
+    def createRosClient(self, name, srv_name, srv_type):
+      if rospy:
+        self.initRosNode()
+        if srv_type.find('.') > 0:
+            pkgname,srv = srv_type.split('.',1)
+        exec_str="import %s.srv as %s" % (pkgname, pkgname)
+        exec(exec_str, globals())
+
+        self.adaptors[name]=rospy.ServiceProxy(srv_name, eval(srv_type)) 
+
+    def callRosService(self, name, *args):
+        try:
+          return self.adaptors[name](*args)
+        except:
+          print("Error in callRosService %s" % name)
+          
     #
     #  Create Adaptor called by SEATML_Parser
     #
@@ -249,6 +280,17 @@ class eSEAT_Core:
                 if fname:
                   utils.exec_script_file(fname, globals())
                 self.createRosSubscriber(name, tag.get('datatype'),tag.get('callback'))
+            elif type == 'ros_server' :
+                fname=tag.get('file')
+                srv_name=tag.get('service')
+                srv_type=tag.get('service_type')
+                srv_impl=tag.get('impl')
+                self.createRosServer(name, srv_name, srv_type, srv_impl, fname)
+
+            elif type == 'ros_client' :
+                srv_name=tag.get('service')
+                srv_type=tag.get('service_type')
+                self.createRosClient(name, srv_name, srv_type)
 
             else:
                 self._logger.warn(u"invalid type: " + type + ": " + name)
