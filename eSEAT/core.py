@@ -264,7 +264,8 @@ class eSEAT_Core:
             self._logger.info(u"!createAdaptor: " + type + ": " + name)
 
             if type == 'web' :
-                dirname = tag.get('dir')
+                dirname = tag.get('document_root')
+                if not dirname: dirname = tag.get('dir')
                 if dirname:
                     self.createWebAdaptor(name, int(tag.get('port')), compname, tag.get('host'), dirname)
                 else:

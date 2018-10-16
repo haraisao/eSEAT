@@ -13,7 +13,11 @@
     <script type="text/javascript">
       function registerHandler(){ requestComet(1); }
       function sendEventToRtc(){ sendValueToRtc($("input[name='msg']").val()); }
-      function processEvents(event){ $("#fromSeat").append(event.message+"<br>"); }
+      function processEvents(event){
+//        var msg = $('textarea[name="fromSeat"]').val();
+        $('textarea[name="fromSeat"]').val( 
+          $('textarea[name="fromSeat"]').val()+event.message+"\n");
+      }
     </script>
     <!-- ///Local functions -->
   </head>
@@ -25,17 +29,20 @@
     <table>
     <tr>
     <td>Send Message : </td>
-    <td><input type="text" name="msg" value="TestMessage"> </td>
+    <td><input type="text" name="msg" size="40" value="TestMessage"> </td>
     <td><input type="button"  value="Send" onClick="sendEventToRtc();"></td>
     </tr>
+    <tr>
+    <td>Outcome Message : </td>
+    <td> <textarea name="fromSeat" cols="50" rows="10"></textarea></td>
+    <td></td>
+    <tr>
     </table>
   </form>
 
   <h2> RESPONSE</h2>
   <hr>
   <div id="response"></div>
-  <hr>
-  <div id="fromSeat"></div>
   </body>
 </html>
 
