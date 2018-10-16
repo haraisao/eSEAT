@@ -4,7 +4,7 @@
     <adaptor name="vel_out" type="rtcout" datatype="TimedVelocity2D" />
     <adaptor name="str_out" type="rtcout" datatype="TimedString" />
     <adaptor name="str_in" type="rtcin" datatype="TimedString" />
-    <adaptor name="web" type="web"  port="8080" dir="/usr/local/eSEAT/html" />
+    <adaptor name="web" type="web"  port="10080" dir="/usr/local/eSEAT/html" />
     <script execfile="libs/action.py" />
   </general>
 

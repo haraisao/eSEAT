@@ -1003,6 +1003,7 @@ def parseQueryString(data):
         key, val = a.split("=")
         val = val.strip()
         val = val.replace('%2F','/')
+        val = val.replace('%3A',':')
         res[key.strip()] = val
   except:
     traceback.print_exc()

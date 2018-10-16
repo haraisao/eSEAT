@@ -33,22 +33,23 @@
     </button>
  
     <rule source="str_in">
+<!--
       <script>
        seat.appendText("main_mode:textOut", rtc_in_data.data+"\n")
       </script>
-<!--
       <message sendto="web" input="main_mode:textOut" />
 -->
       <script sendto="web">
         rtc_result = rtc_in_data.data
-        #rtc_result = rtc_in_data
       </script>
     </rule>
 
     <rule source="web">
+<!--
       <script>
         seat.appendText("main_mode:textOut", web_in_data+"\n")
       </script>
+-->
       <script sendto="str_out">
         rtc_result = web_in_data
       </script>
