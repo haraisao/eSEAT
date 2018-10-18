@@ -384,6 +384,7 @@ class SEATML_Parser():
 
             if g.get('name') :
                 self.componentName = g.get('name')
+                if self.componentName: self.parent.name=self.componentName
                 self.parent.setInstanceName(self.componentName)
 
             for a in g.getchildren():

@@ -6,9 +6,12 @@
 <!--
     <adaptor name="/turtle1/cmd_vel" type="ros_pub"
                     datatype="geometry_msgs/Twist" size="1" />
+
     <adaptor name="/chatter" type="ros_sub" datatype="std_msgs/String"
                      file="aho.py"  callback="aho"/>
+
     <adaptor name="/chatter" type="ros_sub" datatype="std_msgs/String" />
+
     <adaptor name="/joy" type="ros_sub" datatype="sensor_msgs/Joy" />
 -->
   </general>
@@ -63,6 +66,7 @@
       </script>
     </rule>
 -->
+
     <rule>
       <key>hello</key>
       <script>
@@ -74,6 +78,7 @@
       <script>
 <!--
        #seat.appendText("main_mode:textOut", str(rtc_in_data.buttons)+"\n")
+
        if rtc_in_data.axes[1] != 0:
          lv=rtc_in_data.axes[1]
        else:
