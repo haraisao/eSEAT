@@ -197,7 +197,7 @@ class eSEAT_Core:
     #
     def createRosPublisher(self, name, datatype, size):
       if rospy:
-        self.initRosNodean()
+        self.initRosNode()
         if self.ros_node:
           self.adaptors[name]=RosAdaptor(name, 'Publisher')
           self.adaptors[name].create(name, datatype, size)
@@ -275,17 +275,14 @@ class eSEAT_Core:
             elif type == 'socket' :
                 self.createSocketPort(name, tag.get('host'), int(tag.get('port')))
             elif type == 'ros_pub' :
-                if tag.get('anonymous'): self.ros_anonymouse=tag.get('anonymous')
                 self.createRosPublisher(name, tag.get('datatype'),int(tag.get('size')))
 
             elif type == 'ros_sub' :
                 fname=tag.get('file')
                 if fname:
                   utils.exec_script_file(fname, globals())
-                if tag.get('anonymous'): self.ros_anonymouse=tag.get('anonymous')
                 self.createRosSubscriber(name, tag.get('datatype'),tag.get('callback'))
             elif type == 'ros_server' :
-                if tag.get('anonymous'): self.ros_anonymouse=tag.get('anonymous')
                 fname=tag.get('file')
                 srv_name=tag.get('service')
                 srv_type=tag.get('service_type')
@@ -293,7 +290,6 @@ class eSEAT_Core:
                 self.createRosServer(name, srv_name, srv_type, srv_impl, fname)
 
             elif type == 'ros_client' :
-                if tag.get('anonymous'): self.ros_anonymouse=tag.get('anonymous')
                 srv_name=tag.get('service')
                 srv_type=tag.get('service_type')
                 self.createRosClient(name, srv_name, srv_type)

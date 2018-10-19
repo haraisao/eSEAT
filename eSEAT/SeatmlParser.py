@@ -387,6 +387,9 @@ class SEATML_Parser():
                 if self.componentName: self.parent.name=self.componentName
                 self.parent.setInstanceName(self.componentName)
 
+            if g.get('anonymous') :
+                self.parent.ros_anonymous=g.get('anonymous')
+
             for a in g.getchildren():
                 #
                 #  <adaptor>
