@@ -25,17 +25,17 @@ def setRosMaster(hostname=None):
   os.environ['ROS_MASTER_URI'] = 'http://%s:11311' % hostname
 
 
-def initRosNode(name):
+def initRosNode(name, anonymous=False):
   global ros_node_name
   if not ros_node_name:
     try:
       setRosMaster()
-      rospy.init_node(name, anonymous=True)
+      rospy.init_node(name, anonymous=anonymous)
       ros_node_name=rospy.get_name()
       if ros_node_name == '/unnamed': ros_node_name=None
 
     except:
-      print("=== Fail to ros_init")
+      print("=== Fail to ros_init ===")
       ros_node_name=None
   return ros_node_name
 
