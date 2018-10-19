@@ -379,7 +379,9 @@ class SEATML_Parser():
         # Top level tag
         #
         #  <general>
-        for g in doc.findall('general'):
+        g=doc.find('general')
+        #for g in doc.findall('general'):
+        if g :
             self.parent.create_state('all')
 
             if g.get('name') :
@@ -419,6 +421,9 @@ class SEATML_Parser():
                 #  <timoute>
                 elif a.tag == 'ontimeout':
                     self.parseTimeout('all', a)
+        else:
+            print('Error in seatml file') 
+            return -1
         # 
         # 
         #  <state>
