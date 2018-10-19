@@ -83,18 +83,22 @@ class RosAdaptor(object):
   #
   def publish(self, val):
     try:
-      msg=self._port.data_class()
-      if type(val) == str:
-        val = yaml.load(val)
-      args=[]
-      for x in val:
-        if type(x) == str:
-          args.append(yaml.load(x)) 
-        else:
-          args.append(x) 
+      if isinstance(val, self._port.data_class) :
+        self._port.publish(val)
+      else:
+        msg=self._port.data_class()
+        if type(val) == str:
+          val = yaml.load(val)
+        args=[]
+        for x in val:
+          if type(x) == str:
+            args.append(yaml.load(x)) 
+          else:
+            args.append(x) 
       
-      roslib.message.fill_message_args(msg, args)
-      self._port.publish(msg)
+        roslib.message.fill_message_args(msg, args)
+        self._port.publish(msg)
+
     except:
       traceback.print_exc()
       pass
