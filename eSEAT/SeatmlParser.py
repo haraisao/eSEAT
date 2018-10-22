@@ -223,7 +223,8 @@ class SEATML_Parser():
         elif e.tag == 'combobox':
             key = self.getAttribute(e, 'id')
             self.parent.states[name].registerRule(('gui', key), commands)
-            self.parent.addCombobox(name, key, self.getAttribute(e, 'values'), self.getAttribute(e, 'colspan', 1))
+            self.parent.addCombobox(name, key, self.getAttribute(e, 'values'),
+		 self.getAttribute(e,'default', ''), self.getAttribute(e, 'colspan', 1))
         #
         #  Others
         else:

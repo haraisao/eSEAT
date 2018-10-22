@@ -34,7 +34,7 @@
       </script>
     </button>
 
-    <combobox id="combo1" values="Foo,Bar,Baz">
+    <combobox id="combo1" values="Foo,Bar,Baz" default="Bar">
       <script>
        val=seat.getComboboxValue("main_mode:combo1")
        seat.appendText("main_mode:textOut", val+"\n")

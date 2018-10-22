@@ -783,8 +783,8 @@ class eSEAT_Gui:
     def addLabel(self, name, txt, fg, bg, cspan):
         self.items[name].append(['label', txt, fg, bg, cspan])
 
-    def addCombobox(self, name, text, txtlist, cspan):
-        self.items[name].append(['combobox', text, txtlist, cspan])
+    def addCombobox(self, name, text, txtlist, val, cspan):
+        self.items[name].append(['combobox', text, txtlist, val, cspan])
 
     def addBreak(self, name):
         self.items[name].append(['br', "BR"])
@@ -974,12 +974,14 @@ class eSEAT_Gui:
 
     #################  C O M B O B O X ################### 
     ## Create Combobox Item
-    def createComboboxItem(self, frame, sname, name, nameList, cspan=1):
+    def createComboboxItem(self, frame, sname, name, nameList, val="", cspan=1):
         cbox = ttk.Combobox(frame, textvariable=StringVar())
-        cbox.bind('<<ComboboxSelected>>',self.mkcallback(name))
+        func=self.mkcallback(name)
+        cbox.bind('<<ComboboxSelected>>',func)
+        cbox.bind('<Return>', func)
         nlist=nameList.split(',')
         cbox['values']=nlist
-        cbox.set(nlist[0])
+        cbox.set(val)
         self.comboboxes[sname+":"+name] = cbox
         return [cbox, cspan]
     
@@ -1071,7 +1073,7 @@ class eSEAT_Gui:
                elif itm[0] == 'combobox':
                    self.gui_items[name].append(
                        self.createComboboxItem(self.frames[name], name,
-                                itm[1], itm[2], int(itm[3]))
+                                itm[1], itm[2], itm[3], int(itm[4]))
                        )
                    pass
 
