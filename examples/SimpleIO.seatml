@@ -27,11 +27,19 @@
     <text id="textOut" width="50" height="5" colspan="2" >
     </text>
     <brk />
+
     <button label="Clear">
       <script>
        seat.clearText("main_mode:textOut")
       </script>
     </button>
+
+    <combobox id="combo1" values="Foo,Bar,Baz">
+      <script>
+       val=seat.getComboboxValue("main_mode:combo1")
+       seat.appendText("main_mode:textOut", val+"\n")
+      </script>
+    </combobox>
  
     <rule source="str_in">
       <script>

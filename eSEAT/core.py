@@ -39,6 +39,7 @@ from bs4  import BeautifulSoup
 #  GUI etc.
 try:
     from Tkinter import * 
+    import ttk
     from ScrolledText import ScrolledText 
 except:
     from tkinter import *
@@ -734,6 +735,7 @@ class eSEAT_Gui:
         self.inputvar = {}
         self.stext = {}
         self.buttons = {}
+        self.comboboxes = {}
         self.labels = {}
 
     #
@@ -780,6 +782,9 @@ class eSEAT_Gui:
 
     def addLabel(self, name, txt, fg, bg, cspan):
         self.items[name].append(['label', txt, fg, bg, cspan])
+
+    def addCombobox(self, name, text, txtlist, cspan):
+        self.items[name].append(['combobox', text, txtlist, cspan])
 
     def addBreak(self, name):
         self.items[name].append(['br', "BR"])
@@ -967,6 +972,24 @@ class eSEAT_Gui:
         except:
             return ""
 
+    #################  C O M B O B O X ################### 
+    ## Create Combobox Item
+    def createComboboxItem(self, frame, sname, name, nameList, cspan=1):
+        cbox = ttk.Combobox(frame, textvariable=StringVar())
+        cbox.bind('<<ComboboxSelected>>',self.mkcallback(name))
+        nlist=nameList.split(',')
+        cbox['values']=nlist
+        cbox.set(nlist[0])
+        self.comboboxes[sname+":"+name] = cbox
+        return [cbox, cspan]
+    
+    def getComboboxValue(self, eid):
+        try:
+            val= self.comboboxes[eid].get()
+            return val
+        except:
+            return ""
+
     #################  L A B E L ################### 
     ## Create Label Item
     def createLabelItem(self, frame, sname, name, fg="#ffffff", bg="#444444", cspan=1):
@@ -1045,6 +1068,13 @@ class eSEAT_Gui:
                        self.createLabelItem(self.frames[name], name,
                                 itm[1], itm[2], itm[3], int(itm[4]))
                        )
+               elif itm[0] == 'combobox':
+                   self.gui_items[name].append(
+                       self.createComboboxItem(self.frames[name], name,
+                                itm[1], itm[2], int(itm[3]))
+                       )
+                   pass
+
                else:
                    pass
 

@@ -219,6 +219,12 @@ class SEATML_Parser():
                  self.getAttribute(e, 'height', '3'), self.getAttribute(e, 'colspan', 1),
                  self.getAttribute(e, 'rowspan', 1), self.getText(e))
         #
+        #  <combobox>
+        elif e.tag == 'combobox':
+            key = self.getAttribute(e, 'id')
+            self.parent.states[name].registerRule(('gui', key), commands)
+            self.parent.addCombobox(name, key, self.getAttribute(e, 'values'), self.getAttribute(e, 'colspan', 1))
+        #
         #  Others
         else:
            self.logError(u"Invalid tag found: " + unicode(e.tag))
@@ -381,7 +387,7 @@ class SEATML_Parser():
         #  <general>
         g=doc.find('general')
         #for g in doc.findall('general'):
-        if g :
+        if g is not None:
             self.parent.create_state('all')
 
             if g.get('name') :
