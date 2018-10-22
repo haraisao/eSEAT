@@ -103,3 +103,12 @@ class RosAdaptor(object):
       traceback.print_exc()
       pass
 
+  #
+  #
+  def newMessage(self):
+    return self._port.data_class()
+
+  #
+  #
+  def getMessageSlots(self):
+    return roslib.message.get_printable_message_args(self._port.data_class())

@@ -27,9 +27,9 @@ from collections import OrderedDict
 
 ########
 #  for OpenRTM-aist
-import OpenRTM_aist
-import omniORB
-from RTC  import *
+#import OpenRTM_aist
+#import omniORB
+#from RTC  import *
 
 ########
 # XML Parser of Julius result
