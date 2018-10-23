@@ -34,6 +34,34 @@
       </script>
     </button>
 
+    <combobox id="combo1" values="Foo,Bar,Baz" default="Bar">
+      <script>
+       val=seat.getComboboxValue("main_mode:combo1")
+       seat.appendText("main_mode:textOut", val+"\n")
+      </script>
+    </combobox>
+
+    <checkbutton name="Check1">
+      <script>
+       val=seat.getCheckValue("main_mode:Check1")
+       seat.appendText("main_mode:textOut", str(val)+"\n")
+      </script>
+    </checkbutton>
+ 
+    <brk />
+    <radiobutton label="Radio1" variable="r1" value="aaa" />
+    <radiobutton label="Radio2" variable="r1" value="bbb" />
+    <radiobutton label="Radio3" variable="r1" value="ccc" />
+
+    <brk />
+
+    <scale name="scale1" from="0" to="10"  resolution="1" orientation="h" colspan="3">
+    </scale>
+
+    <brk />
+    <listbox name="lb1" values="Red,Green,Blue" height="4" >
+    </listbox>
+
     <rule source="str_in">
       <script>
        seat.appendText("main_mode:textOut", rtc_in_data.data+"\n")

@@ -232,6 +232,36 @@ class SEATML_Parser():
             self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addCheckbutton(name, key, self.getAttribute(e, 'colspan', 1))
         #
+        #  <listbox>
+        elif e.tag == 'listbox':
+            key = self.getAttribute(e, 'name')
+            self.parent.states[name].registerRule(('gui', key), commands)
+            txtlist = self.getAttribute(e, 'values')
+            height = self.getAttribute(e, 'height', len(txtlist.split(',')))
+            self.parent.addListbox(name, key, txtlist, height,
+                  self.getAttribute(e, 'colspan', 1))
+        #
+        #  <radiobutton>
+        elif e.tag == 'radiobutton':
+            key = self.getAttribute(e, 'label')
+            self.parent.states[name].registerRule(('gui', key), commands)
+            var=self.getAttribute(e, 'variable')
+            val=self.getAttribute(e, 'value')
+            self.parent.addRadiobutton(name, key, var, val,
+                 self.getAttribute(e, 'colspan', 1))
+        #
+        #  <scale>
+        elif e.tag == 'scale':
+            key = self.getAttribute(e, 'name')
+            self.parent.states[name].registerRule(('gui', key), commands)
+            frm=self.getAttribute(e, 'from', 0)
+            to=self.getAttribute(e, 'to', 10)
+            res=self.getAttribute(e, 'resolution', 1)
+            ori=self.getAttribute(e, 'orientation', 'horizontal')
+
+            self.parent.addScale(name, key, frm, to, res, ori, 
+                self.getAttribute(e, 'colspan', 1))
+        #
         #  Others
         else:
            self.logError(u"Invalid tag found: " + unicode(e.tag))
