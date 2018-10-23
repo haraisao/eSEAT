@@ -52,6 +52,8 @@ try:
 except:
   rospy=None
 
+###################################################3
+#
 from viewer import OutViewer
 
 if os.getenv('SEAT_ROOT') :
@@ -1248,6 +1250,7 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
         eSEAT_Gui.__init__(self) 
         self.activated=True
         self._on_timeout = -1
+        self.setInterval(1)
 
     def exit(self):
         try:
@@ -1255,6 +1258,17 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
             return True
         except:
             return True
+
+    def setInterval(self, intval):
+        try:
+          self.interval=intval
+          if rospy:
+            self.rate=rospy.Rate(1.0/self.interval)
+          else:
+            self.rate=None
+        except:
+          pass
+          
 
     def setInstanceName(self,name):
         self.name=name
@@ -1317,7 +1331,10 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
         self.processExec('all')
 
         if self.interval :
-           time.sleep(self.interval)
+           if self.rate:
+             self.rate.sleep()
+           else:
+             time.sleep(self.interval)
         return True
 
 #
