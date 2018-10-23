@@ -763,32 +763,32 @@ class eSEAT_Gui:
         if self.root : self.root.title(name)
 
     #  Called by SEATML Parser
-    def addButton(self, name, txt, fg, bg, cspan, w):
-        self.items[name].append(['button', txt, fg, bg, cspan, w])
+    def addButton(self, name, txt, fg, bg, w, cspan=1, rspan=1):
+        self.items[name].append(['button', txt, fg, bg, w, cspan, rspan])
 
-    def addEntry(self, name, txt, w, cspan, val=''):
-        self.items[name].append(['entry', txt, w, cspan, val])
+    def addEntry(self, name, txt, w, val='', cspan=1, rspan=1):
+        self.items[name].append(['entry', txt, w, val, cspan, rspan])
 
-    def addText(self, name, txt, w, h, cspan, rspan, val=""):
+    def addText(self, name, txt, w, h, cspan=1, rspan=1, val=""):
         self.items[name].append(['text', txt, w, h, cspan, rspan, val])
 
-    def addLabel(self, name, txt, fg, bg, cspan):
-        self.items[name].append(['label', txt, fg, bg, cspan])
+    def addLabel(self, name, txt, fg, bg, cspan=1, rspan=1):
+        self.items[name].append(['label', txt, fg, bg, cspan, rspan])
 
-    def addCombobox(self, name, txt, txtlist, val, cspan):
-        self.items[name].append(['combobox', txt, txtlist, val, cspan])
+    def addCombobox(self, name, txt, txtlist, val, cspan=1, rspan=1):
+        self.items[name].append(['combobox', txt, txtlist, val, cspan, rspan])
 
-    def addCheckbutton(self, name, txt, cspan):
-        self.items[name].append(['checkbutton', txt, cspan])
+    def addCheckbutton(self, name, txt, cspan=1, rspan=1):
+        self.items[name].append(['checkbutton', txt, cspan, rspan])
 
-    def addScale(self, name, txt, frm, to, res, ori, cspan):
-        self.items[name].append(['scale', txt, frm, to, res, ori, cspan])
+    def addScale(self, name, txt, frm, to, res, ori, cspan=1, rspan=1):
+        self.items[name].append(['scale', txt, frm, to, res, ori, cspan, rspan])
 
-    def addListbox(self, name, txt, txtlist, height, cspan):
-        self.items[name].append(['listbox', txt, txtlist, height, cspan])
+    def addListbox(self, name, txt, txtlist, height, cspan=1, rspan=1):
+        self.items[name].append(['listbox', txt, txtlist, height, cspan, rspan])
 
-    def addRadiobutton(self, name, txt, var, val, cspan):
-        self.items[name].append(['radiobutton', txt, var, val, cspan])
+    def addRadiobutton(self, name, txt, var, val, cspan=1, rspan=1):
+        self.items[name].append(['radiobutton', txt, var, val, cspan, rspan])
 
     def addBreak(self, name):
         self.items[name].append(['br', "BR"])
@@ -799,14 +799,15 @@ class eSEAT_Gui:
     ###################  CREATE GUI ITEMS ####################
     #################  B U T T O N ################### 
     ## Create Button Ite
-    def createButtonItem(self, frame, sname, name, fg="#000000", bg="#cccccc", cspan=1, w=None):
+    def createButtonItem(self, frame, sname, name, fg="#000000", bg="#cccccc", w=None, cspan=1, rspan=1):
         #btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg)
         if w :
             btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg, width=int(w))
         else:
             btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg)
         self.buttons[sname+":"+name] = btn
-        return [btn, cspan]
+
+        return [btn, cspan, rspan]
     
     def setButtonConfig(self, eid, **cfg):
         try:
@@ -817,14 +818,14 @@ class eSEAT_Gui:
 
     #################  L I N E I N P U T ################### 
     ## Create Entry Item
-    def createEntryItem(self, frame, sname, name, eid, w, cspan=1, val=''):
+    def createEntryItem(self, frame, sname, name, eid, w, val='', cspan=1, rspan=1):
         var=StringVar()
         var.set(val.strip())
         self.inputvar[sname+":"+eid] = var
         enty = Entry(frame, textvariable=var, width=int(w))
         self.bind_commands_to_entry(enty, name, eid)
 
-        return [enty, cspan]
+        return [enty, cspan, rspan]
 
     def bind_commands_to_entry(self, entry, name, eid):
         key = name+":gui:"+eid
@@ -978,7 +979,7 @@ class eSEAT_Gui:
 
     #################  C O M B O B O X ################### 
     ## Create Combobox Item
-    def createComboboxItem(self, frame, sname, name, nameList, val="", cspan=1):
+    def createComboboxItem(self, frame, sname, name, nameList, val="", cspan=1, rspan=1):
         cbox = ttk.Combobox(frame, textvariable=StringVar())
         func=self.mkcallback(name)
         cbox.bind('<<ComboboxSelected>>',func)
@@ -987,7 +988,8 @@ class eSEAT_Gui:
         cbox['values']=nlist
         cbox.set(val)
         self.comboboxes[sname+":"+name] = cbox
-        return [cbox, cspan]
+
+        return [cbox, cspan, rspan]
     
     def getComboboxValue(self, eid):
         try:
@@ -998,14 +1000,15 @@ class eSEAT_Gui:
 
     ################# C H E C K B U T T O N ################### 
     ## Create Checkbutton Item
-    def createCheckButtonItem(self, frame, sname, name, cspan=1):
+    def createCheckButtonItem(self, frame, sname, name, cspan=1, rspan=1):
         chk=BooleanVar()
         func=self.mkcallback(name)
         cbtn=Checkbutton(frame, text=name, variable=chk, command=func)
         self.check_objs[sname+":"+name]=cbtn
         self.checks[sname+":"+name]=chk
+        rspan=1
 
-        return [cbtn, cspan]
+        return [cbtn, cspan, rspan]
     
     def getCheckValue(self, eid):
         try:
@@ -1016,15 +1019,15 @@ class eSEAT_Gui:
 
     ################# L I S T B O X ################### 
     ## Create Listbox Item
-    def createListboxItem(self, frame, sname, name, txtlist, height, cspan=1):
+    def createListboxItem(self, frame, sname, name, txtlist, height, cspan=1, rspan=1):
         func=self.mkcallback(name)
         lbox=Listbox(frame, height=height)
         for x in txtlist.split(','):
-          lbox.insert(END, x)
+            lbox.insert(END, x)
         lbox.bind('<<ListboxSelect>>', func)
         self.listboxes[sname+":"+name]=lbox
 
-        return [lbox, cspan]
+        return [lbox, cspan, rspan]
 
     def getListboxValue(self, eid):
         try:
@@ -1036,13 +1039,13 @@ class eSEAT_Gui:
     
     ################# S C A L E ################### 
     ## Create Scale Item
-    def createScaleItem(self, frame, sname, name, frm, to, res, ori,cspan=1):
+    def createScaleItem(self, frame, sname, name, frm, to, res, ori, cspan=1, rspan=1):
         func=self.mkcallback(name)
         scale=Scale(frame, label=name, orient=ori, from_=frm, to=to, resolution=res,
                      command=func)
         self.scales[sname+":"+name]=scale
 
-        return [scale, cspan]
+        return [scale, cspan, rspan]
 
     def getScaleValue(self, eid):
         try:
@@ -1061,7 +1064,7 @@ class eSEAT_Gui:
     
     ################# R A D I O B U T T O N ################### 
     ## Create Radiobutton Item
-    def createRadiobuttonItem(self, frame, sname, name, var, val, cspan=1):
+    def createRadiobuttonItem(self, frame, sname, name, var, val, cspan=1, rspan=1):
         key=sname+":"+name
 
         if not self.radio_vals.has_key(var) :
@@ -1072,7 +1075,7 @@ class eSEAT_Gui:
                variable=self.radio_vals[var], command=func)
         self.radiobuttons[key]=rbtn
 
-        return [rbtn, cspan]
+        return [rbtn, cspan, rspan]
     
     def getRadioValue(self, var):
         try:
@@ -1083,12 +1086,12 @@ class eSEAT_Gui:
 
     #################  L A B E L ################### 
     ## Create Label Item
-    def createLabelItem(self, frame, sname, name, fg="#ffffff", bg="#444444", cspan=1):
+    def createLabelItem(self, frame, sname, name, fg="#ffffff", bg="#444444", cspan=1, rspan=1):
         if not fg: fg="#ffffff"
         if not bg: bg="#444444"
         lbl = Label(frame, text=name, bg=bg, fg=fg )
         self.labels[sname+":"+name] = lbl
-        return [lbl, cspan]
+        return [lbl, cspan, rspan]
 
     def setLabelConfig(self, eid, **cfg):
         try:
@@ -1115,7 +1118,7 @@ class eSEAT_Gui:
                     i += 1
                 else :
                    if type(itm) == list:
-                       itm[0].grid(row=j, column=i, columnspan=itm[1], sticky=W+E)
+                       itm[0].grid(row=j, column=i, columnspan=itm[1], rowspan=itm[2], sticky=W+E)
                        i = i+itm[1] 
                    else :
                        itm.grid(row=j, column=i, sticky=W + E)
@@ -1139,13 +1142,13 @@ class eSEAT_Gui:
                elif itm[0] == 'button':
                    self.gui_items[name].append(
                        self.createButtonItem(self.frames[name], name,
-                                itm[1], itm[2], itm[3], int(itm[4]), itm[5])
+                                itm[1], itm[2], itm[3], itm[4], int(itm[5]), int(itm[6]))
                        )
 
                elif itm[0] == 'entry':
                    self.gui_items[name].append(
                        self.createEntryItem(self.frames[name], name, name,
-                                       itm[1], itm[2], int(itm[3]), itm[4])
+                                       itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]))
                        )
 
                elif itm[0] == 'text':
@@ -1157,37 +1160,37 @@ class eSEAT_Gui:
                elif itm[0] == 'label':
                    self.gui_items[name].append(
                        self.createLabelItem(self.frames[name], name,
-                                itm[1], itm[2], itm[3], int(itm[4]))
+                                itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]))
                        )
                elif itm[0] == 'combobox':
                    self.gui_items[name].append(
                        self.createComboboxItem(self.frames[name], name,
-                                itm[1], itm[2], itm[3], int(itm[4]))
+                                itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]))
                        )
 
                elif itm[0] == 'checkbutton':
                    self.gui_items[name].append(
                        self.createCheckButtonItem(self.frames[name], name,
-                                itm[1], int(itm[2]))
+                                itm[1], int(itm[2]), int(itm[3]))
                        )
 
                elif itm[0] == 'listbox':
                    self.gui_items[name].append(
                        self.createListboxItem(self.frames[name], name,
-                                itm[1], itm[2], int(itm[3]), int(itm[4]))
+                                itm[1], itm[2], int(itm[3]), int(itm[4]), int(itm[5]))
                        )
 
                elif itm[0] == 'radiobutton':
                    self.gui_items[name].append(
                        self.createRadiobuttonItem(self.frames[name], name,
-                                itm[1], itm[2], itm[3], int(itm[4]))
+                                itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]))
                        )
 
                elif itm[0] == 'scale':
                    self.gui_items[name].append(
                        self.createScaleItem(self.frames[name], name,
                                 itm[1], float(itm[2]), float(itm[3]), float(itm[4]),
-                                itm[5], int(itm[6]))
+                                itm[5], int(itm[6]), int(itm[7]))
                        )
 
                else:
