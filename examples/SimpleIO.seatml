@@ -40,6 +40,13 @@
        seat.appendText("main_mode:textOut", val+"\n")
       </script>
     </combobox>
+
+    <checkbutton name="Check1">
+      <script>
+       val=seat.getCheckValue("main_mode:Check1")
+       seat.appendText("main_mode:textOut", str(val)+"\n")
+      </script>
+    </checkbutton>
  
     <rule source="str_in">
       <script>

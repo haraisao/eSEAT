@@ -26,12 +26,6 @@ import yaml
 from collections import OrderedDict
 
 ########
-#  for OpenRTM-aist
-#import OpenRTM_aist
-#import omniORB
-#from RTC  import *
-
-########
 # XML Parser of Julius result
 from bs4  import BeautifulSoup
 
@@ -43,6 +37,7 @@ try:
     from ScrolledText import ScrolledText 
 except:
     from tkinter import *
+    import tkinter.ttk as ttk
     from tkinter.scrolledtext import ScrolledText
  
 ####### for ROS
@@ -736,6 +731,8 @@ class eSEAT_Gui:
         self.stext = {}
         self.buttons = {}
         self.comboboxes = {}
+        self.checks = {}
+        self.check_objs = {}
         self.labels = {}
 
     #
@@ -783,8 +780,11 @@ class eSEAT_Gui:
     def addLabel(self, name, txt, fg, bg, cspan):
         self.items[name].append(['label', txt, fg, bg, cspan])
 
-    def addCombobox(self, name, text, txtlist, val, cspan):
-        self.items[name].append(['combobox', text, txtlist, val, cspan])
+    def addCombobox(self, name, txt, txtlist, val, cspan):
+        self.items[name].append(['combobox', txt, txtlist, val, cspan])
+
+    def addCheckbutton(self, name, txt, cspan):
+        self.items[name].append(['checkbutton', txt, cspan])
 
     def addBreak(self, name):
         self.items[name].append(['br', "BR"])
@@ -794,7 +794,7 @@ class eSEAT_Gui:
 
     ###################  CREATE GUI ITEMS ####################
     #################  B U T T O N ################### 
-    ## Create Button Item
+    ## Create Button Ite
     def createButtonItem(self, frame, sname, name, fg="#000000", bg="#cccccc", cspan=1, w=None):
         #btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg)
         if w :
@@ -992,6 +992,24 @@ class eSEAT_Gui:
         except:
             return ""
 
+    ################# C H E C K B U T T O N ################### 
+    ## Create Checkbutton Item
+    def createCheckButtonItem(self, frame, sname, name, cspan=1):
+        chk=BooleanVar()
+        func=self.mkcallback(name)
+        cbtn=Checkbutton(frame, text=name, variable=chk, command=func)
+        self.check_objs[sname+":"+name]=cbtn
+        self.checks[sname+":"+name]=chk
+
+        return [cbtn, cspan]
+    
+    def getCheckValue(self, eid):
+        try:
+            val= self.checks[eid].get()
+            return val
+        except:
+            return ""
+
     #################  L A B E L ################### 
     ## Create Label Item
     def createLabelItem(self, frame, sname, name, fg="#ffffff", bg="#444444", cspan=1):
@@ -1075,7 +1093,12 @@ class eSEAT_Gui:
                        self.createComboboxItem(self.frames[name], name,
                                 itm[1], itm[2], itm[3], int(itm[4]))
                        )
-                   pass
+
+               elif itm[0] == 'checkbutton':
+                   self.gui_items[name].append(
+                       self.createCheckButtonItem(self.frames[name], name,
+                                itm[1], int(itm[2]))
+                       )
 
                else:
                    pass

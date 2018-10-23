@@ -226,6 +226,12 @@ class SEATML_Parser():
             self.parent.addCombobox(name, key, self.getAttribute(e, 'values'),
 		 self.getAttribute(e,'default', ''), self.getAttribute(e, 'colspan', 1))
         #
+        #  <checkbutton>
+        elif e.tag == 'checkbutton':
+            key = self.getAttribute(e, 'name')
+            self.parent.states[name].registerRule(('gui', key), commands)
+            self.parent.addCheckbutton(name, key, self.getAttribute(e, 'colspan', 1))
+        #
         #  Others
         else:
            self.logError(u"Invalid tag found: " + unicode(e.tag))
