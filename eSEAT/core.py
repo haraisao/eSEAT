@@ -16,6 +16,12 @@ Copyright (C) 2009-2014
 from __future__ import print_function
 import sys
 import os
+import getopt
+import codecs
+import locale
+
+import threading
+
 import traceback
 import subprocess
 
@@ -46,10 +52,25 @@ try:
 except:
   rospy=None
 
+from viewer import OutViewer
+
+if os.getenv('SEAT_ROOT') :
+  rootdir=os.getenv('SEAT_ROOT')
+else:
+  rootdir='/usr/local/eSEAT/'
+
+sys.path.append(rootdir)
+sys.path.append(os.path.join(rootdir,'libs'))
+sys.path.append(os.path.join(rootdir,'3rd_party'))
+
+opts = None
+
 
 ###############################################################
 #  Global Variables
 #
+__version__ = "3.0"
+
 def getGlobals():
     return globals()
 
@@ -57,7 +78,7 @@ def setGlobals(name, val):
     globals()[name] = val
 
 #########
-#  WebAdaptor
+#  SocketAdaptor
 from SocketAdaptor import SocketAdaptor 
 
 #########
@@ -101,8 +122,7 @@ class SeatLogger:
         print ("WARN:"+self._name+" "+msg, file=sys.stderr)
 
 
-##################################################################
-#
+###############################################################
 #  Class eSEAT_Core
 #
 class eSEAT_Core:
@@ -141,6 +161,8 @@ class eSEAT_Core:
         self.name="eSEAT"
         self.ros_node=None
         self.ros_anonymous=False
+
+        self.interval=1
 
     #
     #
@@ -511,7 +533,8 @@ class eSEAT_Core:
 
         return True
 
-    ####################################################################################
+       
+    ################################################################
     #  Lookup Registered Commands with default
     #
     def lookupWithDefault(self, state, name, s, flag=True):
@@ -541,24 +564,6 @@ class eSEAT_Core:
             cmds = None
         return cmds
         
-    #def lookupCommand_old(self, state, name, s):
-    #    cmds = []
-    #    regkeys = []
-    #    try:
-    #        k = state+":"+name+":"+s
-    #        cmds = self.keys[k]
-    #    except KeyError:
-    #        try:
-    #            regkeys = self.regkeys[state+":"+name]
-    #        except KeyError:
-    #            return None
-    #
-    #        for r in regkeys:
-    #            if r[0].match(s):
-    #                cmds = r[1]
-    #                break
-    #        return None
-    #    return cmds
     #############################
     #  For STATE of eSEAT
     #
@@ -620,7 +625,6 @@ class eSEAT_Core:
     #
     def stateTransfer(self, newstate):
         try:
-            #tasks = self.keys[self.currentstate+":::onexit"]
             tasks = self.states[self.currentstate].onexit
             if tasks:
                 tasks.execute()
@@ -639,7 +643,6 @@ class eSEAT_Core:
         try:
             cmds = self.lookupWithDefault(newstate, '', 'ontimeout', False)
             if cmds: self.setTimeout(cmds.timeout)
-            #tasks = self.keys[self.currentstate+":::onentry"]
             tasks = self.states[self.currentstate].onentry
             if tasks:
                 tasks.execute()
@@ -659,22 +662,6 @@ class eSEAT_Core:
             #sys.exit(1)
         return res
 
-    #
-    #  register commands into self.keys
-    #
-    #def registerCommands(self, key, cmds):
-    #    self._logger.info("register key="+key)
-    #    self.keys[key] = cmds
-    #
-    #def appendCommands(self, key, cmds):
-    #    self._logger.info(" append key="+key)
-    #    self.keys[key].append(cmds) 
-    #
-    #def registerCommandArray(self, tag, cmds):
-    #    if self.keys.keys().count(tag) == 0 :
-    #        self.registerCommands(tag, [cmds])
-    #    else :
-    #        self.appendCommands(tag, cmds)
 
     ##############################################
     #  Callback function for WebAdaptor
@@ -717,6 +704,8 @@ class eSEAT_Core:
         if self.root : self.root.quit()
         return 
 
+#  End of eSEAT_Core
+###########################################################
 ###########################################################
 #   eSEAT_Gui
 #
@@ -1181,12 +1170,10 @@ class eSEAT_Gui:
                        )
 
                elif itm[0] == 'listbox':
-                   print("listbox")
                    self.gui_items[name].append(
                        self.createListboxItem(self.frames[name], name,
                                 itm[1], itm[2], int(itm[3]), int(itm[4]))
                        )
-                   print("...listbox")
 
                elif itm[0] == 'radiobutton':
                    self.gui_items[name].append(
@@ -1251,3 +1238,267 @@ class eSEAT_Gui:
 
         self.root.mainloop()
         return 0
+
+#   End of eSEAT_Gui
+###########################################################
+
+class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
+    def __init__(self):
+        eSEAT_Core.__init__(self) 
+        eSEAT_Gui.__init__(self) 
+        self.activated=True
+        self._on_timeout = -1
+
+    def exit(self):
+        try:
+            eSEAT_Core.exit_comp(self)
+            return True
+        except:
+            return True
+
+    def setInstanceName(self,name):
+        self.name=name
+        return True
+
+    def getInstanceName(self):
+        return self.name
+    #
+    #
+    def onInitialize(self):
+        return True
+    
+
+    #########################
+    #  onActivated
+    #
+    def onActivated(self, ec_id):
+        self.activated = True
+        self.processActivated()
+        self.resetTimer()
+        print (self.currentstate)
+        return True
+
+    #
+    #  onDeactivated
+    #
+    def onDeactivated(self, ec_id):
+        self.processDeactivated()
+        self.processDeactivated('all')
+        self.activated = False
+        return True
+
+    #
+    #  onFinalize
+    #
+    def onFinalize(self):
+        try:
+            self.finalizeSEAT()
+        except:
+            pass
+        return True
+
+    #
+    #  onShutdown
+    #
+    def onShutdown(self, ec_id):
+        return True
+
+    #
+    #  onExecute
+    #
+    def onExecute(self, ec_id):
+        if self.isTimeout() :
+            res=self.processTimeout()
+            if res :
+                return True
+            else:
+                self._on_timeout = -1
+        self.processExec()
+        self.processExec('all')
+
+        if self.interval :
+           time.sleep(self.interval)
+        return True
+
+#
+#  eSEAR_Manager
+class Manager:
+    def __init__(self, mlfile=None):
+        self.comp = None
+        self.run_as_daemon = False
+        self.naming_format = ""
+        self.viewer = None
+        self.loop_flag = True
+
+        if mlfile is None:
+            opts, argv = self.parseArgs()
+            if argv == -1:
+                raise Exception("Error in __init__")
+        else:
+            opts, argv = self.parseArgs(False)
+            self._scriptfile = mlfile
+
+        if opts:
+            self.run_as_daemon = opts.run_as_daemon
+            self.naming_format = opts.naming_format
+
+        if self.run_as_daemon :
+            daemonize()
+
+        self.comp=eSEAT_Comp()
+        #instance_name = SeatmlParser.formatInstanceName(self.naming_format)
+        self.comp.name=self.naming_format
+
+        #
+        # Gui stdout
+        if opts and opts.run_out_viewer:
+            self.viewer = OutViewer()
+
+    #
+    #  Parse command line option...
+    def parseArgs(self, flag=True):
+        encoding = locale.getpreferredencoding()
+        sys.stdout = codecs.getwriter(encoding)(sys.stdout, errors = "replace")
+        sys.stderr = codecs.getwriter(encoding)(sys.stderr, errors = "replace")
+
+        parser = utils.MyParser(version=__version__, usage="%prog [seatmlfile]",
+                                description=__doc__)
+
+        parser.add_option('-f', '--config-file', dest='config_file', type="string",
+                            help='apply configuration file')
+
+        parser.add_option('-n', '--name', dest='naming_format', type="string",
+                            help='set naming format' )
+
+        parser.add_option('-d', '--daemon', dest='run_as_daemon', action="store_true",
+                            help='run as daemon' )
+
+        parser.add_option('-v', '--viewer', dest='run_out_viewer', action="store_true",
+                            help='create output window' )
+
+        try:
+            opts, args = parser.parse_args()
+        except (optparse.OptionError, e):
+            print('OptionError:', e, file=sys.stderr)
+            #sys.exit(1)
+            return [None, -1]
+
+        self._scriptfile = None
+        if(len(args) > 0):
+            self._scriptfile = args[0]
+
+        if opts.naming_format:
+           sys.argv.remove('-n')
+           sys.argv.remove(opts.naming_format)
+
+        if opts.run_as_daemon:
+           sys.argv.remove('-d')
+
+        if opts.run_out_viewer:
+           sys.argv.remove('-v')
+
+        if len(args) == 0 and flag:
+            parser.error("wrong number of arguments")
+            #sys.exit(1)
+            return [None, -1]
+        
+        return [opts, sys.argv]
+
+    #  Initialize the eSEAT-RTC
+    #
+    def initModule(self):
+
+        if self._scriptfile :
+            ret = self.comp.loadSEATML(self._scriptfile)
+            if ret : raise Exception("Error in moduleInit")
+
+    #
+    #  Start Manager
+    #
+    def start(self):
+        if (isinstance(self.comp, eSEAT_Gui) and self.comp.hasGUI() ) or self.viewer :
+            self.startLoop(True)
+
+            # GUI part
+            res = self.comp.startGuiLoop(self.viewer)
+            if res == 0:
+              sys.exit(1)
+              #return
+            else:
+              self.startLoop()
+        else:
+            self.startLoop()
+
+    #
+    #
+    def exit(self):
+        try:
+            self.comp.exit_comp()
+            self.loop_flag = False
+        except:
+            pass
+        print( "....Manager shutdown" )
+        if self.run_as_daemon:
+          os._exit(1)
+        else:
+          sys.exit(1)
+
+    def mainloop(self):
+        if self.comp :
+            self.loop_flag = True
+            while self.loop_flag:
+                self.comp.onExecute(0)
+
+        return True
+
+    def startLoop(self, flag=False):
+        if flag :
+            threading.Thread(target=self.mainloop, args=()) 
+        else:
+            self.mainloop()
+
+
+#
+#
+#
+def daemonize():
+  try:
+    pid=os.fork()
+  except:
+    print( "ERROR in fork1" )
+
+  if pid > 0:
+    os._exit(0)
+
+  try:
+    os.setsid()
+  except:
+    print( "ERROR in setsid" )
+
+  try:
+    pid=os.fork()
+  except:
+    print( "ERROR in fork2" )
+  if pid > 0:
+    os._exit(0)
+
+#
+#
+def main_core(mlfile=None, daemon=False):
+    try:
+        if daemon : daemonize()
+        seatmgr = Manager(mlfile)
+        seatmgr.initModule()
+        seatmgr.start()
+    except:
+        pass
+
+    print ( "...Terminate." )
+    try:
+      if seatmgr.run_as_daemon:
+        os._exit(1)
+      else:
+        sys.exit(1)
+    except:
+      sys.exit(1)
+

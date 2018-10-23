@@ -52,7 +52,7 @@ from RTC  import *
 ########################################
 #  eSEAT_Core
 #
-from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals
+from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals,Manager
 import SeatmlParser
 
 ###############################################################
@@ -403,7 +403,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
 #
 # eSEAT Manager ( RTC manager )
 #
-class eSEATManager:
+class eSEATManager(Manager):
     def __init__(self, mlfile=None):
         self.comp = None
         self.run_as_daemon = False
@@ -533,8 +533,7 @@ class eSEATManager:
               try:
                  self.manager.shutdown()
               except:
-                 pass 
-              #sys.exit(1)
+                 sys.exit(1)
               return
             else:
               self.manager.runManager()
@@ -604,32 +603,8 @@ def instantiateDataType(dtype):
         return desc[1](*arg)
     return None
 
-def daemonize():
-  try:
-    pid=os.fork()
-  except:
-    print( "ERROR in fork1" )
-
-  if pid > 0:
-    os._exit(0)
-
-  try:
-    os.setsid()
-  except:
-    print( "ERROR in setsid" )
-
-  try:
-    pid=os.fork()
-  except:
-    print( "ERROR in fork2" )
-  if pid > 0:
-    os._exit(0)
-
-#  os.umask(0)
-#  os.close(sys.stdin.fileno())
-#  os.close(sys.stdout.fileno())
-#  os.close(sys.stderr.fileno())
-
+#
+#
 def main(mlfile=None, daemon=False):
     try:
         if daemon : daemonize()
