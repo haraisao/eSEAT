@@ -1626,8 +1626,7 @@ def daemonize():
 
 #
 #
-  
-def main_core(mlfile=None, daemon=False):
+def main_node(mlfile=None, daemon=False):
     try:
         import signal
 

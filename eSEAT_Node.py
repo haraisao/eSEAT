@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
-#from eSEAT import eSEAT_main
+#from eSEAT import main_node
 import eSEAT
 
 if __name__ == '__main__':
-  eSEAT.main()
+  eSEAT.main_node()

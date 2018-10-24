@@ -50,7 +50,8 @@ class SEATML_Parser():
             self.setXsd(xsd_file)
             print ("XSD file '"+xsd+"' = '"+xsd_file+"'.")
         else:
-            print ("Warining:XSD file '"+xsd+"' not found.")
+            #print ("Warining:XSD file '"+xsd+"' not found.")
+            pass
 
         self.include_rules = []
         self.seatml_base_dir = ""
