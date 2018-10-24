@@ -46,6 +46,21 @@ def ros_name():
   global ros_node_name
   return ros_node_name
   
+def getMsgClass(datatype):
+  try:
+    dtype=eval(datatype.replace('/','.'),getGlobals())
+    return dtype
+  except:
+    try:
+      pkg, klass=datatype.split('/')
+      exec("import "+pkg+".msg as "+pkg , getGlobals())
+      dtype=eval(datatype.replace('/','.'),getGlobals())
+      return dtype
+    except:
+      traceback.print_exc()
+      return None
+   
+        
 
 #
 #
@@ -74,13 +89,15 @@ class RosAdaptor(object):
   # 
   def createPublisher(self, name, datatype, size):
     if self.type == 'Publisher':
-      self._port=rospy.Publisher(name, eval(datatype.replace('/','.'),getGlobals()), queue_size=size)
+      dtype=getMsgClass(datatype)
+      self._port=rospy.Publisher(name, dtype, queue_size=size)
 
   #
   #
   def createSubscriber(self, name, datatype, callback):
     if self.type == 'Subscriber':
-      self._port=rospy.Subscriber(name, eval(datatype.replace('/','.'),getGlobals()), callback)
+      dtype=getMsgClass(datatype)
+      self._port=rospy.Subscriber(name, dtype, callback)
 
   #
   #

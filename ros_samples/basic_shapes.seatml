@@ -1,8 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <seatml>
-  <general name="basic_shapes" anonymous="1">
+  <general name="basic_shapes" anonymous="1" rate="1">
+    <adaptor name="/visualization_marker" type="ros_pub"
+              datatype="visualization_msgs/Marker" size="1" />
+
     <script>
-     import visualization_msgs.msg as visualization_msgs
      global marker
 
      marker = visualization_msgs.Marker()
@@ -20,11 +22,8 @@
      marker.color.g=1.0
      marker.color.b=0.0
      marker.color.a=1.0
-
     </script>
 
-    <adaptor name="/visualization_maker" type="ros_pub"
-              datatype="visualization_msgs/Marker" size="1" />
     <onexec>
     </onexec>
 
@@ -68,10 +67,9 @@
        else:
          msg="Invalid Shape: "+shape
 
-       marker.lifetime=rospy.Duration()
+       marker.lifetime=rospy.Duration(1,0)
 
-       print(marker)
-       seat.ros_publish("/visualization_maker", marker)
+       seat.ros_publish("/visualization_marker", marker)
        seat.appendText("main_mode:textOut", msg+"\n")
      </script>
     </button>
