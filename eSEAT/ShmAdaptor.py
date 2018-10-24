@@ -7,8 +7,11 @@ import os
 import sysv_ipc
 import struct
 import traceback
+from ctypes import *
 
-
+#
+#
+#
 class ShmAdaptor(object):
   def __init__(self, name, id, size):
     self.name=name

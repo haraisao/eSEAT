@@ -804,16 +804,20 @@ class eSEAT_Gui:
 
     ###################  CREATE GUI ITEMS ####################
     ################# F R A M E ###################
-    def createFrameItem(self, frame, sname, name, h, w, pad, r, fg="#000000", bg="#cccccc", cspan=1, rspan=1):
-        frm = Frame(frame, height=int(h), width=int(w), paddding=int(pad), relief=r, bg=bg, fg=fg)
+    def createFrameItem(self, frame, sname, name, h, w, r, fg="#000000", bg="#cccccc", cspan=1, rspan=1):
+        if not h: h=0
+        if not w: w=0
+        frm = Frame(frame, height=int(h), width=int(w), relief=r, bg=bg, fg=fg)
         self.frames[sname+":"+name] = frm
 
         return [frm, cspan, rspan]
 
     ################# L A B E L F R A M E ###################
-    def createLabelframeItem(self, frame, sname, name, h, w, pad, anchor, r, fg="#000000", bg="#cccccc", cspan=1, rspan=1):
+    def createLabelframeItem(self, frame, sname, name, h, w, anchor, r, fg="#000000", bg="#cccccc", cspan=1, rspan=1):
+        if not h: h=0
+        if not w: w=0
         frm = Frame(frame, text=name, height=int(h), width=int(w), 
-                          paddding=int(pad), labelanchor=anchor, relief=r, bg=bg, fg=fg)
+                          labelanchor=anchor, relief=r, bg=bg, fg=fg)
         self.frames[sname+":"+name] = frm
 
         return [frm, cspan, rspan]
@@ -1121,20 +1125,23 @@ class eSEAT_Gui:
             print ("ERROR in setLabelConfig")
             pass
 
-    def getFrameName(self, itm):
+    def getFrameName(self, itm, name):
         try:
-          if itm[0] == "BR": return itm[1]
-          elif itm[0] == "SP": return itm[2]
+          if itm[0] == "BR":
+            if itm[1] : return name+":"+itm[1]
+            return itm[1]
+          elif itm[0] == "SP":
+            if itm[2] : return name+":"+itm[2]
+            return itm[2]
           else:
             master=itm[0].master 
-            keys = [ k for k,v in self.frams.items() if v == master]
-            print('KEYs:', keys)
+            keys = [ k for k,v in self.frames.items() if v == master]
             if len(keys) == 1:
               return keys[0]
             else:
-              return 'root'
+              return ''
         except:
-          return 'root'
+          return ''
 
     #########  LAYOUT ITEMS ON A FRAME ############
     ## Layout GUI items
@@ -1144,15 +1151,14 @@ class eSEAT_Gui:
         j={}
         n=self.max_columns
         if self.gui_items[name] :
-            i['root']=0
-            j['root']=1
             for n in self.frames.keys():
               i[n]=0
-              j[n]=1
+              j[n]=0
 
             for itm in self.gui_items[name] :
-                fn=self.getFrameName(itm)
-                if not fn : fn='root'
+                fn=self.getFrameName(itm, name)
+                if not fn : fn=name
+
                 if ( i[fn] % self.max_columns ) == 0:
                     j[fn] += 1
 
@@ -1180,7 +1186,7 @@ class eSEAT_Gui:
 
                    i[fn] = i[fn] % self.max_columns
       except:
-        print("Error in packing")
+        print("Error in packing:", self.frames)
         traceback.print_exc()
 
     ## Create and layout GUI items
@@ -1190,78 +1196,84 @@ class eSEAT_Gui:
            self.gui_items[name] = []
 
            for itm in items:
+               fname=name+":"+itm[-1]
+               if fname in self.frames:
+                   target_frame=self.frames[fname]               
+               else:
+                   target_frame=self.frames[name]               
+
                if itm[0] == 'br':
-                   self.gui_items[name].append( ["BR", ''] )
+                   self.gui_items[name].append( ["BR", itm[-1]] )
 
                elif itm[0] == 'space':
                    #for i in range( int(itm[1] )):
                    #    self.gui_items[name].append( ["SP", 1, ''] )
-                   self.gui_items[name].append( ["SP", int(itm[1]), ''] )
+                   self.gui_items[name].append( ["SP", int(itm[1]), itm[-1]] )
 
                elif itm[0] == 'frame':
                    self.gui_items[name].append(
-                       self.createFrameItem(self.frames[name], name,
-                           itm[1], int(itm[2]), int(itm[3]), itm[4], itm[5], 
+                       self.createFrameItem(target_frame, name,
+                           itm[1], itm[2], itm[3], itm[4], itm[5], 
                            itm[6], int(itm[7]), int(itm[8]))
                        )
 
                elif itm[0] == 'labelframe':
                    self.gui_items[name].append(
-                       self.createFrameItem(self.frames[name], name,
-                           itm[1], int(itm[2]), int(itm[3]), itm[4], itm[5], 
+                       self.createFrameItem(target_frame, name,
+                           itm[1], itm[2], itm[3], itm[4], itm[5], 
                            itm[6], itm[7], int(itm[8]), int(itm[9]))
                        )
 
                elif itm[0] == 'button':
                    self.gui_items[name].append(
-                       self.createButtonItem(self.frames[name], name,
+                       self.createButtonItem(target_frame, name,
                                 itm[1], itm[2], itm[3], itm[4], int(itm[5]), int(itm[6]))
                        )
 
                elif itm[0] == 'entry':
                    self.gui_items[name].append(
-                       self.createEntryItem(self.frames[name], name, name,
+                       self.createEntryItem(target_frame, name, name,
                                        itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]))
                        )
 
                elif itm[0] == 'text':
                    self.gui_items[name].append(
-                       self.createTextItem(self.frames[name],name, name,
+                       self.createTextItem(target_frame,name, name,
                                 itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]), itm[6])
                        )
 
                elif itm[0] == 'label':
                    self.gui_items[name].append(
-                       self.createLabelItem(self.frames[name], name,
+                       self.createLabelItem(target_frame, name,
                                 itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]))
                        )
                elif itm[0] == 'combobox':
                    self.gui_items[name].append(
-                       self.createComboboxItem(self.frames[name], name,
+                       self.createComboboxItem(target_frame, name,
                                 itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]))
                        )
 
                elif itm[0] == 'checkbutton':
                    self.gui_items[name].append(
-                       self.createCheckButtonItem(self.frames[name], name,
+                       self.createCheckButtonItem(target_frame, name,
                                 itm[1], int(itm[2]), int(itm[3]))
                        )
 
                elif itm[0] == 'listbox':
                    self.gui_items[name].append(
-                       self.createListboxItem(self.frames[name], name,
+                       self.createListboxItem(target_frame, name,
                                 itm[1], itm[2], int(itm[3]), int(itm[4]), int(itm[5]))
                        )
 
                elif itm[0] == 'radiobutton':
                    self.gui_items[name].append(
-                       self.createRadiobuttonItem(self.frames[name], name,
+                       self.createRadiobuttonItem(target_frame, name,
                                 itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]))
                        )
 
                elif itm[0] == 'scale':
                    self.gui_items[name].append(
-                       self.createScaleItem(self.frames[name], name,
+                       self.createScaleItem(target_frame, name,
                                 itm[1], float(itm[2]), float(itm[3]), float(itm[4]),
                                 itm[5], int(itm[6]), int(itm[7]))
                        )
@@ -1328,6 +1340,8 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
         self._on_timeout = -1
         self._last_process_time=time.time()
         self.rate_hz=0
+        self.intval=1.0
+        self.rate=None
         self.setRate(1)
 
     def exit(self):
@@ -1338,17 +1352,16 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
             return True
 
     def setRate(self, hz):
-        if self.rate_hz == hz: return
         try:
           self.rate_hz=hz
-          self.intval=1.0/hz
-          if rospy:
-            self.rate=rospy.Rate(self.rate_hz)
+          self.intval = 1.0/float(hz)
 
+          if self.ros_node:
+            self.rate=rospy.Rate(self.rate_hz)
           else:
             self.rate=None
         except:
-          pass
+          self.rate=None
           
     def sleep(self):
         if self.rate:
@@ -1358,7 +1371,7 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
             if val > self.intval:
               time.sleep(0)
             else:
-              time.sleep(val)
+              time.sleep(self.intval - val)
             self._last_process_time=time.time()
 
     def setInstanceName(self,name):
@@ -1434,6 +1447,7 @@ class Manager:
         self.naming_format = ""
         self.viewer = None
         self.loop_flag = True
+        self.main_thread=None
 
         if mlfile is None:
             opts, argv = self.parseArgs()
@@ -1527,10 +1541,9 @@ class Manager:
             # GUI part
             res = self.comp.startGuiLoop(self.viewer)
             if res == 0:
-              sys.exit(1)
-              #return
+              self.exit()
             else:
-              self.startLoop()
+              os._exit(1)
         else:
             self.startLoop()
 
@@ -1538,15 +1551,18 @@ class Manager:
     #
     def exit(self):
         try:
-            self.comp.exit_comp()
             self.loop_flag = False
+            self.comp.exit_comp()
         except:
             pass
         print( "....Manager shutdown" )
         if self.run_as_daemon:
           os._exit(1)
         else:
-          sys.exit(1)
+          try:
+            sys.exit(0)
+          except:
+            pass
 
     def mainloop(self):
         if self.comp :
@@ -1558,7 +1574,8 @@ class Manager:
 
     def startLoop(self, flag=False):
         if flag :
-            threading.Thread(target=self.mainloop, args=()) 
+            self.main_thread = threading.Thread(target=self.mainloop, args=())
+            self.main_thread.start()
         else:
             self.mainloop()
 
