@@ -763,44 +763,65 @@ class eSEAT_Gui:
         if self.root : self.root.title(name)
 
     #  Called by SEATML Parser
-    def addButton(self, name, txt, fg, bg, w, cspan=1, rspan=1):
-        self.items[name].append(['button', txt, fg, bg, w, cspan, rspan])
+    def addFrame(self, name, txt, h, w, relief, fg, bg, cspan=1, rspan=1, frame=''):
+        self.items[name].append(['frame', txt, h, w, relief, fg, bg, cspan, rspan, frame])
 
-    def addEntry(self, name, txt, w, val='', cspan=1, rspan=1):
-        self.items[name].append(['entry', txt, w, val, cspan, rspan])
+    def addLabelframe(self, name, txt, h, w, labelanchor, relief, fg, bg, cspan=1, rspan=1, frame=''):
+        self.items[name].append(['labelframe', txt, h, w, labelanchor, relief, fg, bg, cspan, rspan, frame])
 
-    def addText(self, name, txt, w, h, cspan=1, rspan=1, val=""):
-        self.items[name].append(['text', txt, w, h, cspan, rspan, val])
+    def addButton(self, name, txt, fg, bg, w, cspan=1, rspan=1, frame=''):
+        self.items[name].append(['button', txt, fg, bg, w, cspan, rspan, frame])
 
-    def addLabel(self, name, txt, fg, bg, cspan=1, rspan=1):
-        self.items[name].append(['label', txt, fg, bg, cspan, rspan])
+    def addEntry(self, name, txt, w, val='', cspan=1, rspan=1, frame=''):
+        self.items[name].append(['entry', txt, w, val, cspan, rspan, frame])
 
-    def addCombobox(self, name, txt, txtlist, val, cspan=1, rspan=1):
-        self.items[name].append(['combobox', txt, txtlist, val, cspan, rspan])
+    def addText(self, name, txt, w, h, cspan=1, rspan=1, val="", frame=''):
+        self.items[name].append(['text', txt, w, h, cspan, rspan, val, frame])
 
-    def addCheckbutton(self, name, txt, cspan=1, rspan=1):
-        self.items[name].append(['checkbutton', txt, cspan, rspan])
+    def addLabel(self, name, txt, fg, bg, cspan=1, rspan=1, frame=''):
+        self.items[name].append(['label', txt, fg, bg, cspan, rspan, frame])
 
-    def addScale(self, name, txt, frm, to, res, ori, cspan=1, rspan=1):
-        self.items[name].append(['scale', txt, frm, to, res, ori, cspan, rspan])
+    def addCombobox(self, name, txt, txtlist, val, cspan=1, rspan=1, frame=''):
+        self.items[name].append(['combobox', txt, txtlist, val, cspan, rspan, frame])
 
-    def addListbox(self, name, txt, txtlist, height, cspan=1, rspan=1):
-        self.items[name].append(['listbox', txt, txtlist, height, cspan, rspan])
+    def addCheckbutton(self, name, txt, cspan=1, rspan=1, frame=''):
+        self.items[name].append(['checkbutton', txt, cspan, rspan, frame])
 
-    def addRadiobutton(self, name, txt, var, val, cspan=1, rspan=1):
-        self.items[name].append(['radiobutton', txt, var, val, cspan, rspan])
+    def addScale(self, name, txt, frm, to, res, ori, cspan=1, rspan=1, frame=''):
+        self.items[name].append(['scale', txt, frm, to, res, ori, cspan, rspan, frame])
 
-    def addBreak(self, name):
-        self.items[name].append(['br', "BR"])
+    def addListbox(self, name, txt, txtlist, height, cspan=1, rspan=1, frame=''):
+        self.items[name].append(['listbox', txt, txtlist, height, cspan, rspan, frame])
 
-    def addSpace(self, name,n):
-        self.items[name].append(['space', n])
+    def addRadiobutton(self, name, txt, var, val, cspan=1, rspan=1, frame=''):
+        self.items[name].append(['radiobutton', txt, var, val, cspan, rspan, frame])
+
+    def addBreak(self, name, frame=''):
+        self.items[name].append(['br', "BR", frame])
+
+    def addSpace(self, name,n, frame=''):
+        self.items[name].append(['space', n, frame])
 
     ###################  CREATE GUI ITEMS ####################
+    ################# F R A M E ###################
+    def createFrameItem(self, frame, sname, name, h, w, pad, r, fg="#000000", bg="#cccccc", cspan=1, rspan=1):
+        frm = Frame(frame, height=int(h), width=int(w), paddding=int(pad), relief=r, bg=bg, fg=fg)
+        self.frames[sname+":"+name] = frm
+
+        return [frm, cspan, rspan]
+
+    ################# L A B E L F R A M E ###################
+    def createLabelframeItem(self, frame, sname, name, h, w, pad, anchor, r, fg="#000000", bg="#cccccc", cspan=1, rspan=1):
+        frm = Frame(frame, text=name, height=int(h), width=int(w), 
+                          paddding=int(pad), labelanchor=anchor, relief=r, bg=bg, fg=fg)
+        self.frames[sname+":"+name] = frm
+
+        return [frm, cspan, rspan]
+
+
     #################  B U T T O N ################### 
     ## Create Button Ite
     def createButtonItem(self, frame, sname, name, fg="#000000", bg="#cccccc", w=None, cspan=1, rspan=1):
-        #btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg)
         if w :
             btn = Button(frame, text=name, command=self.mkcallback(name) , bg=bg, fg=fg, width=int(w))
         else:
@@ -1100,30 +1121,67 @@ class eSEAT_Gui:
             print ("ERROR in setLabelConfig")
             pass
 
+    def getFrameName(self, itm):
+        try:
+          if itm[0] == "BR": return itm[1]
+          elif itm[0] == "SP": return itm[2]
+          else:
+            master=itm[0].master 
+            keys = [ k for k,v in self.frams.items() if v == master]
+            print('KEYs:', keys)
+            if len(keys) == 1:
+              return keys[0]
+            else:
+              return 'root'
+        except:
+          return 'root'
+
     #########  LAYOUT ITEMS ON A FRAME ############
     ## Layout GUI items
     def packItems(self, name):
+      try:
+        i={}
+        j={}
         n=self.max_columns
         if self.gui_items[name] :
-            i=0
-            j=1
+            i['root']=0
+            j['root']=1
+            for n in self.frames.keys():
+              i[n]=0
+              j[n]=1
+
             for itm in self.gui_items[name] :
-                if ( i % self.max_columns ) == 0:
-                    j += 1
+                fn=self.getFrameName(itm)
+                if not fn : fn='root'
+                if ( i[fn] % self.max_columns ) == 0:
+                    j[fn] += 1
 
                 if itm == "BR":
-                    j += 1
-                    i = 0
+                    j[fn] += 1
+                    i[fn] = 0
+
                 elif itm == "SP":
-                    i += 1
+                    i[fn] += 1
+
+                elif type(itm) == list and itm[0] == "BR":
+                    j[fn] += 1
+                    i[fn] = 0
+
+                elif type(itm) == list and itm[0] == "SP":
+                    i[fn] += itm[1]
+
                 else :
                    if type(itm) == list:
-                       itm[0].grid(row=j, column=i, columnspan=itm[1], rowspan=itm[2], sticky=W+E)
-                       i = i+itm[1] 
+                       itm[0].grid(row=j[fn], column=i[fn], columnspan=itm[1], rowspan=itm[2], sticky=W+E)
+                       i[fn] = i[fn] + itm[1] 
                    else :
-                       itm.grid(row=j, column=i, sticky=W + E)
-                       i = i+1
-                   i = i % self.max_columns
+                       itm.grid(row=j[fn], column=i[fn], sticky=W + E)
+                       i[fn] = i[fn] + 1
+
+                   i[fn] = i[fn] % self.max_columns
+      except:
+        print("Error in packing")
+        traceback.print_exc()
 
     ## Create and layout GUI items
     def createGuiPanel(self, name):
@@ -1133,11 +1191,26 @@ class eSEAT_Gui:
 
            for itm in items:
                if itm[0] == 'br':
-                   self.gui_items[name].append( "BR" )
+                   self.gui_items[name].append( ["BR", ''] )
 
                elif itm[0] == 'space':
-                   for i in range( int(itm[1] )):
-                       self.gui_items[name].append( "SP" )
+                   #for i in range( int(itm[1] )):
+                   #    self.gui_items[name].append( ["SP", 1, ''] )
+                   self.gui_items[name].append( ["SP", int(itm[1]), ''] )
+
+               elif itm[0] == 'frame':
+                   self.gui_items[name].append(
+                       self.createFrameItem(self.frames[name], name,
+                           itm[1], int(itm[2]), int(itm[3]), itm[4], itm[5], 
+                           itm[6], int(itm[7]), int(itm[8]))
+                       )
+
+               elif itm[0] == 'labelframe':
+                   self.gui_items[name].append(
+                       self.createFrameItem(self.frames[name], name,
+                           itm[1], int(itm[2]), int(itm[3]), itm[4], itm[5], 
+                           itm[6], itm[7], int(itm[8]), int(itm[9]))
+                       )
 
                elif itm[0] == 'button':
                    self.gui_items[name].append(
