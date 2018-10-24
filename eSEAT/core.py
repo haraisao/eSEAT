@@ -1340,6 +1340,7 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
     def __init__(self):
         eSEAT_Core.__init__(self) 
         eSEAT_Gui.__init__(self) 
+        self.manager=None
         self.activated=True
         self._on_timeout = -1
         self._last_process_time=time.time()
@@ -1350,7 +1351,9 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
 
     def exit(self):
         try:
-            eSEAT_Core.exit_comp(self)
+            if self.root :
+                 self.root.quit()
+            self.manager.exit()
             return True
         except:
             return True
@@ -1452,6 +1455,7 @@ class Manager:
         self.viewer = None
         self.loop_flag = True
         self.main_thread=None
+        self.stop_event=threading.Event()
 
         if mlfile is None:
             opts, argv = self.parseArgs()
@@ -1471,6 +1475,7 @@ class Manager:
         self.comp=eSEAT_Comp()
         #instance_name = SeatmlParser.formatInstanceName(self.naming_format)
         self.comp.name=self.naming_format
+        self.comp.manager=self
 
         #
         # Gui stdout
@@ -1555,10 +1560,11 @@ class Manager:
     #
     def exit(self):
         try:
-            self.loop_flag = False
+            self.stop()
             self.comp.exit_comp()
         except:
             pass
+           
         print( "....Manager shutdown" )
         if self.run_as_daemon:
           os._exit(1)
@@ -1568,17 +1574,21 @@ class Manager:
           except:
             pass
 
+    def stop(self):
+        self.stop_event.set()
+        if self.main_thread:
+            self.main_thread.join()
+
     def mainloop(self):
         if self.comp :
-            self.loop_flag = True
-            while self.loop_flag:
+            while not self.stop_event.is_set():
                 self.comp.onExecute(0)
 
         return True
 
     def startLoop(self, flag=False):
         if flag :
-            self.main_thread = threading.Thread(target=self.mainloop, args=())
+            self.main_thread = threading.Thread(target=self.mainloop)
             self.main_thread.start()
         else:
             self.mainloop()

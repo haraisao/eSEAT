@@ -105,6 +105,8 @@ class RosAdaptor(object):
     try:
       if isinstance(val, self._port.data_class) :
         self._port.publish(val)
+      elif  self._port.data_class == std_msgs.String :
+        self._port.publish(val)
       else:
         msg=self._port.data_class()
         if type(val) == str:
