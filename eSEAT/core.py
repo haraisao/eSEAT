@@ -59,6 +59,7 @@ sys.path.append(rootdir)
 sys.path.append(os.path.join(rootdir,'libs'))
 sys.path.append(os.path.join(rootdir,'3rd_party'))
 
+
 opts = None
 
 
@@ -72,6 +73,7 @@ def getGlobals():
 
 def setGlobals(name, val):
     globals()[name] = val
+
 
 #########
 #  SocketAdaptor
@@ -104,9 +106,9 @@ from SeatmlParser import SEATML_Parser,convertDataType
 class SeatLogger:
     #
     #
-    def __init__(self, name):
+    def __init__(self, name, flag=True):
         self._name = name
-        self._flag = True
+        self._flag = flag
     #
     #
     def setFlag(self, b):
@@ -171,13 +173,14 @@ class eSEAT_Core:
     #
     #
     def exit_comp(self):
-        print ("Call eSEAT_Core.exit")
         if self.webServer :
             self.webServer.terminate()
-            print ("Call terminate()")
             time.sleep( 1 )
-        print ("Call eSEAT_Core.exit.. done")
+        #print ("Call eSEAT_Core.exit.. done")
         return
+
+    def setLogFlag(self, flg):
+        self._logger.setFlag(flg)
 
     ##### Other Adaptors
     #
@@ -1336,7 +1339,7 @@ class eSEAT_Gui:
 #   End of eSEAT_Gui
 ###########################################################
 
-class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
+class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
     def __init__(self):
         eSEAT_Core.__init__(self) 
         eSEAT_Gui.__init__(self) 
@@ -1348,6 +1351,8 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
         self.intval=1.0
         self.rate=None
         self.setRate(1)
+
+        self.setLogFlag(False)
 
     def exit(self):
         try:
@@ -1472,8 +1477,7 @@ class Manager:
         if self.run_as_daemon :
             daemonize()
 
-        self.comp=eSEAT_Comp()
-        #instance_name = SeatmlParser.formatInstanceName(self.naming_format)
+        self.comp=eSEAT_Node()
         self.comp.name=self.naming_format
         self.comp.manager=self
 
@@ -1545,6 +1549,7 @@ class Manager:
     def start(self):
         self.comp.setRate(self.comp.rate_hz)
         if (isinstance(self.comp, eSEAT_Gui) and self.comp.hasGUI() ) or self.viewer :
+            #print("==== start with GUI ====")
             self.startLoop(True)
 
             # GUI part
@@ -1554,6 +1559,7 @@ class Manager:
             else:
               os._exit(1)
         else:
+            #print("==== start ====")
             self.startLoop()
 
     #
@@ -1562,10 +1568,10 @@ class Manager:
         try:
             self.stop()
             self.comp.exit_comp()
+            self.comp.exit()
         except:
             pass
            
-        print( "....Manager shutdown" )
         if self.run_as_daemon:
           os._exit(1)
         else:
@@ -1620,8 +1626,15 @@ def daemonize():
 
 #
 #
+  
 def main_core(mlfile=None, daemon=False):
     try:
+        import signal
+
+        def sig_handler(signum, frame):
+          seatmgr.exit() 
+
+        signal.signal(signal.SIGINT, sig_handler)        
         if daemon : daemonize()
         seatmgr = Manager(mlfile)
         seatmgr.initModule()
