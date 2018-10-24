@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<seatml>
+  <general name="RosService" anonymous="1">
+<!--
+    <adaptor name="str_out" type="rtcout" datatype="TimedString" />
+    <adaptor name="str_in" type="rtcin" datatype="TimedString" />
+    <adaptor name="myservice0" type="ros_server" service="add_two_ints" service_type="beginner_tutorials.AddTwoInts" file="examples/myservice.py" impl="handle_add_two_ints" />
+-->
+    <adaptor name="myservice1" type="ros_client" service="add_two_ints" service_type="beginner_tutorials.AddTwoInts" />
+  </general>
+
+  <state name="main_mode">
+
+    <label text="SimpleIO" colspan="3" bg_color="blue" />
+
+    <brk />
+    <label text="Input:" />
+    <input id="textIn" width="50" >
+        <message sendto="str_out" input="main_mode:textIn" />
+    </input>
+    <button label="Send">
+        <message sendto="str_out" input="main_mode:textIn" />
+    </button>
+    <brk />
+    <button label="add_two">
+      <script>
+       retval=seat.callRosService("myservice1", 4, 5)
+       print (retval.sum)
+
+      </script>
+    </button>
+
+    <button label="add_two2">
+      <script>
+        retval=seat.callRosService("myservice1", 13, 20)
+        seat.appendText("main_mode:textOut", "==="+str(retval)+"===\n")
+      </script>
+    </button>
+
+    <brk />
+  
+    <label text="Coming Text:" />
+    <text id="textOut" width="50" height="5" colspan="2" >
+	    INIT String...
+    </text>
+    <brk />
+    <button label="Clear">
+      <script>
+       seat.clearText("main_mode:textOut")
+      </script>
+    </button>
+ 
+    <rule source="str_in">
+      <script>
+       seat.appendText("main_mode:textOut", rtc_in_data.data+"\n")
+      </script>
+    </rule>
+
+  </state>
+
+</seatml>

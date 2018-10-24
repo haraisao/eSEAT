@@ -46,12 +46,6 @@ except:
     import tkinter.ttk as ttk
     from tkinter.scrolledtext import ScrolledText
  
-####### for ROS
-try:
-  from RosAdaptor import *
-except:
-  rospy=None
-
 ###################################################3
 #
 from viewer import OutViewer
@@ -88,6 +82,14 @@ from SocketAdaptor import SocketAdaptor
 from WebAdaptor import WebSocketServer,CometReader,parseQueryString
 
 from Task import State, TaskGroup
+
+####### for ROS
+try:
+  from RosAdaptor import *
+except:
+  rospy=None
+  #traceback.print_exc()
+
 
 ###############################################################
 #
@@ -282,7 +284,7 @@ class eSEAT_Core:
         try:
             name = str(tag.get('name'))
             type = tag.get('type')
-            self._logger.info(u"!createAdaptor: " + type + ": " + name)
+            self._logger.info(u"createAdaptor: " + type + ": " + name)
 
             if type == 'web' :
                 dirname = tag.get('document_root')
@@ -294,6 +296,7 @@ class eSEAT_Core:
 
             elif type == 'socket' :
                 self.createSocketPort(name, tag.get('host'), int(tag.get('port')))
+
             elif type == 'ros_pub' :
                 self.createRosPublisher(name, tag.get('datatype'),int(tag.get('size')))
 
@@ -302,6 +305,7 @@ class eSEAT_Core:
                 if fname:
                   utils.exec_script_file(fname, globals())
                 self.createRosSubscriber(name, tag.get('datatype'),tag.get('callback'))
+
             elif type == 'ros_server' :
                 fname=tag.get('file')
                 srv_name=tag.get('service')

@@ -6,6 +6,7 @@ import sys
 import os
 import traceback
 
+
 import yaml
 
 import rospy
@@ -19,6 +20,8 @@ sys.path.append(os.path.realpath('ros/lib/site-packages'))
 
 ros_node_name=None
 os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
+
+from core import getGlobals, setGlobals
 
 def setRosMaster(hostname=None):
   if not hostname : hostname = os.uname()[1]
@@ -71,13 +74,13 @@ class RosAdaptor(object):
   # 
   def createPublisher(self, name, datatype, size):
     if self.type == 'Publisher':
-      self._port=rospy.Publisher(name, eval(datatype.replace('/','.')), queue_size=size)
+      self._port=rospy.Publisher(name, eval(datatype.replace('/','.'),getGlobals()), queue_size=size)
 
   #
   #
   def createSubscriber(self, name, datatype, callback):
     if self.type == 'Subscriber':
-      self._port=rospy.Subscriber(name, eval(datatype.replace('/','.')), callback)
+      self._port=rospy.Subscriber(name, eval(datatype.replace('/','.'),getGlobals()), callback)
 
   #
   #
