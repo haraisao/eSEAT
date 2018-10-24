@@ -4,11 +4,12 @@
     <adaptor name="str_out" type="rtcout" datatype="TimedString" />
     <adaptor name="str_in" type="rtcin" datatype="TimedString" />
 
-    <adaptor name="myservice0" type="ros_server" service="add_two_ints" service_type="beginner_tutorials.AddTwoInts" file="examples/myservice.py" impl="handle_add_two_ints" />
-
-    <adaptor name="myservice1" type="ros_client" service="add_two_ints" service_type="beginner_tutorials.AddTwoInts" />
-
+    <adaptor name="myservice0" type="ros_server" service="add_two_ints"
+             service_type="beginner_tutorials.AddTwoInts"
+             file="ros_samples/myservice.py" impl="handle_add_two_ints" />
 <!--
+    <adaptor name="myservice1" type="ros_client"
+             service="add_two_ints" service_type="beginner_tutorials.AddTwoInts" />
 -->
   </general>
 

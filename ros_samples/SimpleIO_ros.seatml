@@ -8,7 +8,7 @@
                     datatype="geometry_msgs/Twist" size="1" />
 
     <adaptor name="/chatter" type="ros_sub" datatype="std_msgs/String"
-                     file="aho.py"  callback="aho"/>
+                     file="ros_samples/testprint.py"  callback="testprint"/>
 
     <adaptor name="/chatter" type="ros_sub" datatype="std_msgs/String" />
 
