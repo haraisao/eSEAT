@@ -1326,7 +1326,9 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
         eSEAT_Gui.__init__(self) 
         self.activated=True
         self._on_timeout = -1
-        self.setInterval(1)
+        self._last_process_time=time.time()
+        self.rate_hz=0
+        self.setRate(1)
 
     def exit(self):
         try:
@@ -1335,16 +1337,29 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
         except:
             return True
 
-    def setInterval(self, intval):
+    def setRate(self, hz):
+        if self.rate_hz == hz: return
         try:
-          self.interval=intval
+          self.rate_hz=hz
+          self.intval=1.0/hz
           if rospy:
-            self.rate=rospy.Rate(1.0/self.interval)
+            self.rate=rospy.Rate(self.rate_hz)
+
           else:
             self.rate=None
         except:
           pass
           
+    def sleep(self):
+        if self.rate:
+            self.rate.sleep()
+        else:
+            val=time.time() - self._last_process_time
+            if val > self.intval:
+              time.sleep(0)
+            else:
+              time.sleep(val)
+            self._last_process_time=time.time()
 
     def setInstanceName(self,name):
         self.name=name
@@ -1406,11 +1421,8 @@ class eSEAT_Comp(eSEAT_Core, eSEAT_Gui):
         self.processExec()
         self.processExec('all')
 
-        if self.interval :
-           if self.rate:
-             self.rate.sleep()
-           else:
-             time.sleep(self.interval)
+        self.sleep()
+
         return True
 
 #
@@ -1500,7 +1512,6 @@ class Manager:
     #  Initialize the eSEAT-RTC
     #
     def initModule(self):
-
         if self._scriptfile :
             ret = self.comp.loadSEATML(self._scriptfile)
             if ret : raise Exception("Error in moduleInit")
@@ -1509,6 +1520,7 @@ class Manager:
     #  Start Manager
     #
     def start(self):
+        self.comp.setRate(self.comp.rate_hz)
         if (isinstance(self.comp, eSEAT_Gui) and self.comp.hasGUI() ) or self.viewer :
             self.startLoop(True)
 
@@ -1584,6 +1596,7 @@ def main_core(mlfile=None, daemon=False):
         seatmgr.initModule()
         seatmgr.start()
     except:
+        traceback.print_exc()
         pass
 
     print ( "...Terminate." )

@@ -485,6 +485,9 @@ class SEATML_Parser():
             if g.get('anonymous') :
                 self.parent.ros_anonymous=g.get('anonymous')
 
+            if g.get('rate') :
+                self.parent.rate_hz=g.get('rate')
+
             for a in g.getchildren():
                 #
                 #  <adaptor>
