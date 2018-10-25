@@ -55,6 +55,7 @@ from RTC  import *
 from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals,Manager
 import SeatmlParser
 
+__version__="2.5"
 
 #########################################################################
 #
