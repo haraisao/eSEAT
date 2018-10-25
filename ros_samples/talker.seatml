@@ -4,6 +4,9 @@
     <adaptor name="/chatter" type="ros_pub"
               datatype="std_msgs/String" size="1" />
 
+  </general>
+
+  <state name="main_mode">
     <onexec>
       <script>
        hello_str = "hello world %s" % rospy.get_time()
@@ -12,9 +15,6 @@
       </script>
     </onexec>
 
-  </general>
-
-  <state name="main_mode">
 <!--
     <label text="Talker" colspan="3" bg_color="blue" />
     <brk />

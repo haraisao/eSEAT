@@ -326,7 +326,7 @@ class eSEAT_Core:
                 return -1
         except:
             self._logger.error(u"invalid parameters: " + type + ": " + name)
-            traceback.print_exc()
+            #traceback.print_exc()
             return -1
 
         return 1
@@ -1201,7 +1201,7 @@ class eSEAT_Gui:
                    i[fn] = i[fn] % self.max_columns
       except:
         print("Error in packing:", self.frames)
-        traceback.print_exc()
+        #traceback.print_exc()
 
     ## Create and layout GUI items
     def createGuiPanel(self, name):
@@ -1412,7 +1412,7 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
         self.activated = True
         self.processActivated()
         self.resetTimer()
-        print (self.currentstate)
+        #print (self.currentstate)
         return True
 
     #
@@ -1654,7 +1654,7 @@ def main_node(mlfile=None, daemon=False):
         seatmgr.initModule()
         seatmgr.start()
     except:
-        traceback.print_exc()
+        #traceback.print_exc()
         pass
 
     print ( "...Terminate." )

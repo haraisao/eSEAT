@@ -256,7 +256,6 @@ class TaskGroup():
         return False
     
     def execute_pre_script(self):
-        print (self.pre_script)
         if self.pre_script :
             ffname = utils.findfile(self.pre_script)
             if ffname :
