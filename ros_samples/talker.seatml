@@ -7,8 +7,8 @@
     <onexec>
       <script>
        hello_str = "hello world %s" % rospy.get_time()
-       rospy.loginfo(hello_str)
-       seat.ros_publish("/chatter", hello_str)
+       seat.loginfo(hello_str)
+       seat.sendto("/chatter", hello_str)
       </script>
     </onexec>
 

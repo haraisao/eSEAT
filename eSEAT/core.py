@@ -375,6 +375,10 @@ class eSEAT_Core:
         except:
             self._logger.error("Fail to sending message to %s" % (name,))
 
+    def sendto(self, name, data):
+        if self.adaptors.has_key(name) :
+            self.adaptors[name].send(name, data)
+
     ##################################
     #  Event processes 
     #
@@ -712,6 +716,9 @@ class eSEAT_Core:
                 a.terminate()
         if self.root : self.root.quit()
         return 
+
+    def loginfo(self, msg):
+        self._logger.info(msg)
 
 #  End of eSEAT_Core
 ###########################################################
@@ -1340,7 +1347,7 @@ class eSEAT_Gui:
 ###########################################################
 
 class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
-    def __init__(self):
+    def __init__(self, infoflag=False):
         eSEAT_Core.__init__(self) 
         eSEAT_Gui.__init__(self) 
         self.manager=None
@@ -1352,7 +1359,7 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
         self.rate=None
         self.setRate(1)
 
-        self.setLogFlag(False)
+        self.setLogFlag(infoflag)
 
     def exit(self):
         try:
@@ -1461,6 +1468,7 @@ class Manager:
         self.loop_flag = True
         self.main_thread=None
         self.stop_event=threading.Event()
+        self.logflag=False
 
         if mlfile is None:
             opts, argv = self.parseArgs()
@@ -1473,11 +1481,12 @@ class Manager:
         if opts:
             self.run_as_daemon = opts.run_as_daemon
             self.naming_format = opts.naming_format
+            self.logflag = opts.logflag
 
         if self.run_as_daemon :
             daemonize()
 
-        self.comp=eSEAT_Node()
+        self.comp=eSEAT_Node(self.logflag)
         self.comp.name=self.naming_format
         self.comp.manager=self
 
@@ -1508,6 +1517,9 @@ class Manager:
         parser.add_option('-v', '--viewer', dest='run_out_viewer', action="store_true",
                             help='create output window' )
 
+        parser.add_option('-l', '--loginfo', dest='logflag', action="store_true",
+                            help='display logger INFO' )
+
         try:
             opts, args = parser.parse_args()
         except (optparse.OptionError, e):
@@ -1528,6 +1540,9 @@ class Manager:
 
         if opts.run_out_viewer:
            sys.argv.remove('-v')
+
+        if opts.logflag:
+           sys.argv.remove('-l')
 
         if len(args) == 0 and flag:
             parser.error("wrong number of arguments")
