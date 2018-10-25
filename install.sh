@@ -3,8 +3,9 @@
 INST_DIR=/usr/local/eSEAT
 MKDIR="/bin/mkdir -p "
 CP="/bin/cp "
-FILES="seatml.xsd rtc.conf"
-DIRS="html libs 3rd_party examples bin"
+#FILES="seatml.xsd rtc.conf"
+FILES="rtc.conf"
+DIRS="html libs 3rd_party examples bin ros_samples"
 
 [ -d $INST_DIR ] || $MKDIR $INST_DIR
 

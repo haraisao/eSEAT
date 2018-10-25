@@ -4,4 +4,4 @@
 import eSEAT
 
 if __name__ == '__main__':
-  eSEAT.main()
+  eSEAT.main.main()
