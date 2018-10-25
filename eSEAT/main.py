@@ -46,7 +46,7 @@ opts = None
 ########
 #  for OpenRTM-aist
 try:
-  from rtm import *
+  import rtm
 except:
   rtm=None
 
@@ -60,7 +60,7 @@ __version__ = "2.5"
 #
 def main(mlfile=None, daemon=False):
   if rtm:
-    main_rtm(mlfile, daemon)
+    rtm.main_rtm(mlfile, daemon)
   else:
     main_node(mlfile,daemon)
 
