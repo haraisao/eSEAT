@@ -3,8 +3,8 @@
 INST_DIR=/usr/local/eSEAT
 MKDIR="/bin/mkdir -p "
 CP="/bin/cp "
-FILES="*.py seatml.xsd rtc.conf"
-DIRS="bs4 html libs 3rd_party examples"
+FILES="seatml.xsd rtc.conf"
+DIRS="html libs 3rd_party examples bin"
 
 [ -d $INST_DIR ] || $MKDIR $INST_DIR
 
