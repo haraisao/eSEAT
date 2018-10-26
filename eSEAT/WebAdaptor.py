@@ -510,7 +510,6 @@ class CommReader:
         self.buffer = buffer
         self.current = 0
     except:
-      traceback.print_exc()
       print ("ERR in checkBuffer")
       traceback.print_exc()
       self.buffer=""
@@ -587,9 +586,12 @@ class CometReader(CommReader):
     self.rtc = rtc
     self.dirname = dirname
     if rtc:
-      self.orb = rtc.manager._orb
-      #self.namespace = NameSpace(rtc.manager._orb, "localhost")
-      #self.namespace.list_obj()
+      try:
+        self.orb = rtc.manager._orb
+        #self.namespace = NameSpace(rtc.manager._orb, "localhost")
+        #self.namespace.list_obj()
+      except:
+        self.orb = None
 
   def getRtc(self):
     return self.rtc

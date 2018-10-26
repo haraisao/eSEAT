@@ -194,7 +194,10 @@ class eSEAT_Core:
     #
     def createWebAdaptor(self, name, port, index, whost="", dirname="html"):
         if self.webServer  is None:
-            self.adaptors[name] = WebSocketServer(CometReader(self,dirname), name, "", port, index)
+            comet_reader=CometReader(self,dirname)
+            #self.adaptors[name] = WebSocketServer(CometReader(self,dirname), name, "", port, index)
+            self.adaptors[name] = WebSocketServer(comet_reader, name, "", port, index)
+
             if self.adaptors[name].bind_res != 1 :
                 print ("=== Bind ERROR ===")
                 os._exit(1)
@@ -1361,14 +1364,14 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
 
         self.setLogFlag(infoflag)
 
-    def exit(self):
+    def exit(self, flag=False):
         try:
-            if self.root :
-                 self.root.quit()
-            self.manager.exit()
-            return True
+            if self.root : self.root.quit()
+            if not flag : self.manager.exit()
         except:
-            return True
+            pass
+
+        return True
 
     def setRate(self, hz):
         try:
@@ -1583,7 +1586,7 @@ class Manager:
         try:
             self.stop()
             self.comp.exit_comp()
-            self.comp.exit()
+            self.comp.exit(True)
         except:
             pass
            

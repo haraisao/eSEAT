@@ -1,7 +1,7 @@
 #! /bin/bash
 
 INST_DIR=/usr/local/eSEAT
-MKDIR="/bin/mkdir -p "
+MKDIR="/usr/bin/sudo /bin/mkdir -p "
 CP="/usr/bin/sudo /bin/cp "
 #FILES="seatml.xsd rtc.conf"
 FILES="rtc.conf"
