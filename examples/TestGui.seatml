@@ -59,7 +59,7 @@
  
     <brk />
 
-    <frame name="RadioButtons" colspan="2" />
+    <labelframe label="RadioButtons" colspan="2" />
     <radiobutton label="Radio1" variable="r1" value="aaa" frame="RadioButtons" />
     <brk frame="RadioButtons" />
     <radiobutton label="Radio2" variable="r1" value="bbb" frame="RadioButtons" />

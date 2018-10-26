@@ -830,10 +830,10 @@ class eSEAT_Gui:
         return [frm, cspan, rspan]
 
     ################# L A B E L F R A M E ###################
-    def createLabelframeItem(self, frame, sname, name, h, w, anchor, r, fg="#000000", bg="#cccccc", cspan=1, rspan=1):
+    def createLabelFrameItem(self, frame, sname, name, h, w, anchor, r, fg="#000000", bg="#cccccc", cspan=1, rspan=1):
         if not h: h=0
         if not w: w=0
-        frm = Frame(frame, text=name, height=int(h), width=int(w), 
+        frm = LabelFrame(frame, text=name, height=int(h), width=int(w), 
                           labelanchor=anchor, relief=r, bg=bg, fg=fg)
         self.frames[sname+":"+name] = frm
 
@@ -1236,7 +1236,7 @@ class eSEAT_Gui:
 
                elif itm[0] == 'labelframe':
                    self.gui_items[name].append(
-                       self.createFrameItem(target_frame, name,
+                       self.createLabelFrameItem(target_frame, name,
                            itm[1], itm[2], itm[3], itm[4], itm[5], 
                            itm[6], itm[7], int(itm[8]), int(itm[9]))
                        )
