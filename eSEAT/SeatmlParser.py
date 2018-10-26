@@ -313,6 +313,10 @@ class SEATML_Parser():
                 self.getAttribute(e, 'frame', '')
                 )
         #
+        #
+        elif e.tag == etree.Comment:
+           pass
+        #
         #  Others
         else:
            self.logError(u"Invalid tag found: " + unicode(e.tag))
@@ -518,6 +522,9 @@ class SEATML_Parser():
                 #  <timoute>
                 elif a.tag == 'ontimeout':
                     self.parseTimeout('all', a)
+
+                else:
+                    pass
         else:
             print('Error in seatml file') 
             return -1
@@ -554,6 +561,9 @@ class SEATML_Parser():
                 elif e.tag == 'rule':
                     self.include_rules = [ f.replace("\\\\", "\\")] 
                     self.parseRule(name, e)
+
+                elif e.tag == etree.Comment:
+                    pass
 
                 else:
                 #
