@@ -26,7 +26,6 @@ import traceback
 import subprocess
 
 import time
-import utils
 import yaml
 
 from collections import OrderedDict
@@ -48,7 +47,12 @@ except:
  
 ###################################################3
 #
-from viewer import OutViewer
+try:
+  import utils
+  from viewer import OutViewer
+except:
+  from . import utils
+  from .viewer import OutViewer
 
 if os.getenv('SEAT_ROOT') :
   rootdir=os.getenv('SEAT_ROOT')
@@ -77,13 +81,14 @@ def setGlobals(name, val):
 
 #########
 #  SocketAdaptor
-from SocketAdaptor import SocketAdaptor 
-
-#########
-#  WebAdaptor
-from WebAdaptor import WebSocketServer,CometReader,parseQueryString
-
-from Task import State, TaskGroup
+try:
+  from SocketAdaptor import SocketAdaptor 
+  from WebAdaptor import WebSocketServer,CometReader,parseQueryString
+  from Task import State, TaskGroup
+except:
+  from .SocketAdaptor import SocketAdaptor 
+  from .WebAdaptor import WebSocketServer,CometReader,parseQueryString
+  from .Task import State, TaskGroup
 
 ####### for ROS
 try:
@@ -97,7 +102,10 @@ except:
 #
 #  execute seatml parser files
 #
-from SeatmlParser import SEATML_Parser,convertDataType
+try:
+  from SeatmlParser import SEATML_Parser,convertDataType
+except:
+  from .SeatmlParser import SEATML_Parser,convertDataType
 
 ###############################################################
 #
@@ -379,7 +387,7 @@ class eSEAT_Core:
             self._logger.error("Fail to sending message to %s" % (name,))
 
     def sendto(self, name, data):
-        if self.adaptors.has_key(name) :
+        if name in self.adaptors :
             self.adaptors[name].send(name, data)
 
     ##################################
@@ -415,6 +423,8 @@ class eSEAT_Core:
         except UnicodeDecodeError:
             s = str(s).encode('string_escape')
             s = unicode(s)
+        except:
+            pass
 
         self._logger.info("got input %s (%s)" % (s, name))
         cmds = None
@@ -605,7 +615,7 @@ class eSEAT_Core:
     #  check the named state
     #
     def inStates(self, name):
-        return self.states.has_key(name)
+        return name in self.states
 
     #
     #  append the named state
@@ -619,10 +629,14 @@ class eSEAT_Core:
     #
     def initStartState(self, name):
         self.startstate = None
-        if self.states.has_key(name) :
+        if name in self.states :
             self.startstate = name
         else:
-            self.startstate = self.states.keys()[1]
+            try:
+              self.startstate = self.states.keys()[1]
+            except:
+              self.startstate = list(self.states.keys())[1]
+
         self.stateTransfer(self.startstate)
         self._logger.info("current state " + self.currentstate)
     #
@@ -630,7 +644,7 @@ class eSEAT_Core:
     #
     def create_state(self, name):
         self.items[name] = []
-        if not self.states.has_key(name):
+        if not (name in self.states):
             self.states[name] = State(name)
         if self.init_state == None or self.init_state == 'all':
             self.init_state = name
@@ -1109,7 +1123,7 @@ class eSEAT_Gui:
     def createRadiobuttonItem(self, frame, sname, name, var, val, cspan=1, rspan=1):
         key=sname+":"+name
 
-        if not self.radio_vals.has_key(var) :
+        if not (var in self.radio_vals) :
           self.radio_vals[var]=StringVar()
 
         func=self.mkcallback(name)
@@ -1502,8 +1516,8 @@ class Manager:
     #  Parse command line option...
     def parseArgs(self, flag=True):
         encoding = locale.getpreferredencoding()
-        sys.stdout = codecs.getwriter(encoding)(sys.stdout, errors = "replace")
-        sys.stderr = codecs.getwriter(encoding)(sys.stderr, errors = "replace")
+        #sys.stdout = codecs.getwriter(encoding)(sys.stdout, errors = "replace")
+        #sys.stderr = codecs.getwriter(encoding)(sys.stderr, errors = "replace")
 
         parser = utils.MyParser(version=__version__, usage="%prog [seatmlfile]",
                                 description=__doc__)
@@ -1653,11 +1667,12 @@ def main_node(mlfile=None, daemon=False):
 
         signal.signal(signal.SIGINT, sig_handler)        
         if daemon : daemonize()
+
         seatmgr = Manager(mlfile)
         seatmgr.initModule()
         seatmgr.start()
     except:
-        #traceback.print_exc()
+        traceback.print_exc()
         pass
 
     print ( "...Terminate." )

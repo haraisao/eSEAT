@@ -709,8 +709,8 @@ class CometReader(CommReader):
     return
 
   def cometRequest(self, data, force=-1):
-    if data.has_key("id") :
-      if data.has_key("force") : force=int(data['force'])
+    if 'id' in data :
+      if 'force' in data : force=int(data['force'])
 
       if force < 0: fflag=False
       else: fflag=True
@@ -727,7 +727,7 @@ class CometReader(CommReader):
 
   def cometTrigger(self, data):
      res = {}
-     if data.has_key("id") :
+     if 'id' in data :
        self.callHandler(data)
        res["result"] = "OK"
      else:
@@ -846,7 +846,7 @@ class HttpCommand(CommParser):
       self.header["Http-FileName"] = fname
       self.header["Http-Proto"] = proto
 
-      if self.header.has_key("Content-Length") :
+      if 'Content-Length' in self.header :
         contentLen = int(self.header["Content-Length"])
         pos += contentLen
         if len(self.buffer) < contentLen:
@@ -911,16 +911,16 @@ class CometManager:
     self.long_pollings[id] = reader
 
   def registerHandler(self, reader, id, data, force=False):
-    if force and self.long_pollings.has_key(id) and self.long_pollings[id] :
+    if force and (id in self.long_pollings) and self.long_pollings[id] :
       self.long_pollings[id].close()
 
-    if force or not self.long_pollings.has_key(id) or self.long_pollings[id] is None:
+    if force or not (id in self.long_pollings) or self.long_pollings[id] is None:
       self.long_pollings[id] = reader
       return True
     return False
 
   def closeHandler(self, id):
-    if self.long_pollings.has_key(id) :
+    if id in self.long_pollings :
       self.long_pollings[id].close()
       self.long_pollings[id] = None
 
@@ -936,7 +936,7 @@ class CometManager:
     return
 
   def response(self, id, json_data, ctype="application/json"):
-    if not self.long_pollings.has_key(id) :
+    if not (id in self.long_pollings) :
       return
     reader = self.long_pollings[id]
     if reader :

@@ -19,11 +19,11 @@ import os
 import subprocess
 from collections import OrderedDict
 
-import utils
+from . import utils
 import re
 import traceback
 
-from core import getGlobals, setGlobals
+from .core import getGlobals, setGlobals
 '''
 State:
   - name(string), rules([TaskGroup,]), onentry(TaskGroup), onexit(TaskGroup)
@@ -82,9 +82,9 @@ class TaskMessage(Task):
         try:
             ad = self.seat.adaptors[self.sendto]
             if self.input_id :
-                if self.seat.inputvar.has_key(self.input_id) :
+                if self.input_id in self.seat.inputvar :
                     data = self.seat.inputvar[self.input_id].get()
-                elif self.seat.stext.has_key(self.input_id) :
+                elif self.input_id in self.seat.stext :
                     data = self.seat.getLastLine(self.input_id, 1)
             #
             #  Call 'send' method of Adaptor
@@ -284,7 +284,7 @@ class State():
         self.updateKeys()
 
     def registerRuleArray(self, key, tasks):
-        if self.rules.has_key(key) :
+        if key in self.rules :
             self.rules[key].append(tasks)
         else:
             self.rules[key] = [tasks]
@@ -319,4 +319,4 @@ class State():
         return None
 
     def has_rule(self, port, word):
-        return self.rules.has_key((port, word))
+        return (port, word) in self.rules

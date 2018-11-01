@@ -24,11 +24,15 @@ from lxml import etree
 
 ###########################################
 # utils
-import utils
-###########################################
-#
-import core as eSEAT_Core
-import Task
+try:
+  import utils
+  import core as eSEAT_Core
+  import Task
+except:
+  from . import utils
+  from . import core as eSEAT_Core
+  from . import Task
+
 
 ###########################################
 #
@@ -330,17 +334,17 @@ class SEATML_Parser():
 
         try:
             doc = etree.parse(f)
-        except etree.XMLSyntaxError, e:
+        except etree.XMLSyntaxError as e:
             self.logError(u"invalid xml syntax(loadRuleFile): " + unicode(e))
             return 1
-        except IOError, e:
+        except IOError as e:
             self.logError(u"unable to open file " + f + " (loadRuleFile): " + unicode(e))
             return 1
 
         try:
             if self._xmlschema :
                 self._xmlschema.assert_(doc)
-        except AssertionError, b:
+        except AssertionError as b:
             self.logError(u"invalid script file: " + f + " (loadRuleFile): " + unicode(b))
             return 1
 
@@ -456,10 +460,10 @@ class SEATML_Parser():
 
         try:
             doc = etree.parse(f)
-        except etree.XMLSyntaxError, e:
+        except etree.XMLSyntaxError as e:
             self.logError(u"invalid xml syntax: " + unicode(e))
             return 1
-        except IOError, e:
+        except IOError as e:
             self.logError(u"unable to open file " + f + ": " + unicode(e))
             return 1
 
@@ -467,7 +471,7 @@ class SEATML_Parser():
         try:
             if self._xmlschema :
                 self._xmlschema.assert_(doc)
-        except AssertionError, b:
+        except AssertionError as b:
             self.logError(u"invalid script file: " + f + ": " + unicode(b))
             return 1
 
