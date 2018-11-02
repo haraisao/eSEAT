@@ -6,23 +6,39 @@ import sys
 import os
 import traceback
 
-
 import yaml
 
-import rospy
-import roslib
-import roslib.message
-import std_msgs.msg as std_msgs
-import geometry_msgs.msg as geometry_msgs
-import sensor_msgs.msg as sensor_msgs
+#
+#
+try:
+  import rospy
+  import roslib
+  import roslib.message
+  import std_msgs.msg as std_msgs
+  import geometry_msgs.msg as geometry_msgs
+  import sensor_msgs.msg as sensor_msgs
+  __ros_version__=1
+  sys.path.append(os.path.realpath('ros/lib/site-packages'))
+  ros_node_name=None
+  os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
+  from core import getGlobals, setGlobals
+except:
+  try:
+    import rclpy
+    import std_msgs.msg as std_msgs
+    import geometry_msgs.msg as geometry_msgs
+    import sensor_msgs.msg as sensor_msgs
+    __ros_version__=2
+    sys.path.append(os.path.realpath('ros2/lib/site-packages'))
 
-sys.path.append(os.path.realpath('ros/lib/site-packages'))
+    from .core import getGlobals, setGlobals
+  except:
+    __ros_version__=0
+    raise(ImportError)
 
-ros_node_name=None
-os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
-
-from core import getGlobals, setGlobals
-
+#
+#
+#
 def setRosMaster(hostname=None):
   if not hostname : hostname = os.uname()[1]
   os.environ['ROS_MASTER_URI'] = 'http://%s:11311' % hostname

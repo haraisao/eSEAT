@@ -46,7 +46,8 @@ class MyParser(optparse.OptionParser):
     def exit(self, status=0, msg=None):
         if msg is not None:
             sys.stderr.write(msg)
-        sys.exit(status)
+        os._exit(status)
+        #sys.exit(status)
 
     def print_usage(self, file=None):
         if file == None :

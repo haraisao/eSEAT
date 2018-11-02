@@ -26,9 +26,14 @@ import traceback
 import optparse
 import threading
 import subprocess
-import utils
 
-from viewer import OutViewer
+try:
+  import utils
+  from viewer import OutViewer
+except:
+  from . import utils
+  from .viewer import OutViewer
+
 
 if os.getenv('SEAT_ROOT') :
   rootdir=os.getenv('SEAT_ROOT')
@@ -48,9 +53,15 @@ opts = None
 try:
   import rtm
 except:
-  rtm=None
+  try:
+    from . import rtm
+  except:
+    rtm=None
 
-from core import main_node
+try:
+  from core import main_node
+except:
+  from .core import main_node
 
 ###############################################################
 #
@@ -59,10 +70,13 @@ __version__ = "2.5"
 #
 #
 def main(mlfile=None, daemon=False):
-  if rtm:
-    rtm.main_rtm(mlfile, daemon)
-  else:
-    main_node(mlfile,daemon)
+  try:
+    if rtm:
+      rtm.main_rtm(mlfile, daemon)
+    else:
+      main_node(mlfile,daemon)
+  except:
+     pass
 
 
 #########################################################################

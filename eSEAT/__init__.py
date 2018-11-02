@@ -1,5 +1,8 @@
 #
 #
-#import main as eSEAT_main
-#import core as eSEAT_core
-#from core import main_node
+try:
+  import core
+  import main
+except:
+  from . import core
+  from . import main
