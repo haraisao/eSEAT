@@ -222,7 +222,7 @@ class eSEAT_Core:
 
     #
     #
-    #   for ROS
+    #   for ROS Pub/Sub
     def initRosNode(self):
       if rospy:
         self.ros_node=initRosNode(self.name, self.ros_anonymous)
@@ -236,7 +236,7 @@ class eSEAT_Core:
         self.initRosNode()
         if self.ros_node:
           self.adaptors[name]=RosAdaptor(name, 'Publisher')
-          self.adaptors[name].create(name, datatype, size)
+          self.adaptors[name].createPublisher(name, datatype, size)
 
     #
     #
@@ -258,36 +258,26 @@ class eSEAT_Core:
           elif type(callback) == str:
             callback=eval(callback)
 
-          self.adaptors[name].create(name, datatype, callback)
+          self.adaptors[name].createSubscriber(name, datatype, callback)
 
+    #
+    # for Ros Service
     def createRosServer(self, name, srv_name, srv_type, srv_impl, fname):
       if rospy:
         self.initRosNode()
-        if srv_type.find('.') > 0:
-            pkgname,srv = srv_type.split('.',1)
-        exec_str="import %s.srv as %s" % (pkgname, pkgname)
-        exec(exec_str, globals())
 
-        if fname:
-            utils.exec_script_file(fname, globals())
-
-        resfunc=eval(srv_type+"Response")
-        srv_func=lambda x :  resfunc(eval(srv_impl)(x))
-        self.adaptors[name]=rospy.Service(srv_name, eval(srv_type), eval(srv_impl)) 
+        self.adaptors[name]=RosAdaptor(name, 'Server')
+        self.adaptors[name].createServer(srv_name, srv_type, srv_impl, fname) 
         
     def createRosClient(self, name, srv_name, srv_type):
       if rospy:
         self.initRosNode()
-        if srv_type.find('.') > 0:
-            pkgname,srv = srv_type.split('.',1)
-        exec_str="import %s.srv as %s" % (pkgname, pkgname)
-        exec(exec_str, globals())
-
-        self.adaptors[name]=rospy.ServiceProxy(srv_name, eval(srv_type)) 
+        self.adaptors[name]=RosAdaptor(name, 'Client')
+        self.adaptors[name].createClient(srv_name, srv_type) 
 
     def callRosService(self, name, *args):
         try:
-          return self.adaptors[name](*args)
+          return self.adaptors[name].callRosService(name, *args)
         except:
           print("Error in callRosService %s" % name)
           
@@ -337,7 +327,7 @@ class eSEAT_Core:
                 return -1
         except:
             self._logger.error(u"invalid parameters: " + type + ": " + name)
-            #traceback.print_exc()
+            traceback.print_exc()
             return -1
 
         return 1
@@ -1393,7 +1383,8 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
           self.intval = 1.0/float(hz)
 
           if self.ros_node:
-            self.rate=rospy.Rate(self.rate_hz)
+            #self.rate=rospy.Rate(self.rate_hz)
+            self.rate=createRate(self.rate_hz)
           else:
             self.rate=None
         except:

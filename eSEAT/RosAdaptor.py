@@ -8,6 +8,10 @@ import traceback
 
 import yaml
 
+try:
+  import utils
+except:
+  from . import utils
 #
 #
 try:
@@ -37,13 +41,14 @@ except:
     raise(ImportError)
 
 #
-#
+#  Functions
 #
 def setRosMaster(hostname=None):
   if not hostname : hostname = os.uname()[1]
   os.environ['ROS_MASTER_URI'] = 'http://%s:11311' % hostname
 
-
+#
+#
 def initRosNode(name, anonymous=False):
   global ros_node_name
   if not ros_node_name:
@@ -58,10 +63,14 @@ def initRosNode(name, anonymous=False):
       ros_node_name=None
   return ros_node_name
 
+#
+#
 def ros_name():
   global ros_node_name
   return ros_node_name
   
+#
+#
 def getMsgClass(datatype):
   try:
     dtype=eval(datatype.replace('/','.'),getGlobals())
@@ -75,8 +84,17 @@ def getMsgClass(datatype):
     except:
       traceback.print_exc()
       return None
-   
-        
+#   
+#        
+def getRosVersion():
+  global __ros_version__
+  return __ros_version__
+
+#
+#
+def createRate(hz):
+  return rospy.Rate(hz)
+
 
 #
 #
@@ -98,7 +116,7 @@ class RosAdaptor(object):
   def create(self, name, datatype, arg):
     if self.type == 'Publisher':
       self.createPublisher(name, datatype, arg)
-    if self.type == 'Subscriber':
+    elif self.type == 'Subscriber':
       self.createSubscriber(name, datatype, arg)
 
   #
@@ -150,3 +168,44 @@ class RosAdaptor(object):
   #
   def getMessageSlots(self):
     return roslib.message.get_printable_message_args(self._port.data_class())
+
+  #
+  #
+  def createServer(self, srv_name, srv_type, srv_impl, fname):
+    if srv_type.find('.') > 0:
+      pkgname,srv = srv_type.split('.',1)
+      exec_str="import %s.srv as %s" % (pkgname, pkgname)
+      try:
+        exec(exec_str, globals())
+      except:
+        pass
+
+    if fname:
+        utils.exec_script_file(fname, globals())
+
+    resfunc=eval(srv_type+"Response")
+    srv_func=lambda x :  resfunc(eval(srv_impl)(x))
+    self._port=rospy.Service(srv_name, eval(srv_type), eval(srv_impl)) 
+
+    return self._port 
+        
+  #
+  #
+  def createClient(self, srv_name, srv_type):
+    if srv_type.find('.') > 0:
+      pkgname,srv = srv_type.split('.',1)
+      exec_str="import %s.srv as %s" % (pkgname, pkgname)
+      try:
+        exec(exec_str, globals())
+      except:
+        pass
+
+    self._port=rospy.ServiceProxy(srv_name, eval(srv_type)) 
+    return self._port 
+
+  def callRosService(self, name, *args):
+    try:
+      return self._port(*args)
+    except:
+      print("Error in callRosService " % name)
+
