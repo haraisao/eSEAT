@@ -2,7 +2,9 @@
 <seatml>
   <general name="talker" anonymous="1" rate="1">
     <adaptor name="/chatter" type="ros_pub" datatype="std_msgs/String" size="1" />
+<!--
     <adaptor name="/num" type="ros_pub" datatype="beginner_tutorials/Num" size="1" />
+-->
 
   </general>
 

@@ -93,8 +93,9 @@ except:
 ####### for ROS
 try:
   from RosAdaptor import *
+  __ros_version__=getRosVersion()
 except:
-  rospy=None
+  __ros_version__=None
   #traceback.print_exc()
 
 
@@ -224,15 +225,15 @@ class eSEAT_Core:
     #
     #   for ROS Pub/Sub
     def initRosNode(self):
-      if rospy:
+      if __ros_version__  > 0:
         self.ros_node=initRosNode(self.name, self.ros_anonymous)
       else:
-        print("Unsupport rospy")
+        print("Unsupport ROS")
 
     #
     #
     def createRosPublisher(self, name, datatype, size):
-      if rospy:
+      if __ros_version__ > 0:
         self.initRosNode()
         if self.ros_node:
           self.adaptors[name]=RosAdaptor(name, 'Publisher')
@@ -249,7 +250,7 @@ class eSEAT_Core:
     #
     #
     def createRosSubscriber(self, name, datatype, callback):
-      if rospy:
+      if __ros_ersion__ > 0:
         self.initRosNode()
         if self.ros_node:
           self.adaptors[name]=RosAdaptor(name, 'Subscriber')
@@ -263,14 +264,14 @@ class eSEAT_Core:
     #
     # for Ros Service
     def createRosServer(self, name, srv_name, srv_type, srv_impl, fname):
-      if rospy:
+      if __ros_version__ > 0:
         self.initRosNode()
 
         self.adaptors[name]=RosAdaptor(name, 'Server')
         self.adaptors[name].createServer(srv_name, srv_type, srv_impl, fname) 
         
     def createRosClient(self, name, srv_name, srv_type):
-      if rospy:
+      if __ros_version__ > 0:
         self.initRosNode()
         self.adaptors[name]=RosAdaptor(name, 'Client')
         self.adaptors[name].createClient(srv_name, srv_type) 
@@ -1383,7 +1384,6 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
           self.intval = 1.0/float(hz)
 
           if self.ros_node:
-            #self.rate=rospy.Rate(self.rate_hz)
             self.rate=createRate(self.rate_hz)
           else:
             self.rate=None

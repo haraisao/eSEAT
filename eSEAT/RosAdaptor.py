@@ -53,10 +53,17 @@ def initRosNode(name, anonymous=False):
   global ros_node_name
   if not ros_node_name:
     try:
-      setRosMaster()
-      rospy.init_node(name, anonymous=anonymous)
-      ros_node_name=rospy.get_name()
-      if ros_node_name == '/unnamed': ros_node_name=None
+      if __ros_version__ == 1:
+        setRosMaster()
+        rospy.init_node(name, anonymous=anonymous)
+        ros_node_name=rospy.get_name()
+        if ros_node_name == '/unnamed': ros_node_name=None
+      elif __ros_version__ == 2:
+        print("Sorry, not implemented")
+        ros_node_name=None
+      else:
+        print("=== Unexpected error ===")
+        ros_node_name=None
 
     except:
       print("=== Fail to ros_init ===")
@@ -93,7 +100,14 @@ def getRosVersion():
 #
 #
 def createRate(hz):
-  return rospy.Rate(hz)
+  if __ros_version__ == 1:
+    return rospy.Rate(hz)
+  elif __ros_version__ == 2:
+    print("Sorry, not implemented....")
+  else:
+    print("Unexpected error")
+
+  return None
 
 
 #
@@ -123,15 +137,29 @@ class RosAdaptor(object):
   # 
   def createPublisher(self, name, datatype, size):
     if self.type == 'Publisher':
-      dtype=getMsgClass(datatype)
-      self._port=rospy.Publisher(name, dtype, queue_size=size)
+      if __ros_version__ == 1:
+        dtype=getMsgClass(datatype)
+        self._port=rospy.Publisher(name, dtype, queue_size=size)
+      elif __ros_version__ == 2:
+        print("Sorry, notimplement..")
+      else:
+        print("Unexpected error")
+      
+    return self._port
 
   #
   #
   def createSubscriber(self, name, datatype, callback):
     if self.type == 'Subscriber':
-      dtype=getMsgClass(datatype)
-      self._port=rospy.Subscriber(name, dtype, callback)
+      if __ros_version__ == 1:
+        dtype=getMsgClass(datatype)
+        self._port=rospy.Subscriber(name, dtype, callback)
+      elif __ros_version__ == 2:
+        print("Sorry, notimplement..")
+      else:
+        print("Unexpected error")
+      
+    return self._port
 
   #
   #
@@ -152,8 +180,13 @@ class RosAdaptor(object):
           else:
             args.append(x) 
       
-        roslib.message.fill_message_args(msg, args)
-        self._port.publish(msg)
+        if __ros_version__ == 1:
+          roslib.message.fill_message_args(msg, args)
+          self._port.publish(msg)
+        elif __ros_version__ == 2:
+          print("Sorry, notimplement..")
+        else:
+          print("Unexpected error")
 
     except:
       traceback.print_exc()
@@ -167,7 +200,13 @@ class RosAdaptor(object):
   #
   #
   def getMessageSlots(self):
-    return roslib.message.get_printable_message_args(self._port.data_class())
+    if __ros_version__ == 1:
+      return roslib.message.get_printable_message_args(self._port.data_class())
+    elif __ros_version__ == 2:
+      print("Sorry, notimplement..")
+    else:
+      print("Unexpected error")
+    return None
 
   #
   #
@@ -185,7 +224,13 @@ class RosAdaptor(object):
 
     resfunc=eval(srv_type+"Response")
     srv_func=lambda x :  resfunc(eval(srv_impl)(x))
-    self._port=rospy.Service(srv_name, eval(srv_type), eval(srv_impl)) 
+
+    if __ros_version__ == 1:
+      self._port=rospy.Service(srv_name, eval(srv_type), eval(srv_impl)) 
+    elif __ros_version__ == 2:
+      print("Sorry, notimplement..")
+    else:
+      print("Unexpected error")
 
     return self._port 
         
@@ -200,12 +245,24 @@ class RosAdaptor(object):
       except:
         pass
 
-    self._port=rospy.ServiceProxy(srv_name, eval(srv_type)) 
+    if __ros_version__ == 1:
+      self._port=rospy.ServiceProxy(srv_name, eval(srv_type)) 
+    elif __ros_version__ == 2:
+      print("Sorry, notimplement..")
+    else:
+      print("Unexpected error")
+
     return self._port 
 
   def callRosService(self, name, *args):
     try:
-      return self._port(*args)
+      if __ros_version__ == 1:
+        return self._port(*args)
+      elif __ros_version__ == 2:
+        print("Sorry, notimplement..")
+      else:
+        print("Unexpected error")
+      return None
     except:
       print("Error in callRosService " % name)
-
+      return None
