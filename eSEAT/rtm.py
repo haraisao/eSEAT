@@ -423,8 +423,7 @@ class eSEATManager(Manager):
         mgrconf = OpenRTM_aist.ManagerConfig(argv)
         if not mgrconf.findConfigFile():
            argv.append("-f") 
-           argv.append("/usr/local/eSEAT/rtc.conf") 
-           print(argv)
+           argv.append(rootdir + "/rtc.conf") 
 
 
         #
