@@ -5,7 +5,9 @@
   <license>MIT</license>
   <url>http://hara.jpn.com/_default/ja/Software/eSEAT2.html</url>
 
-  <depend package="python-bs4">
+  <depend package="python-pip">
+  <depend package="python-tk">
+  <depend package="python-yaml">
   <depend package="python-lxml">
 
   <rtmdep name="python">

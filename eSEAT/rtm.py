@@ -418,6 +418,17 @@ class eSEATManager(Manager):
             opts, argv = self.parseArgs(False)
             self._scriptfile = mlfile
 
+        #
+        #  check configuration file...
+        mgrconf = OpenRTM_aist.ManagerConfig(argv)
+        if not mgrconf.findConfigFile():
+           argv.append("-f") 
+           argv.append("/usr/local/eSEAT/rtc.conf") 
+           print(argv)
+
+
+        #
+        #
         if opts:
             self.run_as_daemon = opts.run_as_daemon
             self.naming_format = opts.naming_format
