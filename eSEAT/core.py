@@ -250,7 +250,7 @@ class eSEAT_Core:
     #
     #
     def createRosSubscriber(self, name, datatype, callback):
-      if __ros_ersion__ > 0:
+      if __ros_version__ > 0:
         self.initRosNode()
         if self.ros_node:
           self.adaptors[name]=RosAdaptor(name, 'Subscriber')
