@@ -33,11 +33,11 @@ from viewer import OutViewer
 if os.getenv('SEAT_ROOT') :
   rootdir=os.getenv('SEAT_ROOT')
 else:
-  rootdir='/usr/local/eSEAT/'
+  rootdir='/usr/local/eSEAT'
 
 sys.path.append(rootdir)
-sys.path.append(os.path.join(rootdir,'libs'))
-sys.path.append(os.path.join(rootdir,'3rd_party'))
+sys.path.append(os.path.join(rootdir,'/libs'))
+sys.path.append(os.path.join(rootdir,'/3rd_party'))
 
 opts = None
 
@@ -422,8 +422,8 @@ class eSEATManager(Manager):
         #  check configuration file...
         mgrconf = OpenRTM_aist.ManagerConfig(argv)
         if not mgrconf.findConfigFile():
-           argv.append("-f") 
-           argv.append(rootdir + "/rtc.conf") 
+           argv.insert(1, "-f") 
+           argv.insert(2, rootdir + "/rtc.conf") 
 
 
         #
