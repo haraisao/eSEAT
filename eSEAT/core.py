@@ -95,8 +95,12 @@ try:
   from RosAdaptor import *
   __ros_version__=getRosVersion()
 except:
-  __ros_version__=None
-  #traceback.print_exc()
+  try:
+    from .RosAdaptor import *
+    __ros_version__=getRosVersion()
+  except:
+    __ros_version__=None
+    #traceback.print_exc()
 
 
 ###############################################################

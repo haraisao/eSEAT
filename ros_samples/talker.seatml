@@ -5,7 +5,6 @@
 <!--
     <adaptor name="/num" type="ros_pub" datatype="beginner_tutorials/Num" size="1" />
 -->
-
   </general>
 
   <state name="main_mode">

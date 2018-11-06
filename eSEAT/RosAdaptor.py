@@ -25,7 +25,11 @@ try:
   sys.path.append(os.path.realpath('ros/lib/site-packages'))
   ros_node_name=None
   os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
-  from core import getGlobals, setGlobals
+  try:
+    from core import getGlobals, setGlobals
+  except:
+    from .core import getGlobals, setGlobals
+   
 except:
   try:
     import rclpy
@@ -51,6 +55,7 @@ def setRosMaster(hostname=None):
 #
 def initRosNode(name, anonymous=False):
   global ros_node_name
+
   if not ros_node_name:
     try:
       if __ros_version__ == 1:
