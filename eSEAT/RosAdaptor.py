@@ -14,6 +14,10 @@ except:
   from . import utils
 #
 #
+ros_node=None
+ros_node_name=None
+__ros_version__=0
+
 try:
   import rospy
   import roslib
@@ -23,7 +27,6 @@ try:
   import sensor_msgs.msg as sensor_msgs
   __ros_version__=1
   sys.path.append(os.path.realpath('ros/lib/site-packages'))
-  ros_node_name=None
   os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
   try:
     from core import getGlobals, setGlobals
@@ -54,7 +57,7 @@ def setRosMaster(hostname=None):
 #
 #
 def initRosNode(name, anonymous=False):
-  global ros_node_name
+  global ros_node_name, ros_node
 
   if not ros_node_name:
     try:
@@ -65,7 +68,10 @@ def initRosNode(name, anonymous=False):
         if ros_node_name == '/unnamed': ros_node_name=None
       elif __ros_version__ == 2:
         print("Sorry, not implemented")
-        ros_node_name=None
+        rclpy.init(args=[])
+        ros_node=rclpy.create_node(name)
+        ros_node_name="/"+name
+        return ros_node
       else:
         print("=== Unexpected error ===")
         ros_node_name=None
@@ -114,6 +120,12 @@ def createRate(hz):
 
   return None
 
+#
+#
+def getRosNode():
+  global ros_node
+  return ros_node
+  
 
 #
 #
@@ -122,6 +134,8 @@ class RosAdaptor(object):
     self.name=name
     self.type=typ
     self._port=None
+    self.service_dtype=None
+    self.service_timeout=1.0
 
   #
   #
@@ -141,12 +155,17 @@ class RosAdaptor(object):
   #
   # 
   def createPublisher(self, name, datatype, size):
+    global ros_node
     if self.type == 'Publisher':
       if __ros_version__ == 1:
         dtype=getMsgClass(datatype)
         self._port=rospy.Publisher(name, dtype, queue_size=size)
+
       elif __ros_version__ == 2:
-        print("Sorry, notimplement..")
+        if ros_node:
+          dtype=getMsgClass(datatype)
+          self._port=ros_node.create_publisher(dtype, name)
+          self.service_dtype=dtype
       else:
         print("Unexpected error")
       
@@ -155,12 +174,16 @@ class RosAdaptor(object):
   #
   #
   def createSubscriber(self, name, datatype, callback):
+    global ros_node
     if self.type == 'Subscriber':
       if __ros_version__ == 1:
         dtype=getMsgClass(datatype)
         self._port=rospy.Subscriber(name, dtype, callback)
       elif __ros_version__ == 2:
-        print("Sorry, notimplement..")
+        if ros_node:
+          dtype=getMsgClass(datatype)
+          self._port=ros_node.create_subscription(dtype, name, callback)
+          self.service_dtype=dtype
       else:
         print("Unexpected error")
       
@@ -172,8 +195,10 @@ class RosAdaptor(object):
     try:
       if isinstance(val, self._port.data_class) :
         self._port.publish(val)
+
       elif  self._port.data_class == std_msgs.String :
         self._port.publish(val)
+
       else:
         msg=self._port.data_class()
         if type(val) == str:
@@ -189,7 +214,8 @@ class RosAdaptor(object):
           roslib.message.fill_message_args(msg, args)
           self._port.publish(msg)
         elif __ros_version__ == 2:
-          print("Sorry, notimplement..")
+          print("Not implemented")
+
         else:
           print("Unexpected error")
 
@@ -200,7 +226,16 @@ class RosAdaptor(object):
   #
   #
   def newMessage(self):
-    return self._port.data_class()
+    if __ros_version__ == 1:
+      return self._port.data_class()
+
+    elif __ros_version__ == 2:
+      return self.service_dtype()
+
+    else:
+      print("Unexpected error")
+      return None
+  
 
   #
   #
@@ -216,6 +251,7 @@ class RosAdaptor(object):
   #
   #
   def createServer(self, srv_name, srv_type, srv_impl, fname):
+    global ros_node
     if srv_type.find('.') > 0:
       pkgname,srv = srv_type.split('.',1)
       exec_str="import %s.srv as %s" % (pkgname, pkgname)
@@ -232,8 +268,10 @@ class RosAdaptor(object):
 
     if __ros_version__ == 1:
       self._port=rospy.Service(srv_name, eval(srv_type), eval(srv_impl)) 
+
     elif __ros_version__ == 2:
-      print("Sorry, notimplement..")
+      self._port=ros_node.create_service(eval(srv_type), srv_name, eval(srv_impl)) 
+      self.service_dtype=eval(srv_type)
     else:
       print("Unexpected error")
 
@@ -242,6 +280,7 @@ class RosAdaptor(object):
   #
   #
   def createClient(self, srv_name, srv_type):
+    global ros_node
     if srv_type.find('.') > 0:
       pkgname,srv = srv_type.split('.',1)
       exec_str="import %s.srv as %s" % (pkgname, pkgname)
@@ -253,21 +292,42 @@ class RosAdaptor(object):
     if __ros_version__ == 1:
       self._port=rospy.ServiceProxy(srv_name, eval(srv_type)) 
     elif __ros_version__ == 2:
-      print("Sorry, notimplement..")
+      self._port=ros_node.create_client(eval(srv_type), srv_name) 
+      self.service_dtype=eval(srv_type)
     else:
       print("Unexpected error")
 
     return self._port 
-
+  #
+  #
   def callRosService(self, name, *args):
+    global ros_node
     try:
       if __ros_version__ == 1:
         return self._port(*args)
+
       elif __ros_version__ == 2:
-        print("Sorry, notimplement..")
+        if self._port.wait_for_service(timeout_sec=self.service_timeout):
+          node.get_logger().info('service not available....')
+          return None
+        #
+        #
+        req=self.service_dtype.Request()
+        i=0
+        for x in req.__slots__:
+          req.__setattr__(x, args[i])
+          i = i+1
+        #
+        #
+        future = self._port.call_async(req)
+        rclpy.spin_until_future_complete(ros_node, future)
+        return future.result()
+
       else:
         print("Unexpected error")
+
       return None
+
     except:
       print("Error in callRosService " % name)
       return None
