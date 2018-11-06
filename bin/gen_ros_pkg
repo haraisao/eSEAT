@@ -4,8 +4,11 @@
 import os
 import sys
 
+try:
+  ROS_DIR=os.environ['ROS_SEAT_DIR']
+except:
+  ROS_DIR = os.path.join(os.getcwd(), 'ros')
 
-ROS_DIR = os.path.join(os.getcwd(), 'ros')
 LIB_DIR = os.path.join(ROS_DIR, 'lib', 'site-packages')
 PKG_DIR = os.path.join(ROS_DIR, 'packages')
 

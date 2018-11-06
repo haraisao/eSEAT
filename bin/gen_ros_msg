@@ -8,7 +8,11 @@ import genpy.genpy_main
 import genpy.generator
 
 
-DIST="kinetic"
+try:
+  DIST=os.environ['ROS_DISTRO']
+except:
+  DIST="kinetic"
+
 ROS_SHARE_DIR = os.path.join("/","opt","ros",DIST,'share')
 ROS_DIR = os.path.join(os.getcwd(), 'ros')
 LIB_DIR = os.path.join(ROS_DIR, 'lib', 'site-packages')
