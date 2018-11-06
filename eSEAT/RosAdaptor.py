@@ -113,7 +113,8 @@ def createRate(hz):
   if __ros_version__ == 1:
     return rospy.Rate(hz)
   elif __ros_version__ == 2:
-    print("Sorry, not implemented....")
+    #print("Sorry, not implemented....")
+    pass
   else:
     print("Unexpected error")
 
@@ -319,13 +320,13 @@ class RosAdaptor(object):
         #
         #
         try:
-          self._port.call(req)
-          self._port.wait_for_future()
-          return self._port.response
-        except: 
           future = self._port.call_async(req)
           rclpy.spin_until_future_complete(ros_node, future)
           return future.result()
+        except: 
+          self._port.call(req)
+          self._port.wait_for_future()
+          return self._port.response
 
       else:
         print("Unexpected error")
@@ -335,3 +336,15 @@ class RosAdaptor(object):
     except:
       print("Error in callRosService " % name)
       return None
+
+  def terminate(self):
+    global ros_node
+    if __ros_version__ == 1:
+      pass
+    elif __ros_version__ == 2:
+      if ros_node:
+        ros_node.destory_node()
+        rclpy.shutdown()
+        ros_node=None
+    else:
+      pass

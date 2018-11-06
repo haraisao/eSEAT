@@ -134,6 +134,9 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         except:
             return RTC_OK
 
+    def terminate(self):
+        self.exit() 
+
     ##########################################################
     #  E v e n t   H a n d l e r 
     #  onInitialize

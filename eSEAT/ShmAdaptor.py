@@ -14,17 +14,19 @@ from ctypes import *
 #
 class ShmAdaptor(object):
   def __init__(self, name, id, size):
-    self.name=name
-    self.shm_id=id
-    self.shm_size=size
-    try:
-      self.shm=sysv_ipc.SharedMemory(id, 0, mode=666) 
-    except:
-      self.shm=None
+      self.name=name
+      self.shm_id=id
+      self.shm_size=size
+      try:
+        self.shm=sysv_ipc.SharedMemory(id, 0, mode=666) 
+      except:
+        self.shm=None
 
+  def terminate(self):
+      pass
   def createShm(self, id, size):
-    self.shm=sysv_ipc.SharedMemory(id, sysv_ipc.IPC_CREAT, mode=666, size=size) 
-    self.shm_size=size
+      self.shm=sysv_ipc.SharedMemory(id, sysv_ipc.IPC_CREAT, mode=666, size=size) 
+      self.shm_size=size
 
   def read_int(self, off):
       return struct.unpack('i',self.shm.read(4, off))[0]

@@ -186,9 +186,11 @@ class eSEAT_Core:
     #
     #
     def exit_comp(self):
-        if self.webServer :
-            self.webServer.terminate()
-            time.sleep( 1 )
+        #if self.webServer :
+        #    self.webServer.terminate()
+        #    time.sleep( 1 )
+        for adp in self.adaptors:
+           self.adaptors[adp].terminate()
         #print ("Call eSEAT_Core.exit.. done")
         return
 
@@ -1672,11 +1674,6 @@ def main_node(mlfile=None, daemon=False):
         pass
 
     print ( "...Terminate." )
-    try:
-      if seatmgr.run_as_daemon:
-        os._exit(1)
-      else:
-        sys.exit(1)
-    except:
-      sys.exit(1)
+
+    seatmgr.exit()
 
