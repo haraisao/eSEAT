@@ -318,13 +318,14 @@ class RosAdaptor(object):
           i = i+1
         #
         #
-        #future = self._port.call_async(req)
-        self._port.call(req)
-        #rclpy.spin_until_future_complete(ros_node, future)
-        self._port.wait_for_future()
-        
-        #return future.result()
-        return self._port.response
+        try:
+          self._port.call(req)
+          self._port.wait_for_future()
+          return self._port.response
+        except: 
+          future = self._port.call_async(req)
+          rclpy.spin_until_future_complete(ros_node, future)
+          return future.result()
 
       else:
         print("Unexpected error")
