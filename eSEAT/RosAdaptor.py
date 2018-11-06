@@ -67,7 +67,6 @@ def initRosNode(name, anonymous=False):
         ros_node_name=rospy.get_name()
         if ros_node_name == '/unnamed': ros_node_name=None
       elif __ros_version__ == 2:
-        print("Sorry, not implemented")
         rclpy.init(args=[])
         ros_node=rclpy.create_node(name)
         ros_node_name="/"+name
@@ -243,7 +242,7 @@ class RosAdaptor(object):
     if __ros_version__ == 1:
       return roslib.message.get_printable_message_args(self._port.data_class())
     elif __ros_version__ == 2:
-      print("Sorry, notimplement..")
+      print("Sorry, not implement..")
     else:
       print("Unexpected error")
     return None
@@ -307,8 +306,8 @@ class RosAdaptor(object):
         return self._port(*args)
 
       elif __ros_version__ == 2:
-        if self._port.wait_for_service(timeout_sec=self.service_timeout):
-          node.get_logger().info('service not available....')
+        while not self._port.wait_for_service(timeout_sec=self.service_timeout):
+          ros_node.get_logger().info('service not available....')
           return None
         #
         #
@@ -319,9 +318,13 @@ class RosAdaptor(object):
           i = i+1
         #
         #
-        future = self._port.call_async(req)
-        rclpy.spin_until_future_complete(ros_node, future)
-        return future.result()
+        #future = self._port.call_async(req)
+        self._port.call(req)
+        #rclpy.spin_until_future_complete(ros_node, future)
+        self._port.wait_for_future()
+        
+        #return future.result()
+        return self._port.response
 
       else:
         print("Unexpected error")

@@ -277,6 +277,7 @@ class eSEAT_Core:
     def createRosClient(self, name, srv_name, srv_type):
       if __ros_version__ > 0:
         self.initRosNode()
+
         self.adaptors[name]=RosAdaptor(name, 'Client')
         self.adaptors[name].createClient(srv_name, srv_type) 
 
