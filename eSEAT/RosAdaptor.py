@@ -206,6 +206,7 @@ class RosAdaptor(object):
       if __ros_version__ == 1:
         dtype=getMsgClass(datatype)
         self._port=rospy.Publisher(name, dtype, queue_size=size)
+        self.service_dtype=dtype
 
       elif __ros_version__ == 2:
         if ros_node:
@@ -226,6 +227,8 @@ class RosAdaptor(object):
       if __ros_version__ == 1:
         dtype=getMsgClass(datatype)
         self._port=rospy.Subscriber(name, dtype, callback)
+        self.service_dtype=dtype
+
       elif __ros_version__ == 2:
         if ros_node:
           dtype=getMsgClass(datatype)
@@ -241,11 +244,18 @@ class RosAdaptor(object):
   #
   def publish(self, val):
     try:
-      if isinstance(val, self._port.data_class) :
+      if isinstance(val, self.service_dtype) :
         self._port.publish(val)
 
-      elif  self._port.data_class == std_msgs.String :
-        self._port.publish(val)
+      elif  self.service_dtype == std_msgs.String :
+        if __ros_version__ == 1:
+          self._port.publish(val)
+        elif __ros_version__ == 2:
+          msg=std_msgs.String()
+          msg.data=val
+          self._port.publish(msg)
+        else:
+          print("Unexpected error in publish", val)
 
       else:
         msg=self._port.data_class()
