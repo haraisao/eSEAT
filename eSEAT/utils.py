@@ -181,7 +181,7 @@ def findfile(fname, path=sys.path):
 def exec_script_file(fname, gls=globals()):
     if sys.version_info.major > 2:
         with open(fname) as f:
-            code = f.reaf()
+            code = f.read()
             exec(code, gls)
     else:
         execfile(fname, gls)

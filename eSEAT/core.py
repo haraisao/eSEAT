@@ -289,6 +289,9 @@ class eSEAT_Core:
         except:
           print("Error in callRosService %s" % name)
           
+    def startRosService(self):
+        if self.ros_node:
+          startRosService()
     #
     #  Create Adaptor called by SEATML_Parser
     #
@@ -1578,6 +1581,8 @@ class Manager:
     #
     def start(self):
         self.comp.setRate(self.comp.rate_hz)
+        self.comp.startRosService()
+
         if (isinstance(self.comp, eSEAT_Gui) and self.comp.hasGUI() ) or self.viewer :
             #print("==== start with GUI ====")
             self.startLoop(True)

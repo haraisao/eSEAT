@@ -5,6 +5,7 @@ from __future__ import print_function
 import sys
 import os
 import traceback
+import threading
 
 import yaml
 
@@ -16,6 +17,9 @@ except:
 #
 ros_node=None
 ros_node_name=None
+ros_thread=None
+ros_thread_loop=False
+ros_ports=[]
 __ros_version__=0
 
 try:
@@ -126,6 +130,47 @@ def getRosNode():
   global ros_node
   return ros_node
   
+def getRosPorts():
+  global ros_ports
+  return ros_ports
+  
+def addRosPorts(p):
+  global ros_ports
+  ros_ports.append(p)
+  return ros_ports
+  
+def delRosPorts(p):
+  global ros_ports
+  ros_ports.remove(p)
+  return ros_ports
+  
+def numRosPorts():
+  global ros_ports
+  return len(ros_ports)
+#
+#
+def service_loop():
+  global ros_node
+  global ros_thread_loop
+  if __ros_version__ == 2:
+    while ros_thread_loop :
+      rclpy.spin_once(ros_node, timeout_sec=1.0)
+    print("..Terminate RosThread")
+
+def startRosService():
+  global ros_thread
+  global ros_thread_loop
+  if __ros_version__ == 2:
+    if not ros_thread:
+      ros_thread_loop=True
+      ros_thread = threading.Thread(target=service_loop)
+      ros_thread.start()
+    else:
+      print("Warning: ros_thread is already started")
+
+def stopRosService():
+  global ros_thread_loop
+  ros_thread_loop=False
 
 #
 #
@@ -136,6 +181,7 @@ class RosAdaptor(object):
     self._port=None
     self.service_dtype=None
     self.service_timeout=1.0
+    self.stop_event=threading.Event()
 
   #
   #
@@ -166,6 +212,7 @@ class RosAdaptor(object):
           dtype=getMsgClass(datatype)
           self._port=ros_node.create_publisher(dtype, name)
           self.service_dtype=dtype
+          addRosPorts(self._port)
       else:
         print("Unexpected error")
       
@@ -184,6 +231,7 @@ class RosAdaptor(object):
           dtype=getMsgClass(datatype)
           self._port=ros_node.create_subscription(dtype, name, callback)
           self.service_dtype=dtype
+          addRosPorts(self._port)
       else:
         print("Unexpected error")
       
@@ -252,6 +300,9 @@ class RosAdaptor(object):
   #
   def createServer(self, srv_name, srv_type, srv_impl, fname):
     global ros_node
+
+    self.type = 'RosServer'
+
     if srv_type.find('.') > 0:
       pkgname,srv = srv_type.split('.',1)
       exec_str="import %s.srv as %s" % (pkgname, pkgname)
@@ -263,15 +314,16 @@ class RosAdaptor(object):
     if fname:
         utils.exec_script_file(fname, globals())
 
-    resfunc=eval(srv_type+"Response")
-    srv_func=lambda x :  resfunc(eval(srv_impl)(x))
-
     if __ros_version__ == 1:
-      self._port=rospy.Service(srv_name, eval(srv_type), eval(srv_impl)) 
+      resfunc=eval(srv_type+"Response")
+      srv_func=lambda x :  resfunc(eval(srv_impl)(x))
+
+      self._port=rospy.Service(srv_name, eval(srv_type), srv_func) 
 
     elif __ros_version__ == 2:
       self._port=ros_node.create_service(eval(srv_type), srv_name, eval(srv_impl)) 
       self.service_dtype=eval(srv_type)
+      addRosPorts(self._port)
     else:
       print("Unexpected error")
 
@@ -281,6 +333,9 @@ class RosAdaptor(object):
   #
   def createClient(self, srv_name, srv_type):
     global ros_node
+
+    self.type = 'RosClient'
+
     if srv_type.find('.') > 0:
       pkgname,srv = srv_type.split('.',1)
       exec_str="import %s.srv as %s" % (pkgname, pkgname)
@@ -290,10 +345,13 @@ class RosAdaptor(object):
         pass
 
     if __ros_version__ == 1:
-      self._port=rospy.ServiceProxy(srv_name, eval(srv_type)) 
+      self._port=rospy.ServiceProxy(srv_name, eval(srv_type))
+
     elif __ros_version__ == 2:
       self._port=ros_node.create_client(eval(srv_type), srv_name) 
       self.service_dtype=eval(srv_type)
+      addRosPorts(self._port)
+
     else:
       print("Unexpected error")
 
@@ -337,14 +395,22 @@ class RosAdaptor(object):
       print("Error in callRosService " % name)
       return None
 
+  #
+  #
   def terminate(self):
     global ros_node
     if __ros_version__ == 1:
       pass
     elif __ros_version__ == 2:
       if ros_node:
-        ros_node.destory_node()
-        rclpy.shutdown()
-        ros_node=None
+        stopRosService()
+        if self.type == 'RosServer':
+          ros_node.destory_service(self._port)
+
+        delRosPorts(self._port)
+
+        if numRosPorts() < 1:
+          ros_node.destory_node()
+          rclpy.shutdown()
     else:
       pass

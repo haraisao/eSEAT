@@ -533,6 +533,7 @@ class eSEATManager(Manager):
     #  Start Manager
     #
     def start(self):
+        self.comp.startRosService()
         if (isinstance(self.comp, eSEAT_Gui) and self.comp.hasGUI() ) or self.viewer :
             self.manager.runManager(True)
 
@@ -622,6 +623,7 @@ def main_rtm(mlfile=None, daemon=False):
         seatmgr = eSEATManager(mlfile)
         seatmgr.start()
     except:
+        traceback.print_exc()
         pass
 
     print ( "...Terminate." )
