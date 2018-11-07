@@ -1615,6 +1615,9 @@ class Manager:
           except:
             pass
 
+    def shutdown(self):
+        self.exit()
+
     def stop(self):
         self.stop_event.set()
         if self.main_thread:
