@@ -389,8 +389,8 @@ class SEATML_Parser():
                 knd = e.find('cond')
                 if knd is not None :
                     commands.pre_script = knd.get("execfile")
-                    print (knd.get("execfile"))
-                    print (commands.pre_script)
+                    #print (knd.get("execfile"))
+                    #print (commands.pre_script)
                     commands.condition = knd.text
 
                 if keys :

@@ -493,6 +493,9 @@ class eSEAT_Core:
     def processTimeout(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
         cmds = self.states[sname].ontimeout
+        if not cmds:
+            cmds = self.states['all'].ontimeout
+
         if not cmds :
             if flag :
                 self._logger.info("no command found")
@@ -630,6 +633,7 @@ class eSEAT_Core:
     #
     def initStartState(self, name):
         self.startstate = None
+
         if name in self.states :
             self.startstate = name
         else:
@@ -672,7 +676,12 @@ class eSEAT_Core:
         self.currentstate = newstate
 
         try:
-            cmds = self.lookupWithDefault(newstate, '', 'ontimeout', False)
+            #cmds = self.lookupWithDefault(newstate, '', 'ontimeout', False)
+
+            cmds = self.states[newstate].ontimeout
+            if not cmds:
+                cmds = self.states['all'].ontimeout
+
             if cmds: self.setTimeout(cmds.timeout)
             tasks = self.states[self.currentstate].onentry
             if tasks:
