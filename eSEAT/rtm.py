@@ -354,6 +354,11 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                 return self.createDataPort(name, tag.get('datatype') ,type)
 
             elif type == 'provider' or type == 'consumer' :
+                impl_file=tag.get('impl_file')
+                if impl_file:
+                    impl_cmd="from "+impl_file+" import *"
+                    exec(impl_cmd, env)
+
                 module=tag.get('if_class').split('.')
                 if len(module) > 1 and not module[0] in env:
                     exec("import "+module[0], env)
@@ -363,7 +368,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                  return eSEAT_Core.createAdaptor(self, compname, tag)
         except:
             self._logger.error(u"invalid parameters: " + type + ": " + name)
-            print( traceback.format_exc() )
+            traceback.print_exc()
+            #print( traceback.format_exc() )
             return -1
 
         return 1

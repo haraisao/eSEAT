@@ -485,6 +485,7 @@ class SEATML_Parser():
         #for g in doc.findall('general'):
         if g is not None:
             self.parent.create_state('all')
+            sys.path.append('.')
 
             if g.get('name') :
                 self.componentName = g.get('name')
