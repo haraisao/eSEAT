@@ -517,7 +517,7 @@ class eSEAT_Core:
         self._on_timeout = sec
 
     def isTimeout(self):
-       return ( self._on_timeout > 0 and time.time() - self.last_on_data > self._on_timeout )
+       return ( self._on_timeout > 0 and time.time() - self.last_on_data >= self._on_timeout )
 
     #################################
     # Event process for Julius
