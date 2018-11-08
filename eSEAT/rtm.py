@@ -126,6 +126,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._ConsumerPort = {}
         self._ProviderPort = {}
         self._on_timeout = -1
+        self.rate_hz=0 
 
     def exit(self):
         try:
@@ -159,7 +160,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self.activated = True
         self.processActivated()
         self.resetTimer()
-        print (self.currentstate)
+        #print (self.currentstate)
         return RTC_OK
 
     #
