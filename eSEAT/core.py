@@ -493,6 +493,7 @@ class eSEAT_Core:
     def processTimeout(self, sname=None, flag=False):
         if sname is None : sname = self.currentstate
         cmds = self.states[sname].ontimeout
+
         if not cmds:
             cmds = self.states['all'].ontimeout
 
@@ -502,7 +503,10 @@ class eSEAT_Core:
             return False
         #
         cmds.execute('')
-        self.setTimeout(cmds.timeout)
+
+        if sname == self.currentstate:
+            self.setTimeout(cmds.timeout)
+
         self.resetTimer()
         return True
 
@@ -678,11 +682,13 @@ class eSEAT_Core:
         try:
             #cmds = self.lookupWithDefault(newstate, '', 'ontimeout', False)
 
-            cmds = self.states[newstate].ontimeout
+            cmds = self.states[self.currentstate].ontimeout
             if not cmds:
                 cmds = self.states['all'].ontimeout
 
-            if cmds: self.setTimeout(cmds.timeout)
+            if cmds:
+                self.setTimeout(cmds.timeout)
+
             tasks = self.states[self.currentstate].onentry
             if tasks:
                 tasks.execute()
@@ -1634,6 +1640,7 @@ class Manager:
 
     def mainloop(self):
         if self.comp :
+            self.comp.resetTimer()
             while not self.stop_event.is_set():
                 self.comp.onExecute(0)
 
