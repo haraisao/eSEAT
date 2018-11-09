@@ -200,7 +200,7 @@ class RosAdaptor(object):
 
   #
   # 
-  def createPublisher(self, name, datatype, size):
+  def createPublisher(self, name, datatype, size=1):
     global ros_node
     if self.type == 'Publisher':
       if __ros_version__ == 1:
