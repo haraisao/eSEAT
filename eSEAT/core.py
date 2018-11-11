@@ -830,8 +830,8 @@ class eSEAT_Gui:
     def addText(self, name, txt, w, h, cspan=1, rspan=1, val="", frame=''):
         self.items[name].append(['text', txt, w, h, cspan, rspan, val, frame])
 
-    def addLabel(self, name, txt, fg, bg, cspan=1, rspan=1, frame=''):
-        self.items[name].append(['label', txt, fg, bg, cspan, rspan, frame])
+    def addLabel(self, name, txt, fg, bg, cspan=1, rspan=1, frame='', oarg=''):
+        self.items[name].append(['label', txt, fg, bg, cspan, rspan, oarg, frame])
 
     def addCombobox(self, name, txt, txtlist, val, cspan=1, rspan=1, frame=''):
         self.items[name].append(['combobox', txt, txtlist, val, cspan, rspan, frame])
@@ -1163,10 +1163,11 @@ class eSEAT_Gui:
 
     #################  L A B E L ################### 
     ## Create Label Item
-    def createLabelItem(self, frame, sname, name, fg="#ffffff", bg="#444444", cspan=1, rspan=1):
+    def createLabelItem(self, frame, sname, name, fg="#ffffff", bg="#444444", cspan=1, rspan=1, args=''):
         if not fg: fg="#ffffff"
         if not bg: bg="#444444"
-        lbl = Label(frame, text=name, bg=bg, fg=fg )
+        #lbl = Label(frame, text=name, bg=bg, fg=fg )
+        lbl=eval("Label(frame, text=name, bg=bg, fg=fg,"+args+")")
         self.labels[sname+":"+name] = lbl
         return [lbl, cspan, rspan]
 
@@ -1297,7 +1298,7 @@ class eSEAT_Gui:
                elif itm[0] == 'label':
                    self.gui_items[name].append(
                        self.createLabelItem(target_frame, name,
-                                itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]))
+                              itm[1], itm[2], itm[3], int(itm[4]), int(itm[5]),itm[6])
                        )
                elif itm[0] == 'combobox':
                    self.gui_items[name].append(

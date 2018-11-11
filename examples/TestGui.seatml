@@ -17,7 +17,7 @@
 
   <state name="main_mode">
 
-    <label text="TestGui" colspan="3" bg_color="blue" />
+    <label text="TestGui" colspan="3" bg_color="blue" args="font=('helvetica', 20), height=3"/>
 
     <brk />
 

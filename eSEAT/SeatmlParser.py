@@ -193,7 +193,8 @@ class SEATML_Parser():
                    self.getAttribute(e, 'bg_color'),
                    self.getAttribute(e, 'colspan', 1), 
                    self.getAttribute(e, 'rowspan', 1),
-                   self.getAttribute(e, 'frame', ''), 
+                   self.getAttribute(e, 'frame', ''),
+                   self.getAttribute(e, 'args', '')
                    )
         #
         #  <brk>
