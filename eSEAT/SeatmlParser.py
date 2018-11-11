@@ -188,9 +188,12 @@ class SEATML_Parser():
         #
         #  <label>
         if e.tag == 'label':
-            self.parent.addLabel(name, self.getAttribute(e, 'text'), self.getAttribute(e, 'color'),
-                   self.getAttribute(e, 'bg_color'), self.getAttribute(e, 'colspan', 1), 
-                   self.getAttribute(e, 'rowspan', 1), self.getAttribute(e, 'frame', ''), 
+            self.parent.addLabel(name, self.getAttribute(e, 'text'),
+                   self.getAttribute(e, 'color'),
+                   self.getAttribute(e, 'bg_color'),
+                   self.getAttribute(e, 'colspan', 1), 
+                   self.getAttribute(e, 'rowspan', 1),
+                   self.getAttribute(e, 'frame', ''), 
                    )
         #
         #  <brk>
@@ -205,12 +208,12 @@ class SEATML_Parser():
         #  <frame>
         elif e.tag == 'frame':
             key = self.getAttribute(e, 'name')
-            self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addFrame(name, key, 
                 self.getAttribute(e, 'height'), self.getAttribute(e, 'width'),
                 self.getAttribute(e, 'relief', 'flat'), 
                 self.getAttribute(e, 'color'), self.getAttribute(e, 'bg_color'),
-                self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'rowspan', 1),
+                self.getAttribute(e, 'colspan', 1),
+                self.getAttribute(e, 'rowspan', 1),
                 self.getAttribute(e, 'frame', '')
                 )
 
@@ -218,13 +221,13 @@ class SEATML_Parser():
         #  <labelframe>
         elif e.tag == 'labelframe':
             key = self.getAttribute(e, 'label')
-            self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addLabelframe(name, key,
                 self.getAttribute(e, 'height'), self.getAttribute(e, 'width'),
                 self.getAttribute(e, 'labelanchor', 'nw'),
                 self.getAttribute(e, 'relief', 'groove'), 
                 self.getAttribute(e, 'color'), self.getAttribute(e, 'bg_color'),
-                self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'rowspan', 1),
+                self.getAttribute(e, 'colspan', 1),
+                self.getAttribute(e, 'rowspan', 1),
                 self.getAttribute(e, 'frame', '')
                 )
 
@@ -235,8 +238,10 @@ class SEATML_Parser():
             #self.parent.registerCommands(name+":gui:"+key, commands)
             self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addButton(name, key, self.getAttribute(e, 'color'),
-                 self.getAttribute(e, 'bg_color'), self.getAttribute(e, 'width'),
-                 self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'rowspan', 1),
+                 self.getAttribute(e, 'bg_color'),
+                 self.getAttribute(e, 'width'),
+                 self.getAttribute(e, 'colspan', 1),
+                 self.getAttribute(e, 'rowspan', 1),
                  self.getAttribute(e, 'frame', '')
                  )
 
@@ -246,8 +251,10 @@ class SEATML_Parser():
             key = self.getAttribute(e, 'id')
             #self.parent.registerCommands(name+":gui:"+key, commands)
             self.parent.states[name].registerRule(('gui', key), commands)
-            self.parent.addEntry(name, key, self.getAttribute(e, 'width', '20'), self.getText(e),
-                 self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'rowspan', 1),
+            self.parent.addEntry(name, key, self.getAttribute(e, 'width', '20'),
+                 self.getText(e),
+                 self.getAttribute(e, 'colspan', 1),
+                 self.getAttribute(e, 'rowspan', 1),
                  self.getAttribute(e, 'frame', '')
                  )
         #
@@ -257,7 +264,8 @@ class SEATML_Parser():
             #self.parent.registerCommands(name+":gui:"+key, commands)
             self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addText(name, key, self.getAttribute(e, 'width', '20'),
-                 self.getAttribute(e, 'height', '3'), self.getAttribute(e, 'colspan', 1),
+                 self.getAttribute(e, 'height', '3'),
+                 self.getAttribute(e, 'colspan', 1),
                  self.getAttribute(e, 'rowspan', 1), self.getText(e), 
                  self.getAttribute(e, 'frame', '')
                  )
@@ -267,8 +275,9 @@ class SEATML_Parser():
             key = self.getAttribute(e, 'id')
             self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addCombobox(name, key, self.getAttribute(e, 'values'),
-		 self.getAttribute(e,'default', ''),
-                 self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'rowspan', 1),
+                 self.getAttribute(e,'default', ''),
+                 self.getAttribute(e, 'colspan', 1),
+                 self.getAttribute(e, 'rowspan', 1),
                  self.getAttribute(e, 'frame', '')
                  )
         #
@@ -277,7 +286,8 @@ class SEATML_Parser():
             key = self.getAttribute(e, 'name')
             self.parent.states[name].registerRule(('gui', key), commands)
             self.parent.addCheckbutton(name, key,
-                 self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'rowspan', 1),
+                 self.getAttribute(e, 'colspan', 1),
+                 self.getAttribute(e, 'rowspan', 1),
                  self.getAttribute(e, 'frame', '')
                  )
         #
@@ -288,7 +298,8 @@ class SEATML_Parser():
             txtlist = self.getAttribute(e, 'values')
             height = self.getAttribute(e, 'height', len(txtlist.split(',')))
             self.parent.addListbox(name, key, txtlist, height,
-                 self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'rowspan', 1),
+                 self.getAttribute(e, 'colspan', 1),
+                 self.getAttribute(e, 'rowspan', 1),
                  self.getAttribute(e, 'frame', '')
                  )
         #
@@ -299,7 +310,8 @@ class SEATML_Parser():
             var=self.getAttribute(e, 'variable')
             val=self.getAttribute(e, 'value')
             self.parent.addRadiobutton(name, key, var, val,
-                 self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'rowspan', 1),
+                 self.getAttribute(e, 'colspan', 1),
+                 self.getAttribute(e, 'rowspan', 1),
                  self.getAttribute(e, 'frame', '')
                  )
         #
@@ -313,7 +325,8 @@ class SEATML_Parser():
             ori=self.getAttribute(e, 'orientation', 'horizontal')
 
             self.parent.addScale(name, key, frm, to, res, ori, 
-                self.getAttribute(e, 'colspan', 1), self.getAttribute(e, 'rowspan', 1),
+                self.getAttribute(e, 'colspan', 1),
+                self.getAttribute(e, 'rowspan', 1),
                 self.getAttribute(e, 'frame', '')
                 )
         #
