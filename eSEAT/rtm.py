@@ -359,11 +359,15 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                     impl_cmd="from "+impl_file+" import *"
                     exec(impl_cmd, env)
 
-                module=tag.get('if_class').split('.')
+                if_type, if_name=tag.get('interface').split('|')
+                if_class=tag.get('if_class') 
+                if not if_class: if_class=if_name
+
+                module=if_class.split('.')
                 if len(module) > 1 and not module[0] in env:
                     exec("import "+module[0], env)
-                if_type, if_name =tag.get('interface').split('|')
-                return self.createServicePort(name, if_name, if_type, eval(tag.get('if_class'), env), type)
+
+                return self.createServicePort(name, if_name, if_type, eval(if_class, env), type)
             else:
                  return eSEAT_Core.createAdaptor(self, compname, tag)
         except:

@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<seatml>
+  <general name="SimpleService_c">
+    <adaptor name="myservice0" type="consumer"
+          interface="SimpleService::MyService|SimpleService.MyService"
+          if_class="SimpleService.MyService"  />
+  </general>
+
+  <state name="main_mode">
+
+    <label text="SimpleIO" colspan="3" bg_color="blue" />
+
+    <brk />
+    <button label="Echo">
+      <script>
+         seat.callService("myservice0", "echo", "Hello World")
+      </script>
+    </button>
+
+    <button label="GetValue">
+      <script>
+         retval=seat.callService("myservice0", "get_value")
+         seat.appendText("main_mode:textOut", "==="+str(retval)+"===\n")
+      </script>
+    </button>
+
+    <button label="SetValue">
+      <script>
+         import random
+         retval=seat.callService("myservice0", "set_value", int(random.random()*100))
+      </script>
+    </button>
+
+    <brk />
+  
+    <label text="Coming Text:" />
+    <text id="textOut" width="50" height="5" colspan="2" >
+    </text>
+    <brk />
+    <button label="Clear">
+      <script>
+         seat.clearText("main_mode:textOut")
+      </script>
+    </button>
+ 
+  </state>
+</seatml>

@@ -159,7 +159,7 @@ class SEATML_Parser():
             if ffname :
                 utils.exec_script_file(ffname, eSEAT_Core.getGlobals())
         if txt :
-            sys.path.append('.')
+            #sys.path.append('.')
             exec(txt, eSEAT_Core.getGlobals())
 
     #
@@ -499,6 +499,7 @@ class SEATML_Parser():
         if g is not None:
             self.parent.create_state('all')
             sys.path.append('.')
+            sys.path.append('rtm')
 
             if g.get('name') :
                 self.componentName = g.get('name')

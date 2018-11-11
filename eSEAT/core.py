@@ -238,7 +238,7 @@ class eSEAT_Core:
 
     #
     #
-    def createRosPublisher(self, name, datatype, size):
+    def createRosPublisher(self, name, datatype, size=1):
       if __ros_version__ > 0:
         self.initRosNode()
         if self.ros_node:
@@ -313,7 +313,12 @@ class eSEAT_Core:
                 self.createSocketPort(name, tag.get('host'), int(tag.get('port')))
 
             elif type == 'ros_pub' :
-                self.createRosPublisher(name, tag.get('datatype'),int(tag.get('size')))
+                size_str=tag.get('size')
+                if size_str:
+                   size=int(size_str)
+                else:
+                   size=1
+                self.createRosPublisher(name, tag.get('datatype'),size)
 
             elif type == 'ros_sub' :
                 fname=tag.get('file')
@@ -517,7 +522,7 @@ class eSEAT_Core:
         self._on_timeout = sec
 
     def isTimeout(self):
-       return ( self._on_timeout > 0 and time.time() - self.last_on_data > self._on_timeout )
+       return ( self._on_timeout > 0 and time.time() - self.last_on_data >= self._on_timeout )
 
     #################################
     # Event process for Julius
