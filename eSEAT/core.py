@@ -66,6 +66,12 @@ sys.path.append(os.path.join(rootdir,'3rd_party'))
 
 opts = None
 
+try:
+    import OpenRTM_aist
+    import omniORB
+    from RTC import * 
+except:
+    pass
 
 ###############################################################
 #  Global Variables
@@ -375,7 +381,10 @@ class eSEAT_Core:
             self._logger.info("sending message to %s, %s" % (data,code))
             self._data[name].data = unicode(data)
 
-        elif dtype == int or dtype == float :
+        elif dtype == int  and dtype == type(data) :
+            self._data[name].data = dtype(data)
+
+        elif dtype == float and dtype == type(data) :
             self._data[name].data = dtype(data)
 
         else:
@@ -395,6 +404,16 @@ class eSEAT_Core:
     def sendto(self, name, data):
         if name in self.adaptors :
             self.adaptors[name].send(name, data)
+
+    def set_result(self, val):
+        getGlobals()['__retval__'] = True
+        getGlobals()['rtc_result'] = val
+    
+    def get_in_data(self, val):
+        return getGlobals()['rtc_in_data']
+
+    def get_web_data(self, val):
+        return getGlobals()['rtc_web_data']
 
     ##################################
     #  Event processes 
