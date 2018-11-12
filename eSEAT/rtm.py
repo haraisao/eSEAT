@@ -125,6 +125,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._consumer = {}
         self._ConsumerPort = {}
         self._ProviderPort = {}
+        self._datatype = {}
         self._on_timeout = -1
         self.rate_hz=0 
 
@@ -251,6 +252,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     def createInPort(self, name, type=TimedString):
         self._logger.info("create inport: " + name)
+        self._datatype[name]=type
         self._data[name] = instantiateDataType(type)
         self._port[name] = OpenRTM_aist.InPort(name, self._data[name])
         self._port[name].addConnectorDataListener(
@@ -263,6 +265,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     def createOutPort(self, name, type=TimedString):
         self._logger.info("create outport: " + name)
+        self._datatype[name]=type
         self._data[name] = instantiateDataType(type)
         self._port[name] = OpenRTM_aist.OutPort(name, self._data[name],
                                    OpenRTM_aist.RingBuffer(8))
@@ -407,6 +410,15 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         else                   : dtype = eval("%s" % s)
 
         return (eval("%s" % s), dtype, seq)
+
+    def newData(self,name):
+        return instantiateDataType(self._datatype[name])
+
+    def isNew(self,name):
+        try:
+            return self._port[name].isNew()
+        except:
+            return False
 
     ############ End of RTC functions
 
