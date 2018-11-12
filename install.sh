@@ -4,7 +4,7 @@ INST_DIR=/usr/local/eSEAT
 MKDIR="/usr/bin/sudo /bin/mkdir -p "
 CP="/usr/bin/sudo /bin/cp "
 #FILES="seatml.xsd rtc.conf"
-FILES="etc/rtc.conf eSEAT.py eSEAT_Node.py"
+FILES="etc/rtc.conf etc/template.seatml eSEAT.py eSEAT_Node.py"
 DIRS="html libs 3rd_party examples bin ros_samples"
 
 echo "Install Python2"

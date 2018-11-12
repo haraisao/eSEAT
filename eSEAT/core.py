@@ -409,10 +409,10 @@ class eSEAT_Core:
         getGlobals()['__retval__'] = True
         getGlobals()['rtc_result'] = val
     
-    def get_in_data(self, val):
+    def get_in_data(self):
         return getGlobals()['rtc_in_data']
 
-    def get_web_data(self, val):
+    def get_web_data(self):
         return getGlobals()['rtc_web_data']
 
     ##################################
@@ -431,7 +431,7 @@ class eSEAT_Core:
                     else :
                         self.processResult(name, data)
                         self.processOnDataIn(name, data)
-            elif isinstance(data, std_msgs.String):
+            elif __ros_version__ and  isinstance(data, std_msgs.String):
                 self.processResult(name, data.data)
                 self.processOnDataIn(name, data.data)
             else:
