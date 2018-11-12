@@ -70,6 +70,7 @@ try:
     import OpenRTM_aist
     import omniORB
     from RTC import * 
+    from rtm import instantiateDataType 
 except:
     pass
 
