@@ -197,7 +197,8 @@ class eSEAT_Core:
         #    self.webServer.terminate()
         #    time.sleep( 1 )
         for adp in self.adaptors:
-           self.adaptors[adp].terminate()
+           if self.adaptors[adp] != self:
+               self.adaptors[adp].terminate()
         #print ("Call eSEAT_Core.exit.. done")
         return
 
@@ -766,6 +767,7 @@ class eSEAT_Core:
     # Finalize
     #
     def finalizeSEAT(self):
+        print("===Call finalize ====")
         for a in self.adaptors.itervalues():
             if isinstance(a, SocketAdaptor):
                 a.terminate()
@@ -773,6 +775,7 @@ class eSEAT_Core:
             elif isinstance(a, WebSocketServer):
                 a.terminate()
         if self.root : self.root.quit()
+        print("===END : Call finalize ====")
         return 
 
     def loginfo(self, msg):
@@ -1517,8 +1520,8 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
         return True
 
 #
-#  eSEAR_Manager
-class Manager:
+#  eSEAT_Manager
+class eSEAT_Node_Manager:
     def __init__(self, mlfile=None):
         self.comp = None
         self.run_as_daemon = False
@@ -1716,7 +1719,7 @@ def main_node(mlfile=None, daemon=False):
         signal.signal(signal.SIGINT, sig_handler)        
         if daemon : daemonize()
 
-        seatmgr = Manager(mlfile)
+        seatmgr = eSEAT_Node_Manager(mlfile)
         seatmgr.initModule()
         seatmgr.start()
     except:

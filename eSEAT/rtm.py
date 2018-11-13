@@ -52,7 +52,7 @@ from RTC  import *
 ########################################
 #  eSEAT_Core
 #
-from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals,Manager
+from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals
 import SeatmlParser
 
 __version__="2.5"
@@ -184,6 +184,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             self.finalizeSEAT()
         except:
             pass
+
         return RTC_OK
 
     #
@@ -411,14 +412,51 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
 
         return (eval("%s" % s), dtype, seq)
 
+    #
+    #
     def newData(self,name):
         return instantiateDataType(self._datatype[name])
 
+    #
+    #
     def isNew(self,name):
         try:
             return self._port[name].isNew()
         except:
             return False
+
+    #
+    #
+    def writeData(self,name):
+        try:
+            self._port[name].write()
+        except:
+            pass
+
+    #
+    #
+    def getData(self,name):
+        try:
+            return self._data[name]
+        except:
+            return None
+
+    #
+    #
+    def readData(self,name):
+        try:
+            return self._port[name].read()
+        except:
+            return None
+
+    def readAllData(self,name):
+        try:
+            res=[]
+            while self._port[name].isNew():
+                res.append(self._port[name].read())
+            return res
+        except:
+            return []
 
     ############ End of RTC functions
 
@@ -427,7 +465,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
 #
 # eSEAT Manager ( RTC manager )
 #
-class eSEATManager(Manager):
+class eSEATManager:
     def __init__(self, mlfile=None):
         self.comp = None
         self.run_as_daemon = False
@@ -586,8 +624,8 @@ class eSEATManager(Manager):
         print( "....eSEAT Manager shutdown" )
         if self.run_as_daemon:
           os._exit(1)
-        #else:
-        #  sys.exit(1)
+        else:
+          os._exit(1)
 
 
 #########################################################################
@@ -642,6 +680,13 @@ def instantiateDataType(dtype):
 #
 def main_rtm(mlfile=None, daemon=False):
     try:
+        import signal
+
+        def sig_handler(signum, frame):
+          seatmgr.exit() 
+
+        signal.signal(signal.SIGINT, sig_handler)        
+
         if daemon : daemonize()
         seatmgr = eSEATManager(mlfile)
         seatmgr.start()
@@ -654,9 +699,11 @@ def main_rtm(mlfile=None, daemon=False):
       if seatmgr.run_as_daemon:
         os._exit(1)
       else:
-        sys.exit(1)
+        os._exit(1)
+        #sys.exit(1)
     except:
-      sys.exit(1)
+      os._exit(1)
+      #sys.exit(1)
 
 
 #########################################################################
