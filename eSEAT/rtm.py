@@ -100,6 +100,12 @@ class RtcLogger:
     def __init__(self, name):
         self._logger = OpenRTM_aist.Manager.instance().getLogbuf(name)
 
+    def setFlag(self, flag):
+        if flag:
+            self._logger.setLogLevel('INFO')
+        else:
+            self._logger.setLogLevel('ERROR')
+
     def info(self, msg):
         self._logger.RTC_INFO(msg)
 

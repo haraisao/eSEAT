@@ -767,7 +767,6 @@ class eSEAT_Core:
     # Finalize
     #
     def finalizeSEAT(self):
-        print("===Call finalize ====")
         for a in self.adaptors.itervalues():
             if isinstance(a, SocketAdaptor):
                 a.terminate()
@@ -775,7 +774,6 @@ class eSEAT_Core:
             elif isinstance(a, WebSocketServer):
                 a.terminate()
         if self.root : self.root.quit()
-        print("===END : Call finalize ====")
         return 
 
     def loginfo(self, msg):
