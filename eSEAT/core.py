@@ -19,6 +19,7 @@ import os
 import getopt
 import codecs
 import locale
+import string
 
 import threading
 

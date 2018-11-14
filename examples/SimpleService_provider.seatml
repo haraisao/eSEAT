@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <seatml>
-  <general name="SimpleService_p">
+  <general name="MyServiceProvider">
     <adaptor name="myservice0" type="provider"
           impl_file="MyService_Impl"
           interface="SimpleService::MyService|SimpleService.MyService"

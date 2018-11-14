@@ -151,9 +151,12 @@ class SEATML_Parser():
     #
     # execute the python script
     #
-    def procScript(self, tag, fname):
-        txt = self.getScripts(tag)
+    def procScript(self, tag, fname, imports):
+        if imports :
+            import_str="import "+imports
+            exec(import_str, eSEAT_Core.getGlobals())
 
+        txt = self.getScripts(tag)
         if fname :
             ffname = utils.findfile(fname)
             if ffname :
@@ -521,7 +524,7 @@ class SEATML_Parser():
                 #
                 #  <script>
                 elif  a.tag == 'script':
-                    self.procScript(a, a.get('execfile'))
+                    self.procScript(a, a.get('execfile'), a.get('import'))
                 #
                 #  <onexec>
                 elif a.tag == 'onexec':

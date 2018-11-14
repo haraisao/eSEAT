@@ -352,7 +352,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     #    Create communication adaptor
     #
-    def createAdaptor(self, compname, tag, env=globals()):
+    def createAdaptor(self, compname, tag, env=getGlobals()):
         try:
             name = str(tag.get('name'))
             type = tag.get('type')

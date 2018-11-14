@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <seatml>
-  <general name="SimpleService_c">
+  <general name="MyServiceConsumer">
     <adaptor name="myservice0" type="consumer"
           interface="SimpleService::MyService|SimpleService.MyService"
           if_class="SimpleService.MyService"  />

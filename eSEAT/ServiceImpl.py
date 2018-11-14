@@ -28,7 +28,6 @@ class rtService(object):
     cmd +="  def __init__(self):\n"
     cmd +="    self.class_name='"+if_name+"_impl'\n"
     cmd +="    return\n"
-    print(cmd)
     exec(cmd, gl)
 
 genClass=rtService()
