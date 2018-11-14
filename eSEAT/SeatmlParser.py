@@ -135,7 +135,8 @@ class SEATML_Parser():
             elif c.tag == 'script': # get script
                 sendto  = c.get('sendto')
                 if not sendto : sendto = c.get('host')
-                task = Task.TaskScript(self.parent, sendto, self.getScripts(c), c.get('execfile'))
+                task = Task.TaskScript(self.parent, sendto,
+                    self.getScripts(c), c.get('execfile'), c.get('import'))
                 tasks.addTask(task)
         return tasks
 

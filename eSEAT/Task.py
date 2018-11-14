@@ -124,11 +124,12 @@ class TaskShell(Task):
 #
 #
 class TaskScript(Task):
-    def __init__(self, rtc, sendto, data, fname):
+    def __init__(self, rtc, sendto, data, fname, imports=None):
         Task.__init__(self, rtc)
         self.sendto = sendto
         self.data = data
         self.fname = fname
+        self.imports = imports
 
         return
 
@@ -140,6 +141,10 @@ class TaskScript(Task):
         setGlobals('__retval__', retval)
         #
         #   execute script or script file
+        if self.imports:
+            import_str="import "+self.imports
+            exec(import_str, getGlobals())
+
         if self.fname :
             ffname = utils.findfile(self.fname)
             if ffname :
