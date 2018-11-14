@@ -364,11 +364,6 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                 return self.createDataPort(name, tag.get('datatype') ,type)
 
             elif type == 'provider' or type == 'consumer' :
-                impl_file=tag.get('impl_file')
-                if impl_file:
-                    impl_cmd="from "+impl_file+" import *"
-                    exec(impl_cmd, env)
-
                 if_type, if_name=tag.get('interface').split('|')
                 if_class=tag.get('if_class') 
                 if not if_class: if_class=if_name
@@ -376,6 +371,10 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                 module=if_class.split('.')
                 if len(module) > 1 and not module[0] in env:
                     exec("import "+module[0], env)
+
+                impl_file=tag.get('impl_file')
+                if impl_file:
+                    utils.exec_script_file(impl_file, env)
 
                 return self.createServicePort(name, if_name, if_type, eval(if_class, env), type)
             else:
