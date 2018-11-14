@@ -22,6 +22,16 @@
               self._result[0] = obj.echo(self._msg)
           except:
             pass
+
+      class seq_print:
+        def __init__(self):
+          self._cnt = 0
+          return
+
+        def __call__(self, val):
+          print( self._cnt, ": ", val )
+          self._cnt += 1
+          return
      </script>
   </general>
 
@@ -44,7 +54,7 @@
     if seat._async_echo and seat._async_echo.finished():
       print( "echo() finished: ", seat._result[0] )
       seat._async_echo = None
-    
+
     if argv[0] == "echo" and len(argv) > 1:
       if not seat._async_echo:
         retmsg = ""
@@ -53,6 +63,22 @@
       else:
         print( "echo() still invoking" )
 
+    elif argv[0] == "set_value" and len(argv) > 1:
+      val = float(argv[1])
+      seat.callService('myservice0','set_value', val)
+      print( "Set remote value: ", val )
+
+    elif argv[0] == "get_value":
+      retval = seat.callService('myservice0', 'get_value')
+      print( "Current remote value: ", retval )
+
+    elif argv[0] == "get_echo_history":
+      hist=seat.callService('myservice0', 'get_echo_history')
+      OpenRTM_aist.CORBA_SeqUtil.for_each( hist, seq_print())
+
+    elif argv[0] == "get_value_history":
+      hist=seat.callService('myservice0', 'get_value_history')
+      OpenRTM_aist.CORBA_SeqUtil.for_each(hist, seq_print())
      </script>
    </onexec>
   </state>
