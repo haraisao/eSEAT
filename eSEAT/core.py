@@ -296,6 +296,7 @@ class eSEAT_Core:
         try:
           return self.adaptors[name].callRosService(name, *args)
         except:
+          traceback.print_exc()
           print("Error in callRosService %s" % name)
           
     def startRosService(self):

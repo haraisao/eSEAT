@@ -93,14 +93,15 @@ def ros_name():
 #
 #
 def getMsgClass(datatype):
+  env=getGlobals()
   try:
-    dtype=eval(datatype.replace('/','.'),getGlobals())
+    dtype=eval(datatype.replace('/','.'), env)
     return dtype
   except:
     try:
       pkg, klass=datatype.split('/')
-      exec("import "+pkg+".msg as "+pkg , getGlobals())
-      dtype=eval(datatype.replace('/','.'),getGlobals())
+      exec("import "+pkg+".msg as "+pkg , env)
+      dtype=eval(datatype.replace('/','.'), env)
       return dtype
     except:
       traceback.print_exc()
@@ -312,27 +313,29 @@ class RosAdaptor(object):
     global ros_node
 
     self.type = 'RosServer'
+    env=getGlobals()
 
     if srv_type.find('.') > 0:
       pkgname,srv = srv_type.split('.',1)
       exec_str="import %s.srv as %s" % (pkgname, pkgname)
       try:
-        exec(exec_str, globals())
+        exec(exec_str, env)
       except:
         pass
 
     if fname:
-        utils.exec_script_file(fname, globals())
+        utils.exec_script_file(fname, env)
+
+    self.service_dtype=eval(srv_type, env)
 
     if __ros_version__ == 1:
-      resfunc=eval(srv_type+"Response")
-      srv_func=lambda x :  resfunc(eval(srv_impl)(x))
+      resfunc=eval(srv_type+"Response", env)
+      srv_func=lambda x :  resfunc(eval(srv_impl, env)(x))
 
-      self._port=rospy.Service(srv_name, eval(srv_type), srv_func) 
+      self._port=rospy.Service(srv_name, self.service_dtype, srv_func) 
 
     elif __ros_version__ == 2:
-      self._port=ros_node.create_service(eval(srv_type), srv_name, eval(srv_impl)) 
-      self.service_dtype=eval(srv_type)
+      self._port=ros_node.create_service(self.service_dtype, srv_name, eval(srv_impl)) 
       addRosPorts(self._port)
     else:
       print("Unexpected error")
@@ -345,21 +348,21 @@ class RosAdaptor(object):
     global ros_node
 
     self.type = 'RosClient'
-
+    env=getGlobals()
     if srv_type.find('.') > 0:
       pkgname,srv = srv_type.split('.',1)
       exec_str="import %s.srv as %s" % (pkgname, pkgname)
       try:
-        exec(exec_str, globals())
+        exec(exec_str, env)
       except:
         pass
 
+    self.service_dtype=eval(srv_type, env)
     if __ros_version__ == 1:
-      self._port=rospy.ServiceProxy(srv_name, eval(srv_type))
+      self._port=rospy.ServiceProxy(srv_name, self.service_dtype)
 
     elif __ros_version__ == 2:
-      self._port=ros_node.create_client(eval(srv_type), srv_name) 
-      self.service_dtype=eval(srv_type)
+      self._port=ros_node.create_client(self.servive_dtype, srv_name) 
       addRosPorts(self._port)
 
     else:
