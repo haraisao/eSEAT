@@ -463,6 +463,9 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         except:
             return []
 
+    def get_time(self):
+        return time.time()
+
     ############ End of RTC functions
 
 

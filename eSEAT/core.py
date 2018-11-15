@@ -1454,6 +1454,12 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
               time.sleep(self.intval - val)
             self._last_process_time=time.time()
 
+    def get_time(self):
+        try:
+            return rospy.get_time()
+        except:
+            return time.time()
+
     def setInstanceName(self,name):
         self.name=name
         return True
