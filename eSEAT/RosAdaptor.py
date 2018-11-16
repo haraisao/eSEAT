@@ -335,7 +335,7 @@ class RosAdaptor(object):
       self._port=rospy.Service(srv_name, self.service_dtype, srv_func) 
 
     elif __ros_version__ == 2:
-      self._port=ros_node.create_service(self.service_dtype, srv_name, eval(srv_impl)) 
+      self._port=ros_node.create_service(self.service_dtype, srv_name, eval(srv_impl, env)) 
       addRosPorts(self._port)
     else:
       print("Unexpected error")
@@ -362,7 +362,7 @@ class RosAdaptor(object):
       self._port=rospy.ServiceProxy(srv_name, self.service_dtype)
 
     elif __ros_version__ == 2:
-      self._port=ros_node.create_client(self.servive_dtype, srv_name) 
+      self._port=ros_node.create_client(self.service_dtype, srv_name) 
       addRosPorts(self._port)
 
     else:
@@ -392,12 +392,17 @@ class RosAdaptor(object):
         #
         try:
           future = self._port.call_async(req)
-          rclpy.spin_until_future_complete(ros_node, future)
+          #rclpy.spin_until_future_complete(ros_node, future)
+          while not future.done() : pass
+          if future.result() is None:
+            print(futire.exception())
           return future.result()
-        except: 
+        except AttributeError: 
           self._port.call(req)
           self._port.wait_for_future()
           return self._port.response
+        except:
+          traceback.print_exc()
 
       else:
         print("Unexpected error")
