@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <seatml>
   <general name="RosService">
-    <adaptor name="myservice" type="ros_server"
-             service="add_two_ints"
+    <adaptor name="add_two_ints" type="ros_server"
              service_type="example_interfaces.AddTwoInts"
              file="ros_samples/myservice.py"
              impl="handle_add_two_ints2" />

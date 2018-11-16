@@ -1,10 +1,15 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <seatml>
   <general name="RosService">
-    <adaptor name="myservice" type="ros_server"
-             service="add_two_ints"
+    <script>
+      def handle_add_two_ints(req):
+        sum_val = req.a+req.b
+        print ("Returning [ %s + %s = %s]" % (req.a, req.b, sum_val))
+
+        return sum_val
+    </script>
+    <adaptor name="add_two_ints" type="ros_server"
              service_type="beginner_tutorials.AddTwoInts"
-             file="ros_samples/myservice.py"
              impl="handle_add_two_ints" />
   </general>
 

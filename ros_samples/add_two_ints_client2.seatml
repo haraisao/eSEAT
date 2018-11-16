@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <seatml>
   <general name="RosClient" anonymous="1">
-    <adaptor name="myservice1" type="ros_client"
-             service="add_two_ints"
+    <adaptor name="add_two_ints" type="ros_client"
              service_type="example_interfaces.AddTwoInts" />
   </general>
 
@@ -18,7 +17,7 @@
       <script>
        a1 = seat.getEntry("main_mode:a1")
        a2 = seat.getEntry("main_mode:a2")
-       retval=seat.callRosService("myservice1", int(a1), int(a2))
+       retval=seat.callRosService("add_two_ints", int(a1), int(a2))
        str_out=a1+" + "+a2+" = "+str(retval.sum)
        seat.appendText("main_mode:ans", str_out + "\n")
        print (str_out)
