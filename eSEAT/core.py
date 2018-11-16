@@ -311,6 +311,15 @@ class eSEAT_Core:
     def startRosService(self):
         if self.ros_node:
           startRosService()
+
+    def get_caller_id(self):
+      if __ros_version__ == 1:
+        return rospy.get_caller_id()
+      elif __ros_version__ == 2:
+        return ""
+      return None
+     
+
     #
     #  Create Adaptor called by SEATML_Parser
     #

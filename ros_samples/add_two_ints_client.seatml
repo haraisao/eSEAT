@@ -17,7 +17,7 @@
       <script>
        a1 = seat.getEntry("main_mode:a1")
        a2 = seat.getEntry("main_mode:a2")
-       retval=seat.callRosService("add_two_inst", int(a1), int(a2))
+       retval=seat.callRosService("add_two_ints", int(a1), int(a2))
        str_out=a1+" + "+a2+" = "+str(retval.sum)
        seat.appendText("main_mode:ans", str_out + "\n")
        print (str_out)
