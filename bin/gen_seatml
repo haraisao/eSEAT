@@ -8,4 +8,4 @@ fi
 SEATML=$1
 TEMPLATE=/usr/local/eSEAT/template.seatml
 
-/bin/sed s/sample/$SEATML/ $TEMPLATE > $SEATML.seatml
+/bin/sed s/_sample_/$SEATML/ $TEMPLATE > $SEATML.seatml
