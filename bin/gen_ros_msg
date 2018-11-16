@@ -23,6 +23,12 @@ def generate_messages(package, includes=DEFAULT_INCLUDES):
   print("Generating {0} ...".format(package))
   package_path = os.path.join(PKG_DIR, package)
   output_path = os.path.join(LIB_DIR, package)
+
+  try:
+   alib_mod=os.environ['ROS_MSG_LIBS']
+   add_mod=alib_mod.split(',')
+  except:
+   add_mod=[]
    
   for gentype in ('msg', 'srv'):
     files=glob.glob(os.path.join(package_path, gentype,'*.{0}'.format(gentype)))
@@ -35,8 +41,8 @@ def generate_messages(package, includes=DEFAULT_INCLUDES):
         gen = genpy.generator.SrvGenerator()
       search_path = {}
 
-      for include in set(includes+get_package_names()):
-          search_path[include]=[os.path.join(LIB_DIR, include, 'msg') ,os.path.join(ROS_SHARE_DIR, include, 'msg')]
+      for include in set(includes+add_mod+get_package_names()):
+          search_path[include]=[os.path.join(PKG_DIR, include, 'msg') ,os.path.join(ROS_SHARE_DIR, include, 'msg')]
 
       ret = gen.generate_messages(package, files,
                       os.path.join(output_path, gentype), search_path)
