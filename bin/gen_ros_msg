@@ -17,7 +17,7 @@ ROS_SHARE_DIR = os.path.join("/","opt","ros",DIST,'share')
 ROS_DIR = os.path.join(os.getcwd(), 'ros')
 LIB_DIR = os.path.join(ROS_DIR, 'lib', 'site-packages')
 PKG_DIR = os.path.join(ROS_DIR, 'packages')
-DEFAULT_INCLUDES = ['std_msgs', 'geometry_msgs', 'sensor_msgs']
+DEFAULT_INCLUDES = ['std_msgs', 'geometry_msgs', 'sensor_msgs', 'actionlib_msgs' ]
 
 def generate_messages(package, includes=DEFAULT_INCLUDES):
   print("Generating {0} ...".format(package))
