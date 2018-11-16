@@ -499,9 +499,24 @@ class RosAdaptor(object):
   def createActionServer(self, act_id, act_type, act_cb, fname):
     global ros_node
 
-    print("=== Not Supported ===")
     if __ros_version__ == 1:
-      self._port=actionlib.SimpleActionServer(act_id,act_type,execute_cb=act_cb)
+      self.type = 'RosServer'
+      env=getGlobals()
+
+      if act_type.find('.') > 0:
+        pkgname,msg = srv_type.split('.',1)
+        exec_str="import %s.msg as %s" % (pkgname, pkgname)
+        try:
+          exec(exec_str, env)
+        except:
+          pass
+
+      self._action_type=eval(act_type+"Action", env)
+      self._action_feedback=eval(act_type+"Feedback", env)
+      self._action_result=eval(act_type+"Result", env)
+
+      self._port=actionlib.SimpleActionServer(act_id, self._action_type,
+                execute_cb=eval(act_cb, env))
       return self._port
     else:
       print("=== Not Supported ===")
@@ -511,13 +526,33 @@ class RosAdaptor(object):
   #
   def createActionClient(self, act_id, act_type):
     global ros_node
-    print("=== Not Supported ===")
+
     if __ros_version__ == 1:
-      self._port=actionlib.SimpleActionClient(act_id,act_type)
+      if act_type.find('.') > 0:
+        pkgname,msg = srv_type.split('.',1)
+        exec_str="import %s.msg as %s" % (pkgname, pkgname)
+        try:
+          exec(exec_str, env)
+        except:
+          pass
+
+      self._action_type=eval(act_type+"Action", env)
+      self._action_goal=eval(act_type+"Goal", env)
+
+      self._port=actionlib.SimpleActionClient(act_id, self._action_type)
       return self._port
     else:
       print("=== Not Supported ===")
     return None
+
+  def newActionGoal(self):
+    try:
+      return self._action_goal()
+    except:
+      pass
+    return None
+
+ 
   #
   #
   def setActionGoal(self, goal):

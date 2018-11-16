@@ -171,6 +171,8 @@ class eSEAT_Core:
 
         self.ros_server = {}
         self.ros_client = {}
+        self.ros_action_server = {}
+        self.ros_action_client = {}
 
         self._data = {}
         self._port = {}
@@ -308,10 +310,40 @@ class eSEAT_Core:
           traceback.print_exc()
           print("Error in callRosService %s" % name)
           
+    #
+    # for Ros Service
+    def createRosActionServer(self, name, act_id, act_type, act_cb, fname):
+      if __ros_version__ > 0:
+        self.initRosNode()
+
+        if act_id is None:
+          act_id=name
+          name=name+"_act_server"
+
+        self.adaptors[name]=RosAdaptor(name, 'ActionServer')
+        self.adaptors[name].createActionServer(act_id, act_type, act_cb, fname) 
+        self.ros_action_server[act_id]=self.adaptors[name]
+        
+    def createRosClient(self, name, act_id, act_type):
+      if __ros_version__ > 0:
+        self.initRosNode()
+
+        if srv_name is None:
+          srv_name=name
+          name=name+"_act_client"
+
+        self.adaptors[name]=RosAdaptor(name, 'ActionClient')
+        self.adaptors[name].createActionClient(act_id, act_type) 
+        self.ros_action_client[act_id]=self.adaptors[name]
+
+    #
+    #  ros_spin
     def startRosService(self):
         if self.ros_node:
           startRosService()
 
+    #
+    #
     def get_caller_id(self):
       if __ros_version__ == 1:
         return rospy.get_caller_id()
@@ -365,6 +397,18 @@ class eSEAT_Core:
                 srv_name=tag.get('service')
                 srv_type=tag.get('service_type')
                 self.createRosClient(name, srv_name, srv_type)
+
+            elif type == 'ros_action_server' :
+                fname=tag.get('file')
+                act_id=tag.get('action_id')
+                act_type=tag.get('action_type')
+                act_cb=tag.get('callback')
+                self.createRosActionServer(name, act_id, act_type, act_cb, fname)
+
+            elif type == 'ros_action_client' :
+                act_id=tag.get('action_id')
+                act_type=tag.get('action_type')
+                self.createRosActionClient(name, act_id, act_type)
 
             else:
                 self._logger.warn(u"invalid type: " + type + ": " + name)
