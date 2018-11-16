@@ -181,6 +181,7 @@ class RosAdaptor(object):
     self.type=typ
     self._port=None
     self.service_dtype=None
+    self.service_call=None
     self.service_timeout=1.0
     self.stop_event=threading.Event()
 
@@ -381,6 +382,13 @@ class RosAdaptor(object):
         while not self._port.wait_for_service(timeout_sec=self.service_timeout):
           ros_node.get_logger().info('service not available....')
           return None
+
+        try:
+          if self.service_call.done() is None:
+            print("Another service calling...")
+            return None
+        except:
+          pass
         #
         #
         req=self.service_dtype.Request()
@@ -391,16 +399,20 @@ class RosAdaptor(object):
         #
         #
         try:
-          future = self._port.call_async(req)
+          self.service_call = self._port.call_async(req)
           #rclpy.spin_until_future_complete(ros_node, future)
-          while not future.done() : pass
-          if future.result() is None:
-            print(futire.exception())
-          return future.result()
+
+          while not self.service_call.done() : pass
+          if self.service_call.result() is None:
+            print(self.service_call.exception())
+
+          return self.service_call.result()
+
         except AttributeError: 
           self._port.call(req)
           self._port.wait_for_future()
           return self._port.response
+
         except:
           traceback.print_exc()
 
@@ -413,6 +425,71 @@ class RosAdaptor(object):
       traceback.print_exc()
       print("Error in callRosService [%s]" % name)
       return None
+
+  #
+  #
+  def callAsyncRosService(self, name, *args):
+    global ros_node
+    try:
+      if __ros_version__ == 1:
+        print("Sorry, rospy.ServiceService doesn't support async call, please use actinlib...")
+        return None
+
+      elif __ros_version__ == 2:
+        while not self._port.wait_for_service(timeout_sec=self.service_timeout):
+          ros_node.get_logger().info('service not available....')
+          return None
+
+        try:
+          if self.service_call.done() is None:
+            print("Another service calling...")
+            return None
+        except:
+          pass
+        #
+        #
+        req=self.service_dtype.Request()
+        i=0
+        for x in req.__slots__:
+          req.__setattr__(x, args[i])
+          i = i+1
+        #
+        #
+        try:
+          self.service_call=self._port.call_async(req)
+          return self.service_call
+
+        except AttributeError: 
+          print("Sorry, ardernt doesn't support async call, please use bouncy...")
+          return None
+
+        except:
+          traceback.print_exc()
+
+      else:
+        print("Unexpected error")
+
+      return None
+
+    except:
+      traceback.print_exc()
+      print("Error in callRosService [%s]" % name)
+      return None
+
+  def waitForServiceResponse(self):
+    try:
+      while self.service_call.done() is None: pass
+    except:
+      pass
+    return self.service_call.result()
+
+  def checkServiceResponse(self):
+    try:
+      return self.service_call.done()
+    except:
+      pass
+    return None
+        
 
   #
   #
