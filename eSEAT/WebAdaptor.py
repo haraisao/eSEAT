@@ -307,8 +307,8 @@ class WebSocketServer(SocketPort):
       res = self.wait_for_read(timeout) 
       if res == 1:
         self.accept_service()
-      elif res == -1:
-        self.terminate()
+      #elif res == -1:
+      #  self.terminate()
       else:
         pass
       time.sleep(0.01) 

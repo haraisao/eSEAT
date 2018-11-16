@@ -169,6 +169,9 @@ class eSEAT_Core:
         self.adaptors = {}
         self.adaptortype = {}
 
+        self.ros_server = {}
+        self.ros_client = {}
+
         self._data = {}
         self._port = {}
         self.popen = []
@@ -194,13 +197,9 @@ class eSEAT_Core:
     #
     #
     def exit_comp(self):
-        #if self.webServer :
-        #    self.webServer.terminate()
-        #    time.sleep( 1 )
         for adp in self.adaptors:
            if self.adaptors[adp] != self:
                self.adaptors[adp].terminate()
-        #print ("Call eSEAT_Core.exit.. done")
         return
 
     def setLogFlag(self, flg):
@@ -219,8 +218,8 @@ class eSEAT_Core:
     def createWebAdaptor(self, name, port, index, whost="", dirname="html"):
         if self.webServer  is None:
             comet_reader=CometReader(self,dirname)
-            #self.adaptors[name] = WebSocketServer(CometReader(self,dirname), name, "", port, index)
-            self.adaptors[name] = WebSocketServer(comet_reader, name, "", port, index)
+            self.adaptors[name] = WebSocketServer(comet_reader,
+                                          name, "", port, index)
 
             if self.adaptors[name].bind_res != 1 :
                 print ("=== Bind ERROR ===")
@@ -282,19 +281,29 @@ class eSEAT_Core:
       if __ros_version__ > 0:
         self.initRosNode()
 
+        if srv_name is None:
+          srv_name=name
+          name=name+"_ros_server"
+
         self.adaptors[name]=RosAdaptor(name, 'Server')
         self.adaptors[name].createServer(srv_name, srv_type, srv_impl, fname) 
+        self.ros_server[srv_name]=self.adaptors[name]
         
     def createRosClient(self, name, srv_name, srv_type):
       if __ros_version__ > 0:
         self.initRosNode()
 
+        if srv_name is None:
+          srv_name=name
+          name=name+"_ros_client"
+
         self.adaptors[name]=RosAdaptor(name, 'Client')
         self.adaptors[name].createClient(srv_name, srv_type) 
+        self.ros_client[srv_name]=self.adaptors[name]
 
     def callRosService(self, name, *args):
         try:
-          return self.adaptors[name].callRosService(name, *args)
+          return self.ros_client[name].callRosService(name, *args)
         except:
           traceback.print_exc()
           print("Error in callRosService %s" % name)

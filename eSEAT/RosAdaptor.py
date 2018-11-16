@@ -405,7 +405,8 @@ class RosAdaptor(object):
       return None
 
     except:
-      print("Error in callRosService " % name)
+      traceback.print_exc()
+      print("Error in callRosService [%s]" % name)
       return None
 
   #
