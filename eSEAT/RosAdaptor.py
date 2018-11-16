@@ -26,9 +26,13 @@ try:
   import rospy
   import roslib
   import roslib.message
+
+  import actionlib
+
   import std_msgs.msg as std_msgs
   import geometry_msgs.msg as geometry_msgs
   import sensor_msgs.msg as sensor_msgs
+
   __ros_version__=1
   sys.path.append(os.path.realpath('ros/lib/site-packages'))
   os.environ['ROS_PYTHON_LOG_CONFIG_FILE'] = '' 
@@ -489,7 +493,59 @@ class RosAdaptor(object):
     except:
       pass
     return None
-        
+
+  #
+  #
+  def createActionServer(self, act_id, act_type, act_cb, fname):
+    global ros_node
+
+    print("=== Not Supported ===")
+    if __ros_version__ == 1:
+      self._port=actionlib.SimpleActionServer(act_id,act_type,execute_cb=act_cb)
+      return self._port
+    else:
+      print("=== Not Supported ===")
+
+    return None
+  #
+  #
+  def createActionClient(self, act_id, act_type):
+    global ros_node
+    print("=== Not Supported ===")
+    if __ros_version__ == 1:
+      self._port=actionlib.SimpleActionClient(act_id,act_type)
+      return self._port
+    else:
+      print("=== Not Supported ===")
+    return None
+  #
+  #
+  def setActionGoal(self, goal):
+    try:
+      self._port.wait_for_server()
+      self._port.send_goal(goal)
+    except:
+      pass
+    return 
+  #
+  #
+  def waitAction(self, sec=5.0):
+    try:
+      self._port.wait_for_result(rospy.Duration.from_sec(sec))
+      return self._port.get_status()
+    except:
+      pass
+    return None
+  #
+  #
+  def waitActionResult(self):
+    try:
+      self._port.wait_for_result()
+      return self._port.get_result()
+    except:
+      pass
+    return None
+  #
 
   #
   #
