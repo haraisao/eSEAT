@@ -505,6 +505,15 @@ class eSEAT_Core:
         except:
             self._logger.error(traceback.format_exc())
 
+    #
+    #
+    def onCall(self, name, data, key="oncall"):
+        self.resetTimer()
+        try:
+            self.processOnDataIn(name, data.data, key)
+        except:
+            self._logger.error(traceback.format_exc())
+
     ############################################
     #   main event process 
     #
@@ -642,20 +651,21 @@ class eSEAT_Core:
         setGlobals('julius_result', None)
         return
 
-    def processOnDataIn(self, name, data):
+    def processOnDataIn(self, name, data, key="ondata"):
         self._logger.info("got input from %s" %  (name,))
-        cmds = self.lookupWithDefault(self.currentstate, name, "ondata")
+        cmds = self.lookupWithDefault(self.currentstate, name, key)
 
         if not cmds:
             self._logger.info("no command found")
             return False
 
+        res=True
         for cmd in cmds:
             self.initDataIn(data)
             cmd.execute_pre_script()
-            cmd.executeEx(data)
+            res = cmd.executeEx(data)
 
-        return True
+        return res
 
        
     ################################################################
