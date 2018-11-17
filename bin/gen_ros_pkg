@@ -21,7 +21,7 @@ def gen_package_dir(package):
   except:
     pass
 
-  for gentype in ('msg', 'srv'):
+  for gentype in ('msg', 'srv', 'action'):
     dirname=os.path.join(package_path, gentype)
     try:
       os.makedirs(dirname)
