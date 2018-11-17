@@ -324,7 +324,7 @@ class eSEAT_Core:
         self.adaptors[name].createActionServer(act_id, act_type, act_cb, fname) 
         self.ros_action_server[act_id]=self.adaptors[name]
         
-    def createRosClient(self, name, act_id, act_type):
+    def createRosActionClient(self, name, act_id, act_type):
       if __ros_version__ > 0:
         self.initRosNode()
 
