@@ -6,30 +6,31 @@
         seat.setRate(1)
         success = True
         server=seat.ros_action_server['fibonacci']
-        _feedback = server._action_feedback()
+
+        _feedback = server.newActionFeedback()
         
         _feedback.sequence = []
         _feedback.sequence.append(0)
         _feedback.sequence.append(1)
         
-        seat.loginfo('%s: Executing, creating fibonacci sequence of order %i with seeds %i, %i' % (server._action_name, goal.order, _feedback.sequence[0], _feedback.sequence[1]))
+        seat.loginfo('%s: Executing, creating fibonacci sequence of order %i with seeds %i, %i' % (server.getActionName(), goal.order, _feedback.sequence[0], _feedback.sequence[1]))
         
         for i in range(1, goal.order):
-          if server._port.is_preempt_requested():
-            seat.loginfo('%s: Preempted' % server._action_name)
-            server._port.set_preempted()
+          if server.isPreemptRequested():
+            seat.loginfo('%s: Preempted' % server.getActionName() )
+            server.setPreempted()
             success = False
             break
           _feedback.sequence.append(_feedback.sequence[i] + _feedback.sequence[i-1])
 
-          server._port.publish_feedback(_feedback)
+          server.publishFeedback(_feedback)
           seat.sleep()
           
         if success:
-          _result=server._action_result()
+          _result=server.newActionResult()
           _result.sequence = _feedback.sequence
-          seat.loginfo('%s: Succeeded' % server._action_name)
-          server._port.set_succeeded(_result)
+          seat.loginfo('%s: Succeeded' % server.getActionName() )
+          server.setSucceeded(_result)
         
         return
     </script>

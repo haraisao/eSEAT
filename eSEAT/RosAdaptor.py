@@ -552,13 +552,70 @@ class RosAdaptor(object):
       print("=== Not Supported ===")
     return None
 
+  #
+  #
   def newActionGoal(self, *arg, **kwargs):
     try:
       return self._action_goal(*arg, **kwargs)
     except:
       pass
     return None
-
+  #
+  #
+  def newActionFeedback(self, *arg, **kwargs):
+    try:
+      return self._action_feedback(*arg, **kwargs)
+    except:
+      pass
+    return None
+  #
+  #
+  def newActionResult(self, *arg, **kwargs):
+    try:
+      return self._action_result(*arg, **kwargs)
+    except:
+      pass
+    return None
+  #
+  # 
+  def isPreemptRequested(self):
+    try:
+      return self._port.is_preempt_requested()
+    except:
+      pass
+    return False
+  #
+  # 
+  def setPreempted(self):
+    try:
+      return self._port.set_preempted()
+    except:
+      pass
+    return None
+  #
+  # 
+  def getActionName(self):
+    try:
+      return self._action_name
+    except:
+      pass
+    return False
+  #
+  # 
+  def publishFeedback(self, val):
+    try:
+      self._port.publish_feedback(val)
+    except:
+      pass
+    return
+  #
+  # 
+  def setSucceeded(self, val):
+    try:
+      self._port.set_succeeded(val)
+    except:
+      pass
+    return
   #
   # 
   def startActionServer(self):

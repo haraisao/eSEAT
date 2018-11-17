@@ -8,10 +8,11 @@
   <state name="main_state">
    <onentry>
     <script>
-     goal=seat.ros_action_client['fibonacci'].newActionGoal(order=10)
-     seat.ros_action_client['fibonacci'].setActionGoal(goal)
+     client=seat.ros_action_client['fibonacci']
 
-     result=seat.ros_action_client['fibonacci'].waitActionResult()
+     goal=client.newActionGoal(order=10)
+     client.setActionGoal(goal)
+     result=client.waitActionResult()
 
      print("  Result==>", result)
      seat.exit()
