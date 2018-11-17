@@ -510,9 +510,10 @@ class eSEAT_Core:
     def onCall(self, name, data, key="oncall"):
         self.resetTimer()
         try:
-            self.processOnDataIn(name, data.data, key)
+            return self.processOnDataIn(name, data.data, key)
         except:
             self._logger.error(traceback.format_exc())
+        return None
 
     ############################################
     #   main event process 
