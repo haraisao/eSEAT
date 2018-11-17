@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<seatml>
+  <general name="Fibonacci_server">
+    <script>
+      def execute_cb(goal):
+        seat.setRate(1)
+        success = True
+        server=seat.ros_action_server['fibonacci']
+        _feedback = server._action_feedback()
+        
+        _feedback.sequence = []
+        _feedback.sequence.append(0)
+        _feedback.sequence.append(1)
+        
+        seat.loginfo('%s: Executing, creating fibonacci sequence of order %i with seeds %i, %i' % (server._action_name, goal.order, _feedback.sequence[0], _feedback.sequence[1]))
+        
+        for i in range(1, goal.order):
+          if server._port.is_preempt_requested():
+            seat.loginfo('%s: Preempted' % server._action_name)
+            server._port.set_preempted()
+            success = False
+            break
+          _feedback.sequence.append(_feedback.sequence[i] + _feedback.sequence[i-1])
+
+          server._port.publish_feedback(_feedback)
+          seat.sleep()
+          
+        if success:
+          _result=server._action_result()
+          _result.sequence = _feedback.sequence
+          seat.loginfo('%s: Succeeded' % server._action_name)
+          server._port.set_succeeded(_result)
+        
+        return
+    </script>
+
+    <adaptor name="fibonacci" type="ros_action_server"
+             action_type="learning_actionlib.Fibonacci"
+             callback="execute_cb"
+             />
+  </general>
+
+  <state name="main_state">
+  </state>
+</seatml>
+

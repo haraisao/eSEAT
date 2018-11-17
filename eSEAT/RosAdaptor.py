@@ -511,12 +511,14 @@ class RosAdaptor(object):
         except:
           pass
 
+      self._action_name=act_id
       self._action_type=eval(act_type+"Action", env)
       self._action_feedback=eval(act_type+"Feedback", env)
       self._action_result=eval(act_type+"Result", env)
 
       self._port=actionlib.SimpleActionServer(act_id, self._action_type,
-                execute_cb=eval(act_cb, env))
+                execute_cb=eval(act_cb, env), auto_start=False)
+      self._port.start()
       return self._port
     else:
       print("=== Not Supported ===")
@@ -540,6 +542,7 @@ class RosAdaptor(object):
         except:
           pass
 
+      self._action_id=act_id
       self._action_type=eval(act_type+"Action", env)
       self._action_goal=eval(act_type+"Goal", env)
 
@@ -549,14 +552,21 @@ class RosAdaptor(object):
       print("=== Not Supported ===")
     return None
 
-  def newActionGoal(self):
+  def newActionGoal(self, *arg, **kwargs):
     try:
-      return self._action_goal()
+      return self._action_goal(*arg, **kwargs)
     except:
       pass
     return None
 
- 
+  #
+  # 
+  def startActionServer(self):
+    try:
+      self._port.start()
+    except:
+      pass
+    return 
   #
   #
   def setActionGoal(self, goal):
