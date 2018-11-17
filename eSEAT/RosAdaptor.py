@@ -500,11 +500,11 @@ class RosAdaptor(object):
     global ros_node
 
     if __ros_version__ == 1:
-      self.type = 'RosServer'
+      self.type = 'RosActionServer'
       env=getGlobals()
 
       if act_type.find('.') > 0:
-        pkgname,msg = srv_type.split('.',1)
+        pkgname,msg = act_type.split('.',1)
         exec_str="import %s.msg as %s" % (pkgname, pkgname)
         try:
           exec(exec_str, env)
@@ -528,8 +528,12 @@ class RosAdaptor(object):
     global ros_node
 
     if __ros_version__ == 1:
+      self.type = 'RosActionClient'
+      env=getGlobals()
+
       if act_type.find('.') > 0:
-        pkgname,msg = srv_type.split('.',1)
+        pkgname,msg = act_type.split('.',1)
+
         exec_str="import %s.msg as %s" % (pkgname, pkgname)
         try:
           exec(exec_str, env)

@@ -328,8 +328,8 @@ class eSEAT_Core:
       if __ros_version__ > 0:
         self.initRosNode()
 
-        if srv_name is None:
-          srv_name=name
+        if act_id is None:
+          act_id=name
           name=name+"_act_client"
 
         self.adaptors[name]=RosAdaptor(name, 'ActionClient')
