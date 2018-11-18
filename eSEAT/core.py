@@ -521,7 +521,7 @@ class eSEAT_Core:
     def onCall(self, name, data, key="oncall"):
         self.resetTimer()
         try:
-            return self.processOnDataIn(name, data.data, key)
+            return self.processOnDataIn(name, data, key)
         except:
             self._logger.error(traceback.format_exc())
         return None
