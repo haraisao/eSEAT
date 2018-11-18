@@ -336,6 +336,17 @@ class eSEAT_Core:
         self.adaptors[name].createActionClient(act_id, act_type) 
         self.ros_action_client[act_id]=self.adaptors[name]
 
+    def getRosActionServer(self, name):
+      try:
+        return self.ros_action_server[name]
+      except:
+        return None
+
+    def getRosActionClient(self, name):
+      try:
+        return self.ros_action_client[name]
+      except:
+        return None
     #
     #  ros_spin
     def startRosService(self):
