@@ -290,7 +290,8 @@ class eSEAT_Core:
         self.adaptors[name]=RosAdaptor(name, 'Server')
         self.adaptors[name].createServer(srv_name, srv_type, srv_impl, fname) 
         self.ros_server[srv_name]=self.adaptors[name]
-        
+    #
+    #     
     def createRosClient(self, name, srv_name, srv_type):
       if __ros_version__ > 0:
         self.initRosNode()
@@ -302,7 +303,8 @@ class eSEAT_Core:
         self.adaptors[name]=RosAdaptor(name, 'Client')
         self.adaptors[name].createClient(srv_name, srv_type) 
         self.ros_client[srv_name]=self.adaptors[name]
-
+    #
+    #
     def callRosService(self, name, *args):
         try:
           return self.ros_client[name].callRosService(name, *args)
@@ -323,7 +325,8 @@ class eSEAT_Core:
         self.adaptors[name]=RosAdaptor(name, 'ActionServer')
         self.adaptors[name].createActionServer(act_id, act_type, act_cb, fname) 
         self.ros_action_server[act_id]=self.adaptors[name]
-        
+    #
+    #     
     def createRosActionClient(self, name, act_id, act_type):
       if __ros_version__ > 0:
         self.initRosNode()
@@ -335,13 +338,15 @@ class eSEAT_Core:
         self.adaptors[name]=RosAdaptor(name, 'ActionClient')
         self.adaptors[name].createActionClient(act_id, act_type) 
         self.ros_action_client[act_id]=self.adaptors[name]
-
+    #
+    #
     def getRosActionServer(self, name):
       try:
         return self.ros_action_server[name]
       except:
         return None
-
+    #
+    #
     def getRosActionClient(self, name):
       try:
         return self.ros_action_client[name]
@@ -361,7 +366,6 @@ class eSEAT_Core:
       elif __ros_version__ == 2:
         return ""
       return None
-     
 
     #
     #  Create Adaptor called by SEATML_Parser
@@ -478,17 +482,23 @@ class eSEAT_Core:
         except:
             self._logger.error("Fail to sending message to %s" % (name,))
 
+    #
+    #
     def sendto(self, name, data):
         if name in self.adaptors :
             self.adaptors[name].send(name, data)
 
+    #
+    #
     def set_result(self, val):
         getGlobals()['__retval__'] = True
         getGlobals()['rtc_result'] = val
-    
+    #
+    #
     def get_in_data(self):
         return getGlobals()['rtc_in_data']
-
+    #
+    #
     def get_web_data(self):
         return getGlobals()['rtc_web_data']
 
@@ -620,13 +630,16 @@ class eSEAT_Core:
 
         self.resetTimer()
         return True
-
+    #
+    #
     def resetTimer(self):
         self.last_on_data = time.time()
-
+    #
+    #
     def setTimeout(self, sec):
         self._on_timeout = sec
-
+    #
+    #
     def isTimeout(self):
        return ( self._on_timeout > 0 and time.time() - self.last_on_data >= self._on_timeout )
 
@@ -662,7 +675,8 @@ class eSEAT_Core:
         setGlobals('rtc_in_data', data)
         setGlobals('julius_result', None)
         return
-
+    #
+    #
     def processOnDataIn(self, name, data, key="ondata"):
         self._logger.info("got input from %s" %  (name,))
         cmds = self.lookupWithDefault(self.currentstate, name, key)
@@ -678,8 +692,7 @@ class eSEAT_Core:
             res = cmd.executeEx(data)
 
         return res
-
-       
+  
     ################################################################
     #  Lookup Registered Commands with default
     #
@@ -842,7 +855,8 @@ class eSEAT_Core:
                 newlst.append(p)
         self.popen = newlst
         return res
-
+    #
+    #
     def killSubprocess(self, pid=None):
         for p in self.popen:
             p.poll()
@@ -861,7 +875,8 @@ class eSEAT_Core:
                 a.terminate()
         if self.root : self.root.quit()
         return 
-
+    #
+    #
     def loginfo(self, msg):
         self._logger.info(msg)
 
@@ -904,7 +919,8 @@ class eSEAT_Gui:
         def callback(event=None):
            self.processResult("gui", name)
         return callback
-
+    #
+    #
     def mkinputcallback(self, name):
         def callback(event=None):
            self.processResult("gui", name)
@@ -917,7 +933,8 @@ class eSEAT_Gui:
     def newFrame(self, name):
         self.frames[name] = Frame(self.root)
         return self.frames[name]
-
+    #
+    #
     def setTitle(self, name):
         if self.root : self.root.title(name)
 
@@ -1244,7 +1261,6 @@ class eSEAT_Gui:
             return val
         except:
             return ""
-
     
     ################# R A D I O B U T T O N ################### 
     ## Create Radiobutton Item
@@ -1491,7 +1507,7 @@ class eSEAT_Gui:
 
 #   End of eSEAT_Gui
 ###########################################################
-
+#
 class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
     def __init__(self, infoflag=False):
         eSEAT_Core.__init__(self) 
@@ -1506,7 +1522,8 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
         self.setRate(1)
 
         self.setLogFlag(infoflag)
-
+    #
+    #
     def exit(self, flag=False):
         try:
             if self.root : self.root.quit()
@@ -1515,7 +1532,8 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
             pass
 
         return True
-
+    #
+    #
     def setRate(self, hz):
         try:
           self.rate_hz=hz
@@ -1527,7 +1545,8 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
             self.rate=None
         except:
           self.rate=None
-          
+    #
+    #      
     def sleep(self):
         if self.rate:
             self.rate.sleep()
@@ -1538,24 +1557,26 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
             else:
               time.sleep(self.intval - val)
             self._last_process_time=time.time()
-
+    # 
+    #
     def get_time(self):
         try:
             return rospy.get_time()
         except:
             return time.time()
-
+    #
+    #
     def setInstanceName(self,name):
         self.name=name
         return True
-
+    #
+    #
     def getInstanceName(self):
         return self.name
     #
     #
     def onInitialize(self):
         return True
-    
 
     #########################
     #  onActivated
@@ -1748,15 +1769,18 @@ class eSEAT_Node_Manager:
             sys.exit(0)
           except:
             pass
-
+    #
+    #
     def shutdown(self):
         self.exit()
-
+    #
+    #
     def stop(self):
         self.stop_event.set()
         if self.main_thread:
             self.main_thread.join()
-
+    #
+    #
     def mainloop(self):
         if self.comp :
             self.comp.resetTimer()
@@ -1764,15 +1788,14 @@ class eSEAT_Node_Manager:
                 self.comp.onExecute(0)
 
         return True
-
+    #
+    #
     def startLoop(self, flag=False):
         if flag :
             self.main_thread = threading.Thread(target=self.mainloop)
             self.main_thread.start()
         else:
             self.mainloop()
-
-
 #
 #
 #
@@ -1819,4 +1842,3 @@ def main_node(mlfile=None, daemon=False):
     print ( "...Terminate." )
 
     seatmgr.exit()
-

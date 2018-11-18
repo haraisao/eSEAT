@@ -134,21 +134,25 @@ def createRate(hz):
 def getRosNode():
   global ros_node
   return ros_node
-  
+#
+#   
 def getRosPorts():
   global ros_ports
   return ros_ports
-  
+#
+#   
 def addRosPorts(p):
   global ros_ports
   ros_ports.append(p)
   return ros_ports
-  
+#
+#   
 def delRosPorts(p):
   global ros_ports
   ros_ports.remove(p)
   return ros_ports
-  
+#
+#   
 def numRosPorts():
   global ros_ports
   return len(ros_ports)
@@ -161,7 +165,8 @@ def service_loop():
     while ros_thread_loop :
       rclpy.spin_once(ros_node, timeout_sec=1.0)
     print("..Terminate RosThread")
-
+#
+#
 def startRosService():
   global ros_thread
   global ros_thread_loop
@@ -172,11 +177,11 @@ def startRosService():
       ros_thread.start()
     else:
       print("Warning: ros_thread is already started")
-
+#
+#
 def stopRosService():
   global ros_thread_loop
   ros_thread_loop=False
-
 #
 #
 class RosAdaptor(object):
@@ -188,7 +193,6 @@ class RosAdaptor(object):
     self.service_call=None
     self.service_timeout=1.0
     self.stop_event=threading.Event()
-
   #
   #
   def send(self, name, val):
@@ -197,7 +201,8 @@ class RosAdaptor(object):
         self.publish(val)
     else:
       print("Error: mismatch topic name")
-
+  #
+  #
   def create(self, name, datatype, arg):
     if self.type == 'Publisher':
       self.createPublisher(name, datatype, arg)
@@ -299,7 +304,6 @@ class RosAdaptor(object):
     else:
       print("Unexpected error")
       return None
-  
 
   #
   #
@@ -479,14 +483,16 @@ class RosAdaptor(object):
       traceback.print_exc()
       print("Error in callRosService [%s]" % name)
       return None
-
+  #
+  #
   def waitForServiceResponse(self):
     try:
       while self.service_call.done() is None: pass
     except:
       pass
     return self.service_call.result()
-
+  #
+  #
   def checkServiceResponse(self):
     try:
       return self.service_call.done()
@@ -651,7 +657,6 @@ class RosAdaptor(object):
     except:
       pass
     return None
-  #
 
   #
   #
