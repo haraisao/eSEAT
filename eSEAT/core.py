@@ -535,6 +535,15 @@ class eSEAT_Core:
         except:
             self._logger.error(traceback.format_exc())
         return None
+    #
+    #
+    def onCallback(self, name, *data):
+        self.resetTimer()
+        try:
+            return self.processOnDataIn(name, data, "callback")
+        except:
+            self._logger.error(traceback.format_exc())
+        return None
 
     ############################################
     #   main event process 
@@ -673,6 +682,7 @@ class eSEAT_Core:
     def initDataIn(self, data):
         setGlobals('seat', self)
         setGlobals('rtc_in_data', data)
+        setGlobals('seat_argv', data)
         setGlobals('julius_result', None)
         return
     #
