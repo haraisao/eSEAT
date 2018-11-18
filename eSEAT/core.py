@@ -537,10 +537,14 @@ class eSEAT_Core:
         return None
     #
     #
-    def onCallback(self, name, *data):
+    def onCallback(self, name, *data, **kwarg):
         self.resetTimer()
         try:
-            return self.processOnDataIn(name, data, "callback")
+            if 'key' in kwarg:
+               key=kwarg['key']
+            else:
+               key="callback"
+            return self.processOnDataIn(name, data, key)
         except:
             self._logger.error(traceback.format_exc())
         return None
