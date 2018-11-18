@@ -36,7 +36,7 @@
     </script>
 
     <adaptor name="fibonacci" type="ros_action_server"
-             action_type="learning_actionlib.Fibonacci"
+             action_type="actionlib_tutorials.Fibonacci"
              callback="execute_cb"
              />
   </general>
