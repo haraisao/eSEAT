@@ -252,7 +252,7 @@ class eSEAT_Core:
       if __ros_version__ > 0:
         self.initRosNode()
         if self.ros_node:
-          self.adaptors[name]=RosAdaptor(name, 'Publisher')
+          self.adaptors[name]=RosAdaptor(name, 'Publisher', self)
           self.adaptors[name].createPublisher(name, datatype, size)
 
     #
@@ -269,7 +269,7 @@ class eSEAT_Core:
       if __ros_version__ > 0:
         self.initRosNode()
         if self.ros_node:
-          self.adaptors[name]=RosAdaptor(name, 'Subscriber')
+          self.adaptors[name]=RosAdaptor(name, 'Subscriber', self)
           if not callback:
             callback=lambda x: eSEAT_Core.onData(self,name, x)
           elif type(callback) == str:
@@ -287,7 +287,7 @@ class eSEAT_Core:
           srv_name=name
           name=name+"_ros_server"
 
-        self.adaptors[name]=RosAdaptor(name, 'Server')
+        self.adaptors[name]=RosAdaptor(name, 'Server', self)
         self.adaptors[name].createServer(srv_name, srv_type, srv_impl, fname) 
         self.ros_server[srv_name]=self.adaptors[name]
     #
@@ -300,7 +300,7 @@ class eSEAT_Core:
           srv_name=name
           name=name+"_ros_client"
 
-        self.adaptors[name]=RosAdaptor(name, 'Client')
+        self.adaptors[name]=RosAdaptor(name, 'Client', self)
         self.adaptors[name].createClient(srv_name, srv_type) 
         self.ros_client[srv_name]=self.adaptors[name]
     #
@@ -311,6 +311,7 @@ class eSEAT_Core:
         except:
           traceback.print_exc()
           print("Error in callRosService %s" % name)
+          return None
           
     #
     # for Ros Service
@@ -322,7 +323,7 @@ class eSEAT_Core:
           act_id=name
           name=name+"_act_server"
 
-        self.adaptors[name]=RosAdaptor(name, 'ActionServer')
+        self.adaptors[name]=RosAdaptor(name, 'ActionServer', self)
         self.adaptors[name].createActionServer(act_id, act_type, act_cb, fname) 
         self.ros_action_server[act_id]=self.adaptors[name]
     #
@@ -335,7 +336,7 @@ class eSEAT_Core:
           act_id=name
           name=name+"_act_client"
 
-        self.adaptors[name]=RosAdaptor(name, 'ActionClient')
+        self.adaptors[name]=RosAdaptor(name, 'ActionClient', self)
         self.adaptors[name].createActionClient(act_id, act_type) 
         self.ros_action_client[act_id]=self.adaptors[name]
     #
@@ -700,10 +701,15 @@ class eSEAT_Core:
             return False
 
         res=True
-        for cmd in cmds:
+        if type(cmds) is list:
+          for cmd in cmds:
             self.initDataIn(data)
             cmd.execute_pre_script()
             res = cmd.executeEx(data)
+        else:
+          self.initDataIn(data)
+          cmds.execute_pre_script()
+          res = cmds.executeEx(data)
 
         return res
   

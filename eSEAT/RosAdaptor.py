@@ -185,8 +185,9 @@ def stopRosService():
 #
 #
 class RosAdaptor(object):
-  def __init__(self,name,typ):
+  def __init__(self, name, typ, comp):
     self.name=name
+    self.comp=comp
     self.type=typ
     self._port=None
     self.service_dtype=None
@@ -338,8 +339,13 @@ class RosAdaptor(object):
     self.service_dtype=eval(srv_type, env)
 
     if __ros_version__ == 1:
-      resfunc=eval(srv_type+"Response", env)
-      srv_func=lambda x :  resfunc(eval(srv_impl, env)(x))
+      if srv_impl is None:
+        resfunc=eval(srv_type+"Response", env)
+        srv_func=lambda x :  resfunc(self.comp.onCallback(srv_name, x, key='ros_service'))
+      else:
+        resfunc=eval(srv_type+"Response", env)
+        srv_func=lambda x :  resfunc(eval(srv_impl, env)(x))
+      
 
       self._port=rospy.Service(srv_name, self.service_dtype, srv_func) 
 
