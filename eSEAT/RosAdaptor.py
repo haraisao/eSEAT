@@ -649,10 +649,10 @@ class RosAdaptor(object):
     return 
   #
   #
-  def setActionGoal(self, goal):
+  def setActionGoal(self, goal, **kwargs):
     try:
       self._port.wait_for_server()
-      self._port.send_goal(goal)
+      self._port.send_goal(goal, **kwargs)
     except:
       pass
     return 
