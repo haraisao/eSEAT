@@ -350,7 +350,12 @@ class RosAdaptor(object):
       self._port=rospy.Service(srv_name, self.service_dtype, srv_func) 
 
     elif __ros_version__ == 2:
-      self._port=ros_node.create_service(self.service_dtype, srv_name, eval(srv_impl, env)) 
+      if srv_impl is None:
+        srv_func=lambda x,y : self.comp.onCallback(srv_name, x, y, key='ros_service')
+      else:
+        srv_func=eval(srv_impl, env)
+
+      self._port=ros_node.create_service(self.service_dtype, srv_name, srv_func) 
       addRosPorts(self._port)
     else:
       print("Unexpected error")
@@ -528,8 +533,14 @@ class RosAdaptor(object):
       self._action_feedback=eval(act_type+"Feedback", env)
       self._action_result=eval(act_type+"Result", env)
 
+      if act_cb is None:
+         action_cb = lambda x : self.comp.onCallback(act_id, x, key='ros_action')
+      else:
+         action_cb = eval(act_cb, env)
+
       self._port=actionlib.SimpleActionServer(act_id, self._action_type,
-                execute_cb=eval(act_cb, env), auto_start=False)
+                execute_cb=action_cb, auto_start=False)
+
       self._port.start()
       return self._port
     else:
