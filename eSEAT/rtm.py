@@ -420,7 +420,10 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #
     #
     def newData(self,name):
-        return instantiateDataType(self._datatype[name])
+        if self.adaptors[name] == self:
+          return instantiateDataType(self._datatype[name])
+        else:
+          return eSEAT_Core.newData(self, name)
 
     #
     #

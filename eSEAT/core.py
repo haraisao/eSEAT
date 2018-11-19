@@ -368,6 +368,17 @@ class eSEAT_Core:
       return None
 
     #
+    #
+    def newData(self, name):
+      try:
+        if __ros_version__ > 0 and isinstance(self.adaptors[name], RosAdaptor):
+          return self.adaptors[name].newMessage()
+        else:
+          return ""
+      except:
+        return ""
+
+    #
     #  Create Adaptor called by SEATML_Parser
     #
     def createAdaptor(self, compname, tag, env=globals()):
