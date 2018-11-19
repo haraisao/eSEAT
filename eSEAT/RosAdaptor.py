@@ -658,6 +658,31 @@ class RosAdaptor(object):
     return 
   #
   #
+  def setActionGoalEx(self, goal, done_cb, active_cb, feedback_cb):
+    try:
+
+      if done_cb:
+         _done_cb=lambda x : self.comp.onCallback(self._action_name, x, key='ros_action_done')
+      else:
+         _done_cb=None
+
+      if active_cb:
+         _active_cb=lambda x : self.comp.onCallback(self._action_name, x, key='ros_action_active')
+      else:
+         _active_cb=None
+
+      if feedback_cb:
+         _feedback_cb=lambda x : self.comp.onCallback(self._action_name, x, key='ros_action_feedback')
+      else:
+         _feedback_cb=None
+
+      self._port.wait_for_server()
+      self._port.send_goal(goal, done_cb=_done_cb, active_cb=_active_cb, feedback_cb=_feedback_cb)
+    except:
+      pass
+    return 
+  #
+  #
   def waitAction(self, sec=5.0):
     try:
       self._port.wait_for_result(rospy.Duration.from_sec(sec))
