@@ -161,11 +161,12 @@ class TaskScript(Task):
         rtc_result = getGlobals()['rtc_result'] 
         if rtc_result != None and retval:
             try:
-                ad = self.seat.adaptors[self.sendto]
-                ad.send(self.sendto, rtc_result)
+                if self.sendto :
+                    ad = self.seat.adaptors[self.sendto]
+                    ad.send(self.sendto, rtc_result)
             except KeyError:
                 self.error("no such adaptor:" + self.sendto)
-        return retval
+        return rtc_result
 #
 #
 class TaskLog(Task):
