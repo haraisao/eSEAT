@@ -226,13 +226,13 @@ class TaskGroup():
         return True
 
     def executeEx(self, data=None):
+        retval=True
         if self.checkCondition():
             for cmd in self.taskseq:
                 if cmd.checkCondition() :
                     if isinstance(cmd, TaskMessage):  cmd.encoding = None
                     retval = cmd.execute(data)
-                    if not retval: return retval
-        return True
+        return retval
 
     def setCondition(self, cond_str):
         self.condition=cond_str

@@ -26,13 +26,36 @@ import string
 import traceback
 import subprocess
 
+import itertools
+
+import ssl
+
+import base64
+import random
+from hashlib import sha1
+
+import logging
+import logging.handlers
+
+logger=logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+FORMAT='%(levelname)s:%(asctime)s: [%(name)s] %(message)s'
+CONS_FORMAT='%(levelname(s: %(message)s'
+
+ch=logging.StreamHandler()
+ch.setLevel(logging.INFO)
+ch.setFormatter(logging.Formatter(CONS_FORMAT))
+
+logger.addHandler(ch)
+
+
 #######################################
 # Raw Socket Adaptor
 #
 #   threading.Tread <--- SocketPort
 #
 class SocketPort(threading.Thread):
-  def __init__(self, reader, name, host, port):
+  def __init__(self, reader, name, host, port, ssl=False):
     threading.Thread.__init__(self)
     self.reader = reader
     if self.reader:
@@ -47,6 +70,18 @@ class SocketPort(threading.Thread):
     self.server_adaptor = None
     self.mainloop = False
     self.debug = False
+
+    self.logger=logger
+    self.ssl=ssl
+
+    if self.ssl == True:
+      self.ssl_dir = os.getenv('SEAT_SSL_DIR', "ssl")
+      self.ssl_cert = self.ssl_dir + "/seat_web.crt"
+      self.ssl_key = self.ssl_dir + "/seat_web.key"
+      if not os.path.isfile(self.ssl_cert) or not os.path.isfile(self.ssl_key):
+        self.logger.error("Cert or Key file not found.")
+        self.ssl=False
+
   #
   #
   #
@@ -288,7 +323,14 @@ class WebSocketServer(SocketPort):
       self.service_id += 1
       name = self.name+":service:%d" % self.service_id
       reader = copy.copy(self.reader)
-      newadaptor = SocketService(self, reader, name, conn, addr)
+
+      if self.ssl == True:
+        sslconn = ssl.wrap_socket(conn, server_side=True,
+                        certfile=self.ssl_cert, keyfile=self.ssl_key)
+        newadaptor = SocketService(self, reader, name, sslconn, addr)
+      else:
+        newadaptor = SocketService(self, reader, name, conn, addr)
+
       if flag :
         newadaptor.start()
         self.service.append(newadaptor)
@@ -301,7 +343,10 @@ class WebSocketServer(SocketPort):
     return None
 
   def accept_service_loop(self, lno=5, timeout=1.0):
-    print ("Wait for accept: %s(%s:%d)" % (self.name, self.host, self.port))
+    if self.ssl:
+      print ("Wait for accept with SSL: %s(%s:%d)" % (self.name, self.host, self.port))
+    else:
+      print ("Wait for accept: %s(%s:%d)" % (self.name, self.host, self.port))
     self.socket.listen(lno)
     while self.mainloop:
       res = self.wait_for_read(timeout) 
