@@ -2,7 +2,7 @@
 <seatml>
   <general name="RosClient" anonymous="1">
     <adaptor name="add_two_ints" type="ros_client"
-             service_type="beginner_tutorials.AddTwoInts" />
+             service_type="example_interfaces.AddTwoInts" />
   </general>
 
   <state name="main_mode">

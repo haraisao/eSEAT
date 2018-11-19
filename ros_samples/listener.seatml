@@ -7,7 +7,7 @@
   <state name="main_mode">
     <rule source="chatter">
       <script>
-        print(rospy.get_caller_id()+" I harad %s" % rtc_in_data)
+        print(seat.get_caller_id()+" I harad %s" % rtc_in_data)
         seat.loginfo( "I heard %s" % rtc_in_data)
       </script>
     </rule>

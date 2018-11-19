@@ -171,6 +171,8 @@ class eSEAT_Core:
 
         self.ros_server = {}
         self.ros_client = {}
+        self.ros_action_server = {}
+        self.ros_action_client = {}
 
         self._data = {}
         self._port = {}
@@ -288,7 +290,8 @@ class eSEAT_Core:
         self.adaptors[name]=RosAdaptor(name, 'Server')
         self.adaptors[name].createServer(srv_name, srv_type, srv_impl, fname) 
         self.ros_server[srv_name]=self.adaptors[name]
-        
+    #
+    #     
     def createRosClient(self, name, srv_name, srv_type):
       if __ros_version__ > 0:
         self.initRosNode()
@@ -300,7 +303,8 @@ class eSEAT_Core:
         self.adaptors[name]=RosAdaptor(name, 'Client')
         self.adaptors[name].createClient(srv_name, srv_type) 
         self.ros_client[srv_name]=self.adaptors[name]
-
+    #
+    #
     def callRosService(self, name, *args):
         try:
           return self.ros_client[name].callRosService(name, *args)
@@ -308,9 +312,61 @@ class eSEAT_Core:
           traceback.print_exc()
           print("Error in callRosService %s" % name)
           
+    #
+    # for Ros Service
+    def createRosActionServer(self, name, act_id, act_type, act_cb, fname):
+      if __ros_version__ > 0:
+        self.initRosNode()
+
+        if act_id is None:
+          act_id=name
+          name=name+"_act_server"
+
+        self.adaptors[name]=RosAdaptor(name, 'ActionServer')
+        self.adaptors[name].createActionServer(act_id, act_type, act_cb, fname) 
+        self.ros_action_server[act_id]=self.adaptors[name]
+    #
+    #     
+    def createRosActionClient(self, name, act_id, act_type):
+      if __ros_version__ > 0:
+        self.initRosNode()
+
+        if act_id is None:
+          act_id=name
+          name=name+"_act_client"
+
+        self.adaptors[name]=RosAdaptor(name, 'ActionClient')
+        self.adaptors[name].createActionClient(act_id, act_type) 
+        self.ros_action_client[act_id]=self.adaptors[name]
+    #
+    #
+    def getRosActionServer(self, name):
+      try:
+        return self.ros_action_server[name]
+      except:
+        return None
+    #
+    #
+    def getRosActionClient(self, name):
+      try:
+        return self.ros_action_client[name]
+      except:
+        return None
+    #
+    #  ros_spin
     def startRosService(self):
         if self.ros_node:
           startRosService()
+
+    #
+    #
+    def get_caller_id(self):
+      if __ros_version__ == 1:
+        return rospy.get_caller_id()
+      elif __ros_version__ == 2:
+        return ""
+      return None
+
     #
     #  Create Adaptor called by SEATML_Parser
     #
@@ -356,6 +412,18 @@ class eSEAT_Core:
                 srv_name=tag.get('service')
                 srv_type=tag.get('service_type')
                 self.createRosClient(name, srv_name, srv_type)
+
+            elif type == 'ros_action_server' :
+                fname=tag.get('file')
+                act_id=tag.get('action_id')
+                act_type=tag.get('action_type')
+                act_cb=tag.get('callback')
+                self.createRosActionServer(name, act_id, act_type, act_cb, fname)
+
+            elif type == 'ros_action_client' :
+                act_id=tag.get('action_id')
+                act_type=tag.get('action_type')
+                self.createRosActionClient(name, act_id, act_type)
 
             else:
                 self._logger.warn(u"invalid type: " + type + ": " + name)
@@ -414,17 +482,23 @@ class eSEAT_Core:
         except:
             self._logger.error("Fail to sending message to %s" % (name,))
 
+    #
+    #
     def sendto(self, name, data):
         if name in self.adaptors :
             self.adaptors[name].send(name, data)
 
+    #
+    #
     def set_result(self, val):
         getGlobals()['__retval__'] = True
         getGlobals()['rtc_result'] = val
-    
+    #
+    #
     def get_in_data(self):
         return getGlobals()['rtc_in_data']
-
+    #
+    #
     def get_web_data(self):
         return getGlobals()['rtc_web_data']
 
@@ -451,6 +525,29 @@ class eSEAT_Core:
                 self.processOnDataIn(name, data)
         except:
             self._logger.error(traceback.format_exc())
+
+    #
+    #
+    def onCall(self, name, data, key="oncall"):
+        self.resetTimer()
+        try:
+            return self.processOnDataIn(name, data, key)
+        except:
+            self._logger.error(traceback.format_exc())
+        return None
+    #
+    #
+    def onCallback(self, name, *data, **kwarg):
+        self.resetTimer()
+        try:
+            if 'key' in kwarg:
+               key=kwarg['key']
+            else:
+               key="callback"
+            return self.processOnDataIn(name, data, key)
+        except:
+            self._logger.error(traceback.format_exc())
+        return None
 
     ############################################
     #   main event process 
@@ -546,13 +643,16 @@ class eSEAT_Core:
 
         self.resetTimer()
         return True
-
+    #
+    #
     def resetTimer(self):
         self.last_on_data = time.time()
-
+    #
+    #
     def setTimeout(self, sec):
         self._on_timeout = sec
-
+    #
+    #
     def isTimeout(self):
        return ( self._on_timeout > 0 and time.time() - self.last_on_data >= self._on_timeout )
 
@@ -586,25 +686,27 @@ class eSEAT_Core:
     def initDataIn(self, data):
         setGlobals('seat', self)
         setGlobals('rtc_in_data', data)
+        setGlobals('seat_argv', data)
         setGlobals('julius_result', None)
         return
-
-    def processOnDataIn(self, name, data):
+    #
+    #
+    def processOnDataIn(self, name, data, key="ondata"):
         self._logger.info("got input from %s" %  (name,))
-        cmds = self.lookupWithDefault(self.currentstate, name, "ondata")
+        cmds = self.lookupWithDefault(self.currentstate, name, key)
 
         if not cmds:
             self._logger.info("no command found")
             return False
 
+        res=True
         for cmd in cmds:
             self.initDataIn(data)
             cmd.execute_pre_script()
-            cmd.executeEx(data)
+            res = cmd.executeEx(data)
 
-        return True
-
-       
+        return res
+  
     ################################################################
     #  Lookup Registered Commands with default
     #
@@ -767,7 +869,8 @@ class eSEAT_Core:
                 newlst.append(p)
         self.popen = newlst
         return res
-
+    #
+    #
     def killSubprocess(self, pid=None):
         for p in self.popen:
             p.poll()
@@ -786,7 +889,8 @@ class eSEAT_Core:
                 a.terminate()
         if self.root : self.root.quit()
         return 
-
+    #
+    #
     def loginfo(self, msg):
         self._logger.info(msg)
 
@@ -829,7 +933,8 @@ class eSEAT_Gui:
         def callback(event=None):
            self.processResult("gui", name)
         return callback
-
+    #
+    #
     def mkinputcallback(self, name):
         def callback(event=None):
            self.processResult("gui", name)
@@ -842,7 +947,8 @@ class eSEAT_Gui:
     def newFrame(self, name):
         self.frames[name] = Frame(self.root)
         return self.frames[name]
-
+    #
+    #
     def setTitle(self, name):
         if self.root : self.root.title(name)
 
@@ -1169,7 +1275,6 @@ class eSEAT_Gui:
             return val
         except:
             return ""
-
     
     ################# R A D I O B U T T O N ################### 
     ## Create Radiobutton Item
@@ -1416,7 +1521,7 @@ class eSEAT_Gui:
 
 #   End of eSEAT_Gui
 ###########################################################
-
+#
 class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
     def __init__(self, infoflag=False):
         eSEAT_Core.__init__(self) 
@@ -1431,7 +1536,8 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
         self.setRate(1)
 
         self.setLogFlag(infoflag)
-
+    #
+    #
     def exit(self, flag=False):
         try:
             if self.root : self.root.quit()
@@ -1440,7 +1546,8 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
             pass
 
         return True
-
+    #
+    #
     def setRate(self, hz):
         try:
           self.rate_hz=hz
@@ -1452,7 +1559,8 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
             self.rate=None
         except:
           self.rate=None
-          
+    #
+    #      
     def sleep(self):
         if self.rate:
             self.rate.sleep()
@@ -1463,24 +1571,26 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
             else:
               time.sleep(self.intval - val)
             self._last_process_time=time.time()
-
+    # 
+    #
     def get_time(self):
         try:
             return rospy.get_time()
         except:
             return time.time()
-
+    #
+    #
     def setInstanceName(self,name):
         self.name=name
         return True
-
+    #
+    #
     def getInstanceName(self):
         return self.name
     #
     #
     def onInitialize(self):
         return True
-    
 
     #########################
     #  onActivated
@@ -1673,15 +1783,18 @@ class eSEAT_Node_Manager:
             sys.exit(0)
           except:
             pass
-
+    #
+    #
     def shutdown(self):
         self.exit()
-
+    #
+    #
     def stop(self):
         self.stop_event.set()
         if self.main_thread:
             self.main_thread.join()
-
+    #
+    #
     def mainloop(self):
         if self.comp :
             self.comp.resetTimer()
@@ -1689,15 +1802,14 @@ class eSEAT_Node_Manager:
                 self.comp.onExecute(0)
 
         return True
-
+    #
+    #
     def startLoop(self, flag=False):
         if flag :
             self.main_thread = threading.Thread(target=self.mainloop)
             self.main_thread.start()
         else:
             self.mainloop()
-
-
 #
 #
 #
@@ -1744,4 +1856,3 @@ def main_node(mlfile=None, daemon=False):
     print ( "...Terminate." )
 
     seatmgr.exit()
-
