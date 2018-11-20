@@ -554,6 +554,10 @@ class eSEATManager:
         parser.add_option('-v', '--viewer', dest='run_out_viewer', action="store_true",
                             help='create output window' )
 
+        parser.add_option('-o', '--option', dest='option', action='append',
+                      default=None,
+                      help='specify custom configuration parameter')
+
         try:
             opts, args = parser.parse_args()
         except (optparse.OptionError, e):
