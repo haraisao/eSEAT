@@ -11,7 +11,7 @@
      client=seat.getRosActionClient('fibonacci')
      if client: 
        goal=client.newActionGoal(order=10)
-       client.setActionGoalEx(goal, None, None,'action_feedback')
+       client.setActionGoalEx(goal, feedback_cb='fback')
        result=client.waitActionResult()
        print("  Result==>", result)
 
@@ -19,13 +19,12 @@
    </onentry>
 
    <rule source="fibonacci">
-    <key>action_feedback</key>
+    <key>fback</key>
     <script>
-        fback=seat.get_in_data()[0]
-        print(fback)
+      fback=seat.get_in_data()[0]
+      print(fback)
     </script>
    </rule>
-
 
    <onexec>
     <script>

@@ -658,7 +658,7 @@ class RosAdaptor(object):
     return 
   #
   #
-  def setActionGoalEx(self, goal, done_cb, active_cb, feedback_cb):
+  def setActionGoalEx(self, goal, done_cb=None, active_cb=None, feedback_cb=None):
     try:
 
       if done_cb:
