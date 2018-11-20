@@ -3,10 +3,6 @@
   <general name="Fibonacci_client">
     <adaptor name="fibonacci" type="ros_action_client"
              action_type="actionlib_tutorials.Fibonacci" />
-    <script>
-      def fback_cb(fback):
-        print(fback)
-    </script>
   </general>
 
   <state name="main_state">
@@ -15,12 +11,22 @@
      client=seat.getRosActionClient('fibonacci')
      if client: 
        goal=client.newActionGoal(order=10)
-       client.setActionGoal(goal, feedback_cb=fback_cb)
+       client.setActionGoalEx(goal, None, None,'action_feedback')
        result=client.waitActionResult()
        print("  Result==>", result)
 
     </script>
    </onentry>
+
+   <rule source="fibonacci">
+    <key>action_feedback</key>
+    <script>
+        fback=seat.get_in_data()[0]
+        print(fback)
+    </script>
+   </rule>
+
+
    <onexec>
     <script>
      seat.exit()

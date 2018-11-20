@@ -565,7 +565,7 @@ class RosAdaptor(object):
         except:
           pass
 
-      self._action_id=act_id
+      self._action_name=act_id
       self._action_type=eval(act_type+"Action", env)
       self._action_goal=eval(act_type+"Goal", env)
 
@@ -662,17 +662,17 @@ class RosAdaptor(object):
     try:
 
       if done_cb:
-         _done_cb=lambda x : self.comp.onCallback(self._action_name, x, key='ros_action_done')
+         _done_cb=lambda x : self.comp.onCallback(self._action_name, x, key=done_cb)
       else:
          _done_cb=None
 
       if active_cb:
-         _active_cb=lambda x : self.comp.onCallback(self._action_name, x, key='ros_action_active')
+         _active_cb=lambda x : self.comp.onCallback(self._action_name, x, key=active_cb)
       else:
          _active_cb=None
 
       if feedback_cb:
-         _feedback_cb=lambda x : self.comp.onCallback(self._action_name, x, key='ros_action_feedback')
+         _feedback_cb=lambda x : self.comp.onCallback(self._action_name, x, key=feedback_cb)
       else:
          _feedback_cb=None
 
