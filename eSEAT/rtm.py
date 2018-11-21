@@ -52,7 +52,7 @@ from RTC  import *
 ########################################
 #  eSEAT_Core
 #
-from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals
+from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals,daemonize
 import SeatmlParser
 
 __version__="2.5"
