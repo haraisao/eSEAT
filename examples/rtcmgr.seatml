@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<seatml>
+  <general name="RtcMgr">
+   <adaptor name="vel_in" type="rtcin" datatype="TimedFloatSeq" />
+   <adaptor name="vel_out" type="rtcout" datatype="TimedFloatSeq" />
+  </general>
+
+  <state name="main_state">
+   <onentry>
+    <script>
+     try:
+       seat.activate()
+     except:
+       seat.exit()
+    </script>
+   </onentry>
+
+   <onexec>
+    <script>
+  import traceback
+  try:
+     print("==>", end="") 
+     in_str=sys.stdin.readline()
+     argv=in_str.strip()
+     argv=argv.split()
+
+     NS = seat.namespace
+
+     if argv[0] == "quit":
+       seat.deactivate()
+       seat.exit()
+
+     elif argv[0] == "ns":
+       print(NS)
+
+     elif argv[0] == "list":
+       num=0
+       print("==============")
+       res = NS.getRTObjectList()
+       for n in res:
+         num += 1
+         print(num, ":", n[0])
+       print("==============")
+
+     elif argv[0] == "get_ports":
+       num=0
+       ports = NS.getPorts(argv[1])
+       print("==============")
+       for pp in ports:
+         num += 1
+         print(num, ":", pp[0], pp[1])
+       print("==============")
+
+     elif argv[0] == "get_port":
+       port_ref = NS.getPortRef(argv[1], argv[2])
+       print(port_ref)
+
+     elif argv[0] == "get_connection":
+       cons = NS.getConnections(argv[1], argv[2])
+       print(cons)
+
+     elif argv[0] == "activate":
+       NS.activate(argv[1])
+
+     elif argv[0] == "deactivate":
+       NS.deactivate(argv[1])
+
+     elif argv[0] == "terminate":
+       NS.terminate(argv[1])
+
+     else:
+       print("No such command:", argv[0])
+       print("   qiut")
+       print("   ns")
+       print("   list")
+       print("   get_ports [rtc_name]")
+       print("   get_port [rtc_name] [port_name]")
+       print("   get_connection [rtc_name] [port_name]")
+       print("   activate [rtc_name]")
+       print("   deactivate [rtc_name]")
+       print("   terminate [rtc_name]")
+  except:
+    traceback.print_exc()
+    </script>
+   </onexec>
+  </state>
+</seatml>

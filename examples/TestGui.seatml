@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <seatml>
   <general name="TestGui" rate="2" >
-<!--
     <adaptor name="str_out" type="rtcout" datatype="TimedString" />
     <adaptor name="str_in" type="rtcin" datatype="TimedString" />
+<!--
     <adaptor name="web" type="web"  port="8080" document_root="/usr/local/eSEAT/html" />
 -->
 <!--

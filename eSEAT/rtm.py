@@ -134,6 +134,10 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._datatype = {}
         self._on_timeout = -1
         self.rate_hz=0 
+        self.namespace=None
+
+    def setNameSpace(self, ns):
+        self.namespace=ns
 
     def exit(self):
         try:
@@ -526,6 +530,8 @@ class eSEATManager:
         instance_name = SeatmlParser.formatInstanceName(instance_name)
         self.comp.setInstanceName(instance_name)
 
+        self.comp.setNameSpace(RtmNameSpace(self.manager.getORB()))
+
         #
         # Gui stdout
         if opts and opts.run_out_viewer:
@@ -605,11 +611,13 @@ class eSEATManager:
         self.comp.getProperties().setProperty("naming.names",naming_names)
         manager.registerComponent(self.comp)
 
+
     #
     #  Start Manager
     #
     def start(self):
         self.comp.startRosService()
+
         if (isinstance(self.comp, eSEAT_Gui) and self.comp.hasGUI() ) or self.viewer :
             self.manager.runManager(True)
 
@@ -720,7 +728,130 @@ def main_rtm(mlfile=None, daemon=False):
       os._exit(1)
       #sys.exit(1)
 
+#########################
+import CosNaming 
+from CorbaNaming import *
+import SDOPackage
+import omniORB.URI
 
+class RtmNameSpace:
+  def __init__(self, orb, server_name='localhost'):
+    self.orb=orb
+    self.name=server_name
+    self.naming=CorbaNaming(self.orb, self.name)
+    self.maxlen=20
+    self.object_list={}
+    self.getRTObjectList()
+
+  def resolveRTObject(self, name):
+    ref=self.naming.resolveStr(name)
+    return ref._narrow(RTObject)
+
+  def clearObjectList(self):
+    self.object_list={}
+
+  def getRTObjectList(self, name_context=None, parent=""):
+    res=[]
+    if name_context is None:
+      name_context = self.naming._rootContext
+    binds, bind_i = name_context.list(self.maxlen)
+    for bind in binds:
+      res = res + self.resolveBindings(bind, name_context, parent)
+    if bind_i :
+      tl = bind_i.next_n(self.maxlen)
+      while tl[0]:
+        for bind in tl[1] :
+           res = res + self.resolveBindings(bind, name_conext, parent)
+        tl = bind_i.next_n(self.maxlen)
+    return res
+
+  def resolveBindings(self, bind, name_context, parent):
+    res = []
+    prefix=parent
+
+    if parent :
+      prefix += "/"
+
+    name = prefix + omniORB.URI.nameToString(bind.binding_name)
+    if bind.binding_type == CosNaming.nobject:
+      obj = name_context.resolve(bind.binding_name)
+      self.object_list[name] = obj
+      try:
+        obj = obj._narrow(RTObject)
+        res = [[name, obj]]
+      except:
+        obj = None
+    else:
+      ctx = name_context.resolve(bind.binding_name)
+      ctx = ctx._narrow(CosNaming.NamingContext)
+      res = self.getRTObjectList( name_context, parent)
+    return res
+
+  def refreshObjectList(self):
+    self.object_list = {}
+    self.getRTObjectList()
+
+  def getPorts(self, name):
+    res=[]
+    if name in self.object_list:
+      self.refreshObjectList()
+
+    if name in self.object_list:
+      port_ref = self.object_list[name].get_ports()
+      for p in port_ref:
+        pp = p.get_port_profile()
+        pprof =  nvlist2dict(pp.properties)
+        res.append( (pp.name, pprof))
+    else:
+      print("No such RTC:", name)
+    return res
+
+  def getPortRef(self, name, port):
+    res=[]
+    if name in self.object_list:
+      self.refreshObjectList()
+
+    if name in self.object_list:
+      port_ref = self.object_list[name].get_ports()
+      for p in port_ref:
+        pp = p.get_port_profile()
+        if port == pp.name.split('.')[-1]:
+          return p
+    else:
+      print("No such port:", name, ":", port)
+    return None
+
+  def getConnections(self, name, port):
+    port_ref=self.getPortRef(name, port)
+    if port_ref:
+      cons = port_ref.get_connector_profiles()
+      return cons
+    return None
+      
+  def activate(self, name):
+    obj=self.resolveRTObject(name)
+    ec=obj.get_owned_contexts()[0]
+    ec.activate_component(obj)
+    return None
+      
+  def deactivate(self, name):
+    obj=self.resolveRTObject(name)
+    ec=obj.get_owned_contexts()[0]
+    ec.deactivate_component(obj)
+    return None
+
+  def terminate(self, name):
+    obj=self.resolveRTObject(name)
+    obj.exit()
+    return None
+      
+      
+      
+def nvlist2dict(nvlist):
+  res={}
+  for v in nvlist:
+    res[v.name] = v.value.value()
+  return res
 #########################################################################
 #
 #  M A I N 
