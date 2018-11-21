@@ -1,3 +1,7 @@
-#!/bin/bash
+#!/usr/bin/python
 #
-eSEAT /usr/local/eSEAT/examples/rtcmgr.seatml
+import eSEAT
+import eSEAT.main
+
+if __name__ == '__main__':
+	eSEAT.main.main('/usr/local/eSEAT/examples/rtcmgr.seatml')
