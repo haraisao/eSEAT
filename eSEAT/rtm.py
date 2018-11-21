@@ -733,6 +733,7 @@ import CosNaming
 from CorbaNaming import *
 import SDOPackage
 import omniORB.URI
+import string
 
 class RtmNameSpace:
   def __init__(self, orb, server_name='localhost'):
@@ -811,6 +812,8 @@ class RtmNameSpace:
     if name in self.object_list:
       self.refreshObjectList()
 
+    if name.count(".rtc") == 0 : name = name+".rtc"
+
     if name in self.object_list:
       port_ref = self.object_list[name].get_ports()
       for p in port_ref:
@@ -821,13 +824,87 @@ class RtmNameSpace:
       print("No such port:", name, ":", port)
     return None
 
-  def getConnections(self, name, port):
+  def getConnectors(self, name, port):
     port_ref=self.getPortRef(name, port)
     if port_ref:
       cons = port_ref.get_connector_profiles()
       return cons
     return None
-      
+ 
+  def getConnectionInfo(self, con):
+    ports = [(con.ports[0].get_port_profile()).name, (con.ports[1].get_port_profile()).name]
+    res={'name': con.name, 'ports': ports, 'id': con.connector_id }
+    return res
+
+  def getConnections(self, name, port):
+    res = []
+    cons = self.getConnectors(name, port)
+    if cons:
+      for c in cons:
+        res.append(self.getConnectionInfo(c))
+    return res
+
+  def find_connection(self, portname1, portname2):
+    try:
+      name1, port1 = portname1.split(":")
+      name2, port2 = portname2.split(":")
+      p1=self.getPortRef(name1, port1)
+      p2=self.getPortRef(name2, port2)
+      p2name=(p2.get_port_profile()).name
+      cons = self.getConnectors(name1, port1)
+      if cons:
+        for c in cons:
+          cp1name=(c.ports[0].get_port_profile()).name
+          cp2name=(c.ports[1].get_port_profile()).name
+          if cp1name == p2name or cp2name == p2name:
+            return c
+      return False
+    except:
+      traceback.print_exc()
+      return None
+
+  def connect(self, portname1, portname2, service=False):
+
+    if service:
+      con_prof = {'port.port_type':'CorbaPort' }
+    else:
+      con_prof={'dataport.dataflow_type':'push',
+              'dataport.interface_type':'corba_cdr' ,
+              'dataport.subscription_type':'flush'}
+
+    chk = self.find_connection(portname1, portname2)
+    if chk is None:
+        return None
+    if chk :
+       print("Connrction exists:", chk.connector_id)
+       return 
+    try:
+      name1, port1 = portname1.split(":")
+      name2, port2 = portname2.split(":")
+      p1=self.getPortRef(name1, port1)
+      p2=self.getPortRef(name2, port2)
+      if p1 and p2:
+        name=string.join([name1, port1, name2, port2], '_')
+        prof_req=ConnectorProfile(name, "", [p1, p2], dict2nvlist(con_prof)) 
+        res, prof=p1.connect(prof_req)
+      else:
+        res="Error in connect"
+    except:
+      res="Error"
+    print(res)
+    return
+
+  def disconnect(self, portname1, portname2):
+    try:
+      con=self.find_connection(portname1, portname2)
+      if con is None or not con:
+        print("No such connrction:", portname1, portname2)
+       
+      con.ports[0].disconnect(con.connector_id)
+      print("Sucess to disconnect:", portname1, portname2)
+    except:
+      print("Fail to disconnect:", portname1, portname2)
+
   def activate(self, name):
     obj=self.resolveRTObject(name)
     ec=obj.get_owned_contexts()[0]
@@ -845,13 +922,20 @@ class RtmNameSpace:
     obj.exit()
     return None
       
-      
-      
 def nvlist2dict(nvlist):
   res={}
   for v in nvlist:
     res[v.name] = v.value.value()
   return res
+
+def dict2nvlist(dict) :
+  import omniORB.any
+  rslt = []
+  for tmp in dict.keys() :
+    rslt.append(SDOPackage.NameValue(tmp, omniORB.any.to_any(dict[tmp])))
+  return rslt
+#     
+
 #########################################################################
 #
 #  M A I N 

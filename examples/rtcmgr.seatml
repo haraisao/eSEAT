@@ -18,6 +18,7 @@
    <onexec>
     <script>
   import traceback
+  import time
   try:
      print("==>", end="") 
      in_str=sys.stdin.readline()
@@ -57,7 +58,19 @@
 
      elif argv[0] == "get_connection":
        cons = NS.getConnections(argv[1], argv[2])
-       print(cons)
+       num=0
+       if cons:
+         for x in cons:
+           print(num, ":", cons)
+           num += 1
+       else:
+         print("No connection")
+
+     elif argv[0] == "disconnect":
+       NS.disconnect(argv[1], argv[2])
+
+     elif argv[0] == "connect":
+       NS.connect(argv[1], argv[2])
 
      elif argv[0] == "activate":
        NS.activate(argv[1])
@@ -76,6 +89,8 @@
        print("   get_ports [rtc_name]")
        print("   get_port [rtc_name] [port_name]")
        print("   get_connection [rtc_name] [port_name]")
+       print("   connect [port_name1] [port_name2]")
+       print("   disconnect [rtc_name] [port_name] [idx]")
        print("   activate [rtc_name]")
        print("   deactivate [rtc_name]")
        print("   terminate [rtc_name]")
