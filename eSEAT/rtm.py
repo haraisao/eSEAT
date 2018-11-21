@@ -745,6 +745,7 @@ class RtmNameSpace:
     self.getRTObjectList()
 
   def resolveRTObject(self, name):
+    if name.count(".rtc") == 0 : name = name+".rtc"
     ref=self.naming.resolveStr(name)
     return ref._narrow(RTObject)
 
@@ -797,6 +798,7 @@ class RtmNameSpace:
     if name in self.object_list:
       self.refreshObjectList()
 
+    if name.count(".rtc") == 0 : name = name+".rtc"
     if name in self.object_list:
       port_ref = self.object_list[name].get_ports()
       for p in port_ref:
