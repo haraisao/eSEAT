@@ -749,12 +749,17 @@ class Rtc_Sh:
     self.getRTObjectList()
 
   def resolveRTObject(self, name):
-    if name.count(".rtc") == 0 : name = name+".rtc"
-    ref=self.naming.resolveStr(name)
-    return ref._narrow(RTObject)
+    try:
+      if name.count(".rtc") == 0 : name = name+".rtc"
+      ref=self.naming.resolveStr(name)
+      ref._non.existent()
+      return ref._narrow(RTObject)
+    except:
+      return None
 
   def unbind(self, name):
     self.naming.unbind(name)
+    print("Unbind :", name)
     return
 
   def clearObjectList(self):
@@ -789,10 +794,12 @@ class Rtc_Sh:
         obj = name_context.resolve(bind.binding_name)
         self.object_list[name] = obj
         try:
+          obj._non_existent()
           obj = obj._narrow(RTObject)
           res = [[name, obj]]
         except:
           obj = None
+          res = [[name, obj]]
       else:
         self.object_list[name] = None
     else:

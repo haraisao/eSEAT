@@ -36,7 +36,10 @@
        res = rtsh.getRTObjectList()
        for n in res:
          num += 1
-         print(num, ":", n[0])
+         if n[1]:
+           print(num, ":", n[0])
+         else:
+           print(num, ":", n[0], "*")
        print("==============")
 
      elif argv[0] == "get_ports":
