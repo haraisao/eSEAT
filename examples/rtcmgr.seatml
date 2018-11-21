@@ -11,7 +11,7 @@
      try:
        seat.activate()
      except:
-       seat.exit()
+       seat.seat_mgr.exit()
     </script>
    </onentry>
 
@@ -20,24 +20,20 @@
   import traceback
   import time
   try:
-     print("==>", end="") 
-     in_str=sys.stdin.readline()
-     argv=in_str.strip()
-     argv=argv.split()
+     #print("==>", end="") 
+     #in_str=(sys.stdin.readline()).strip()
+     in_str=raw_input("===>")
+     argv=in_str.split()
 
-     NS = seat.namespace
+     rtsh = seat.rtsh
 
-     if argv[0] == "quit":
-       seat.deactivate()
-       seat.exit()
-
-     elif argv[0] == "ns":
-       print(NS)
+     if argv[0] == "rtsh":
+       print(rtsh)
 
      elif argv[0] == "list":
        num=0
        print("==============")
-       res = NS.getRTObjectList()
+       res = rtsh.getRTObjectList()
        for n in res:
          num += 1
          print(num, ":", n[0])
@@ -45,19 +41,18 @@
 
      elif argv[0] == "get_ports":
        num=0
-       ports = NS.getPorts(argv[1])
+       ports = rtsh.getPorts(argv[1])
        print("==============")
        for pp in ports:
          num += 1
-         print(num, ":", pp[0], pp[1])
+         print(num, ":", pp[0].split('.')[1])
+         for k in pp[1]:
+            print("   ", k,":", pp[1][k])
+            
        print("==============")
 
-     elif argv[0] == "get_port":
-       port_ref = NS.getPortRef(argv[1], argv[2])
-       print(port_ref)
-
      elif argv[0] == "get_connection":
-       cons = NS.getConnections(argv[1], argv[2])
+       cons = rtsh.getConnections(argv[1], argv[2])
        num=0
        if cons:
          for x in cons:
@@ -67,38 +62,38 @@
          print("No connection")
 
      elif argv[0] == "disconnect":
-       NS.disconnect(argv[1], argv[2])
+       rtsh.disconnect(argv[1], argv[2])
 
      elif argv[0] == "connect":
-       NS.connect(argv[1], argv[2])
+       rtsh.connect(argv[1], argv[2])
 
      elif argv[0] == "activate":
-       NS.activate(argv[1])
+       rtsh.activate(argv[1])
 
      elif argv[0] == "deactivate":
-       NS.deactivate(argv[1])
+       rtsh.deactivate(argv[1])
 
      elif argv[0] == "terminate":
-       NS.terminate(argv[1])
+       rtsh.terminate(argv[1])
 
      elif argv[0] == "unbind":
-       NS.unbind(argv[1])
+       rtsh.unbind(argv[1])
 
      else:
        print("No such command:", argv[0])
-       print("   qiut")
-       print("   ns")
+       print("   rtsh")
        print("   list")
        print("   get_ports [rtc_name]")
-       print("   get_port [rtc_name] [port_name]")
        print("   get_connection [rtc_name] [port_name]")
        print("   connect [port_name1] [port_name2]")
-       print("   disconnect [rtc_name] [port_name] [idx]")
+       print("   disconnect [port_name1] [port_name2] ")
        print("   activate [rtc_name]")
        print("   deactivate [rtc_name]")
        print("   terminate [rtc_name]")
+       print("   unbind [rtc_name]")
   except:
-    traceback.print_exc()
+    #traceback.print_exc()
+    sys.exit()
     </script>
    </onexec>
   </state>

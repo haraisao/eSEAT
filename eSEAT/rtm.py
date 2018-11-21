@@ -134,13 +134,13 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._datatype = {}
         self._on_timeout = -1
         self.rate_hz=0 
-        self.namespace=None
+        self.rtsh=None
 
-    def setNameSpace(self, ns):
-        self.namespace=ns
+    def setRtsh(self, ns):
+        self.rtsh=ns
 
-    def getNameSpace(self):
-        return self.namespace
+    def getRtsh(self):
+        return self.rtsh
 
     def exit(self):
         try:
@@ -533,7 +533,8 @@ class eSEATManager:
         instance_name = SeatmlParser.formatInstanceName(instance_name)
         self.comp.setInstanceName(instance_name)
 
-        self.comp.setNameSpace(RtmNameSpace(self.manager.getORB()))
+        self.comp.setRtsh(Rtc_Sh(self.manager.getORB()))
+        self.comp.seat_mgr=self
 
         #
         # Gui stdout
@@ -738,7 +739,7 @@ import SDOPackage
 import omniORB.URI
 import string
 
-class RtmNameSpace:
+class Rtc_Sh:
   def __init__(self, orb, server_name='localhost'):
     self.orb=orb
     self.name=server_name
