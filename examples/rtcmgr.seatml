@@ -17,22 +17,16 @@
 
    <onexec>
     <script>
-  import traceback
-  import time
   try:
-     #print("==>", end="") 
-     #in_str=(sys.stdin.readline()).strip()
-     in_str=raw_input("===>")
+     in_str=raw_input("==> ")
      argv=in_str.split()
-
-     rtsh = seat.rtsh
 
      if argv[0] == "rtsh":
        print(rtsh)
 
      elif argv[0] == "list":
        num=0
-       print("==============")
+       print("===== RTCs =====")
        res = rtsh.getRTObjectList()
        for n in res:
          num += 1
@@ -40,19 +34,19 @@
            print(num, ":", n[0])
          else:
            print(num, ":", n[0], "*")
-       print("==============")
+       print("")
 
      elif argv[0] == "get_ports":
        num=0
        ports = rtsh.getPorts(argv[1])
-       print("==============")
+       print("====== Ports(%s) ======" % argv[0])
        for pp in ports:
          num += 1
          print(num, ":", pp[0].split('.')[1])
          for k in pp[1]:
             print("   ", k,":", pp[1][k])
             
-       print("==============")
+       print("")
 
      elif argv[0] == "get_connection":
        cons = rtsh.getConnections(argv[1], argv[2])
@@ -95,7 +89,6 @@
        print("   terminate [rtc_name]")
        print("   unbind [rtc_name]")
   except:
-    #traceback.print_exc()
     sys.exit()
     </script>
    </onexec>

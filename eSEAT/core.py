@@ -184,6 +184,8 @@ class eSEAT_Core:
         self.webServer = None
         self.root = None
 
+        self.seat_mgr=None
+
         self.last_on_data = 0
 
         self._logger = SeatLogger("eSEAT")
@@ -697,6 +699,7 @@ class eSEAT_Core:
     #
     def initDataIn(self, data):
         setGlobals('seat', self)
+        setGlobals('seat_mgr', self.seat_mgr)
         setGlobals('rtc_in_data', data)
         setGlobals('seat_argv', data)
         setGlobals('julius_result', None)

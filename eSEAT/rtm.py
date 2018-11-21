@@ -136,8 +136,9 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self.rate_hz=0 
         self.rtsh=None
 
-    def setRtsh(self, ns):
-        self.rtsh=ns
+    def setRtsh(self, s):
+        self.rtsh=s
+        setGlobals('rtsh',self.rtsh)
 
     def getRtsh(self):
         return self.rtsh
