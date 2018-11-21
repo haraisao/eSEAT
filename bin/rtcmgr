@@ -1,0 +1,3 @@
+#!/bin/bash
+#
+eSEAT /usr/local/eSEAT/examples/rtcmgr.seatml
