@@ -26,7 +26,6 @@
      argv=argv.split()
 
      NS = seat.namespace
-     print( seat.namespace)
 
      if argv[0] == "quit":
        seat.deactivate()
@@ -81,6 +80,9 @@
 
      elif argv[0] == "terminate":
        NS.terminate(argv[1])
+
+     elif argv[0] == "unbind":
+       NS.unbind(argv[1])
 
      else:
        print("No such command:", argv[0])

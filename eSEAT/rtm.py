@@ -752,6 +752,10 @@ class RtmNameSpace:
     ref=self.naming.resolveStr(name)
     return ref._narrow(RTObject)
 
+  def unbind(self, name):
+    self.naming.unbind(name)
+    return
+
   def clearObjectList(self):
     self.object_list={}
 
@@ -780,13 +784,16 @@ class RtmNameSpace:
 
     name = prefix + omniORB.URI.nameToString(bind.binding_name)
     if bind.binding_type == CosNaming.nobject:
-      obj = name_context.resolve(bind.binding_name)
-      self.object_list[name] = obj
-      try:
-        obj = obj._narrow(RTObject)
-        res = [[name, obj]]
-      except:
-        obj = None
+      if bind.binding_name[0].kind == "rtc":
+        obj = name_context.resolve(bind.binding_name)
+        self.object_list[name] = obj
+        try:
+          obj = obj._narrow(RTObject)
+          res = [[name, obj]]
+        except:
+          obj = None
+      else:
+        self.object_list[name] = None
     else:
       ctx = name_context.resolve(bind.binding_name)
       ctx = ctx._narrow(CosNaming.NamingContext)
