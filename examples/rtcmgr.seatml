@@ -26,6 +26,7 @@
      argv=argv.split()
 
      NS = seat.namespace
+     print( seat.namespace)
 
      if argv[0] == "quit":
        seat.deactivate()

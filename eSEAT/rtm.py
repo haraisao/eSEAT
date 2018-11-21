@@ -139,6 +139,9 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     def setNameSpace(self, ns):
         self.namespace=ns
 
+    def getNameSpace(self):
+        return self.namespace
+
     def exit(self):
         try:
             eSEAT_Core.exit_comp(self)
@@ -759,6 +762,7 @@ class RtmNameSpace:
     binds, bind_i = name_context.list(self.maxlen)
     for bind in binds:
       res = res + self.resolveBindings(bind, name_context, parent)
+
     if bind_i :
       tl = bind_i.next_n(self.maxlen)
       while tl[0]:
@@ -850,16 +854,17 @@ class RtmNameSpace:
     try:
       name1, port1 = portname1.split(":")
       name2, port2 = portname2.split(":")
+
       p1=self.getPortRef(name1, port1)
       p2=self.getPortRef(name2, port2)
-      p2name=(p2.get_port_profile()).name
-      cons = self.getConnectors(name1, port1)
-      if cons:
+
+      cons  = self.getConnectors(name1, port1)
+      cons2 = self.getConnectors(name2, port2)
+      if cons and  cons2 :
         for c in cons:
-          cp1name=(c.ports[0].get_port_profile()).name
-          cp2name=(c.ports[1].get_port_profile()).name
-          if cp1name == p2name or cp2name == p2name:
-            return c
+          for c2 in cons2:
+            if c.connector_id == c2.connector_id:
+              return c
       return False
     except:
       traceback.print_exc()
@@ -878,7 +883,7 @@ class RtmNameSpace:
     if chk is None:
         return None
     if chk :
-       print("Connrction exists:", chk.connector_id)
+       print("Conntction exists:", chk.connector_id)
        return 
     try:
       name1, port1 = portname1.split(":")
