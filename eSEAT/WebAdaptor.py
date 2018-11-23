@@ -34,6 +34,11 @@ import base64
 import random
 from hashlib import sha1
 
+try:
+  from core import setGlobals, getGlobals
+except:
+  from core import setGlobals, getGlobals
+
 import logging
 import logging.handlers
 
@@ -725,8 +730,8 @@ class CometReader(CommReader):
         res={}
         try:
           if self.getServer().isInWhiteList(self.owner.host) :
-            globals()['seat'] = self.rtc
-            exec(data, globals())
+            getGlobals()['seat'] = self.rtc
+            exec(data, getGlobals())
           res["result"] = "OK"
         except:
           res["result"] = "ERROR: in exec"
