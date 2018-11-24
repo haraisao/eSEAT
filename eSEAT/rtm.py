@@ -55,6 +55,8 @@ from RTC  import *
 from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals,daemonize
 import SeatmlParser
 
+from rtsh import *
+
 __version__="2.5"
 
 #########################################################################
@@ -477,6 +479,9 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     def get_time(self):
         return time.time()
 
+    def get_rtcmd(self):
+        return RtCmd(self.rtsh, True)
+
     ############ End of RTC functions
 
 
@@ -535,7 +540,7 @@ class eSEATManager:
         self.comp.setInstanceName(instance_name)
 
         self.comp.setRtsh(Rtc_Sh(self.manager.getORB()))
-        self.comp.seat_mgr=self
+        self.comp.seatmgr=self
 
         #
         # Gui stdout
@@ -732,244 +737,6 @@ def main_rtm(mlfile=None, daemon=False):
     except:
       os._exit(1)
       #sys.exit(1)
-
-#########################
-import CosNaming 
-from CorbaNaming import *
-import SDOPackage
-import omniORB.URI
-import string
-
-class Rtc_Sh:
-  def __init__(self, orb, server_name='localhost'):
-    self.orb=orb
-    self.name=server_name
-    self.naming=CorbaNaming(self.orb, self.name)
-    self.maxlen=20
-    self.object_list={}
-    self.current_ctx=""
-    #self.getRTObjectList()
-
-  def resolveRTObject(self, name):
-    try:
-      if name.count(".rtc") == 0 : name = name+".rtc"
-      ref=self.naming.resolveStr(name)
-      ref._non_existent()
-      return ref._narrow(RTObject)
-    except:
-      #traceback.print_exc()
-      return None
-
-  def unbind(self, name):
-    self.naming.unbind(name)
-    print("Unbind :", name)
-    return
-
-  def clearObjectList(self):
-    self.object_list={}
-
-  def getRTObjectList(self, name_context=None, parent=""):
-    res=[]
-    if name_context is None:
-      name_context = self.naming._rootContext
-    binds, bind_i = name_context.list(self.maxlen)
-    for bind in binds:
-      res = res + self.resolveBindings(bind, name_context, parent)
-
-    if bind_i :
-      tl = bind_i.next_n(self.maxlen)
-      while tl[0]:
-        for bind in tl[1] :
-           res = res + self.resolveBindings(bind, name_conext, parent)
-        tl = bind_i.next_n(self.maxlen)
-    return res
-
-  def resolveBindings(self, bind, name_context, parent):
-    res = []
-    prefix=parent
-
-    if parent :
-      prefix += "/"
-
-    name = prefix + omniORB.URI.nameToString(bind.binding_name)
-    if bind.binding_type == CosNaming.nobject:
-      if bind.binding_name[0].kind == "rtc":
-        obj = name_context.resolve(bind.binding_name)
-        self.object_list[name] = obj
-        try:
-          obj._non_existent()
-          obj = obj._narrow(RTObject)
-          res = [[name, obj]]
-        except:
-          obj = None
-          res = [[name, obj]]
-      else:
-        self.object_list[name] = None
-    else:
-      ctx = name_context.resolve(bind.binding_name)
-      ctx = ctx._narrow(CosNaming.NamingContext)
-      parent = name
-      res = self.getRTObjectList( ctx, parent)
-    return res
-
-  def refreshObjectList(self):
-    self.object_list = {}
-    return self.getRTObjectList()
-
-  def getPorts(self, name):
-    res=[]
-    if name.count(".rtc") == 0 : name = name+".rtc"
-    if not (name in self.object_list):
-      self.refreshObjectList()
-
-    if name in self.object_list:
-      port_ref = self.object_list[name].get_ports()
-      for p in port_ref:
-        pp = p.get_port_profile()
-        pprof =  nvlist2dict(pp.properties)
-        res.append( (pp.name, pprof))
-    else:
-      print("No such RTC:", name)
-    return res
-
-  def getPortRef(self, name, port):
-    res=[]
-    if name in self.object_list:
-      self.refreshObjectList()
-
-    if name.count(".rtc") == 0 : name = name+".rtc"
-
-    if name in self.object_list:
-      port_ref = self.object_list[name].get_ports()
-      for p in port_ref:
-        pp = p.get_port_profile()
-        if port == pp.name.split('.')[-1]:
-          return p
-    else:
-      print("No such port:", name, ":", port)
-    return None
-
-  def getConnectors(self, name, port):
-    port_ref=self.getPortRef(name, port)
-    if port_ref:
-      cons = port_ref.get_connector_profiles()
-      return cons
-    return None
- 
-  def getConnectionInfo(self, con):
-    ports = [(con.ports[0].get_port_profile()).name, (con.ports[1].get_port_profile()).name]
-    res={'name': con.name, 'ports': ports, 'id': con.connector_id }
-    return res
-
-  def getConnections(self, name, port):
-    res = []
-    cons = self.getConnectors(name, port)
-    if cons:
-      for c in cons:
-        res.append(self.getConnectionInfo(c))
-    return res
-
-  def find_connection(self, portname1, portname2):
-    try:
-      name1, port1 = portname1.split(":")
-      name2, port2 = portname2.split(":")
-
-      p1=self.getPortRef(name1, port1)
-      p2=self.getPortRef(name2, port2)
-
-      cons  = self.getConnectors(name1, port1)
-      cons2 = self.getConnectors(name2, port2)
-      if cons and  cons2 :
-        for c in cons:
-          for c2 in cons2:
-            if c.connector_id == c2.connector_id:
-              return c
-      return False
-    except:
-      traceback.print_exc()
-      return None
-
-  def connect(self, portname1, portname2, service=False):
-    if service:
-      con_prof = {'port.port_type':'CorbaPort' }
-    else:
-      con_prof={'dataport.dataflow_type':'push',
-              'dataport.interface_type':'corba_cdr' ,
-              'dataport.subscription_type':'flush'}
-
-    chk = self.find_connection(portname1, portname2)
-    if chk is None:
-        return None
-    if chk :
-       print("Conntction exists:", chk.connector_id)
-       return 
-    try:
-      name1, port1 = portname1.split(":")
-      name2, port2 = portname2.split(":")
-      p1=self.getPortRef(name1, port1)
-      p2=self.getPortRef(name2, port2)
-      if p1 and p2:
-        name=string.join([name1, port1, name2, port2], '_')
-        prof_req=ConnectorProfile(name, "", [p1, p2], dict2nvlist(con_prof)) 
-        res, prof=p1.connect(prof_req)
-      else:
-        res="Error in connect"
-    except:
-      res="Error"
-    print(res)
-    return
-
-  def disconnect(self, portname1, portname2):
-    try:
-      con=self.find_connection(portname1, portname2)
-      if con is None or not con:
-        print("No such connrction:", portname1, portname2)
-       
-      con.ports[0].disconnect(con.connector_id)
-      print("Sucess to disconnect:", portname1, portname2)
-    except:
-      print("Fail to disconnect:", portname1, portname2)
-
-  def getEC(self, name):
-    obj=self.resolveRTObject(name)
-    ec=obj.get_owned_contexts()[0]
-    return ec
-      
-  def activate(self, name):
-    obj=self.resolveRTObject(name)
-    ec=obj.get_owned_contexts()[0]
-    ec.activate_component(obj)
-    return None
-      
-  def deactivate(self, name):
-    obj=self.resolveRTObject(name)
-    ec=obj.get_owned_contexts()[0]
-    ec.deactivate_component(obj)
-    return None
-
-  def get_component_state(self, name):
-    obj=self.resolveRTObject(name)
-    ec=obj.get_owned_contexts()[0]
-    return ec.get_component_state(obj)
-
-  def terminate(self, name):
-    obj=self.resolveRTObject(name)
-    obj.exit()
-    return None
-      
-def nvlist2dict(nvlist):
-  res={}
-  for v in nvlist:
-    res[v.name] = v.value.value()
-  return res
-
-def dict2nvlist(dict) :
-  import omniORB.any
-  rslt = []
-  for tmp in dict.keys() :
-    rslt.append(SDOPackage.NameValue(tmp, omniORB.any.to_any(dict[tmp])))
-  return rslt
-#     
 
 #########################################################################
 #
