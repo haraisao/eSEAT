@@ -818,10 +818,10 @@ class Rtc_Sh:
 
   def getPorts(self, name):
     res=[]
-    if name in self.object_list:
+    if name.count(".rtc") == 0 : name = name+".rtc"
+    if not (name in self.object_list):
       self.refreshObjectList()
 
-    if name.count(".rtc") == 0 : name = name+".rtc"
     if name in self.object_list:
       port_ref = self.object_list[name].get_ports()
       for p in port_ref:

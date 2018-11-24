@@ -121,10 +121,10 @@ class Rtc_Sh:
 
   def getPorts(self, name):
     res=[]
-    if name in self.object_list:
+    if name.count(".rtc") == 0 : name = name+".rtc"
+    if not (name in self.object_list):
       self.refreshObjectList()
 
-    if name.count(".rtc") == 0 : name = name+".rtc"
     if name in self.object_list:
       port_ref = self.object_list[name].get_ports()
       for p in port_ref:
@@ -268,16 +268,18 @@ class Rtc_Sh:
 #
 #
 class RtCmd(cmd.Cmd):
-  intro="Welcome to RtCmd"
+  #intro="Welcome to RtCmd"
   prompt="==> "
   file=None
 
-  def __init__(self):
+  def __init__(self, once=False):
     cmd.Cmd.__init__(self)
     self.rtsh=Rtc_Sh()
+    self.onecycle=once
 
   def do_echo(self, arg, arg2=None):
     print(arg, arg2)
+    return self.onecycle
 
   def do_list(self, arg):
     num=0
@@ -290,10 +292,15 @@ class RtCmd(cmd.Cmd):
     for n in res:
       num += 1
       if n[1]:
-        print(num, ":", n[0])
+        stat=self.rtsh.get_component_state(n[0])
+        if stat == ACTIVE_STATE:
+          print(num, ":", n[0], "*")
+        else :
+          print(num, ":", n[0])
       else:
-        print(num, ":", n[0], "*")
+        print(num, ":[", n[0], "]")
     print("")
+    return self.onecycle
 
   def do_get_ports(self, arg):
     num=0
@@ -306,6 +313,7 @@ class RtCmd(cmd.Cmd):
          print("   ", k,":", pp[1][k])
             
     print("")
+    return self.onecycle
 
   def do_get_connection(self, arg):
     argv=arg.split()
@@ -317,30 +325,38 @@ class RtCmd(cmd.Cmd):
         num += 1
     else:
       print("No connection")
+    return self.onecycle
 
   def do_disconnect(self, arg):
     argv=arg.split()
     self.rtsh.disconnect(argv[1], argv[2])
+    return self.onecycle
 
   def do_connect(self, arg):
     argv=arg.split()
     self.rtsh.connect(argv[1], argv[2])
+    return self.onecycle
 
   def do_activate(self, arg):
     self.rtsh.activate(arg)
+    return self.onecycle
 
   def do_deactivate(self, arg):
     self.rtsh.deactivate(arg)
+    return self.onecycle
 
   def do_get_state(self, arg):
     stat=self.rtsh.get_component_state(arg)
     print("State:", arg,":", stat)
+    return self.onecycle
 
   def do_terminate(self, arg):
     self.rtsh.terminate(arg)
+    return self.onecycle
 
   def do_unbind(self, arg):
     self.rtsh.unbind(arg)
+    return self.onecycle
 
   def do_bye(self, arg):
     print('...BYE')
@@ -387,5 +403,5 @@ def dict2nvlist(dict) :
 #  M A I N 
 #
 if __name__=='__main__':
-  RtCmd().cmdloop()
-#  main()
+  while True:
+    RtCmd(True).cmdloop()
