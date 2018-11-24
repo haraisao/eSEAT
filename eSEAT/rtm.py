@@ -747,7 +747,8 @@ class Rtc_Sh:
     self.naming=CorbaNaming(self.orb, self.name)
     self.maxlen=20
     self.object_list={}
-    self.getRTObjectList()
+    self.current_ctx=""
+    #self.getRTObjectList()
 
   def resolveRTObject(self, name):
     try:
@@ -807,7 +808,8 @@ class Rtc_Sh:
     else:
       ctx = name_context.resolve(bind.binding_name)
       ctx = ctx._narrow(CosNaming.NamingContext)
-      res = self.getRTObjectList( name_context, parent)
+      parent = name
+      res = self.getRTObjectList( ctx, parent)
     return res
 
   def refreshObjectList(self):
@@ -888,7 +890,6 @@ class Rtc_Sh:
       return None
 
   def connect(self, portname1, portname2, service=False):
-
     if service:
       con_prof = {'port.port_type':'CorbaPort' }
     else:
@@ -949,10 +950,7 @@ class Rtc_Sh:
   def get_component_state(self, name):
     obj=self.resolveRTObject(name)
     ec=obj.get_owned_contexts()[0]
-    res = ec.get_component_state(obj)
-    print("==Status:", res)
-    return res
-    #return ec.get_component_state(obj)
+    return ec.get_component_state(obj)
 
   def terminate(self, name):
     obj=self.resolveRTObject(name)

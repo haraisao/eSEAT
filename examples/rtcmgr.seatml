@@ -74,7 +74,8 @@
        rtsh.deactivate(argv[1])
 
      elif argv[0] == "get_state":
-       rtsh.get_component_state(argv[1])
+       stat=rtsh.get_component_state(argv[1])
+       print("State:", argv[1],":",stat)
 
      elif argv[0] == "terminate":
        rtsh.terminate(argv[1])
