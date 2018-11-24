@@ -403,5 +403,5 @@ def dict2nvlist(dict) :
 #  M A I N 
 #
 if __name__=='__main__':
-  while True:
-    RtCmd(True).cmdloop()
+  #while True:
+    RtCmd().cmdloop()
