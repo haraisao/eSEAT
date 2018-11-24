@@ -26,6 +26,9 @@
 
      elif argv[0] == "list":
        num=0
+       if len(argv) > 1 and argv[1] == '-r':
+         rtsh.refreshRTObjectList()
+  
        print("===== RTCs =====")
        res = rtsh.getRTObjectList()
        for n in res:
@@ -70,6 +73,9 @@
      elif argv[0] == "deactivate":
        rtsh.deactivate(argv[1])
 
+     elif argv[0] == "get_state":
+       rtsh.get_component_state(argv[1])
+
      elif argv[0] == "terminate":
        rtsh.terminate(argv[1])
 
@@ -84,6 +90,7 @@
        print("   get_connection [rtc_name] [port_name]")
        print("   connect [port_name1] [port_name2]")
        print("   disconnect [port_name1] [port_name2] ")
+       print("   get_state [rtc_name]")
        print("   activate [rtc_name]")
        print("   deactivate [rtc_name]")
        print("   terminate [rtc_name]")

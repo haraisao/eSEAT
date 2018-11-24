@@ -753,9 +753,10 @@ class Rtc_Sh:
     try:
       if name.count(".rtc") == 0 : name = name+".rtc"
       ref=self.naming.resolveStr(name)
-      ref._non.existent()
+      ref._non_existent()
       return ref._narrow(RTObject)
     except:
+      #traceback.print_exc()
       return None
 
   def unbind(self, name):
@@ -811,7 +812,7 @@ class Rtc_Sh:
 
   def refreshObjectList(self):
     self.object_list = {}
-    self.getRTObjectList()
+    return self.getRTObjectList()
 
   def getPorts(self, name):
     res=[]
@@ -928,6 +929,11 @@ class Rtc_Sh:
     except:
       print("Fail to disconnect:", portname1, portname2)
 
+  def getEC(self, name):
+    obj=self.resolveRTObject(name)
+    ec=obj.get_owned_contexts()[0]
+    return ec
+      
   def activate(self, name):
     obj=self.resolveRTObject(name)
     ec=obj.get_owned_contexts()[0]
@@ -939,6 +945,14 @@ class Rtc_Sh:
     ec=obj.get_owned_contexts()[0]
     ec.deactivate_component(obj)
     return None
+
+  def get_component_state(self, name):
+    obj=self.resolveRTObject(name)
+    ec=obj.get_owned_contexts()[0]
+    res = ec.get_component_state(obj)
+    print("==Status:", res)
+    return res
+    #return ec.get_component_state(obj)
 
   def terminate(self, name):
     obj=self.resolveRTObject(name)

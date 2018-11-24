@@ -225,17 +225,21 @@ class eSEAT_Core:
             self.adaptors[name] = WebSocketServer(comet_reader,
                                           name, "", port, index)
 
-            if self.adaptors[name].bind_res != 1 :
-                print ("=== Bind ERROR ===")
-                os._exit(1)
-
-            self.adaptors[name].start()
-            self.webServer = self.adaptors[name]
             if whost :
                 whosts = whost.split(',')
                 for x in whosts:
                     if x :
                         self.webServer.appendWhiteList(x.strip())
+
+            self.webServer = self.adaptors[name]
+
+            if self.adaptors[name].bind_res != 1 :
+                print ("=== Bind ERROR ===")
+                #os._exit(1)
+                return
+
+            self.adaptors[name].start()
+
         else:
             self._logger.info(u"Failed to create Webadaptor:" + name + " already exists")
 
