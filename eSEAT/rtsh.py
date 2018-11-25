@@ -27,6 +27,7 @@ import threading
 import subprocess
 #import utils
 
+import readline
 import cmd
 
 #########################
@@ -130,6 +131,11 @@ class Rtc_Sh:
       for p in port_ref:
         pp = p.get_port_profile()
         pprof =  nvlist2dict(pp.properties)
+        if pp.interfaces:
+          ifp=pp.interfaces[0]
+          pprof['interface_name'] = ifp.instance_name
+          pprof['interface_type_name'] = ifp.type_name
+          pprof['interface_polarity'] = ifp.polarity
         res.append( (pp.name, pprof))
     else:
       print("No such RTC:", name)
@@ -268,7 +274,7 @@ class Rtc_Sh:
 #
 #
 class RtCmd(cmd.Cmd):
-  #intro="Welcome to RtCmd"
+  intro="Welcome to RtCmd"
   prompt="==> "
   file=None
 
@@ -281,15 +287,22 @@ class RtCmd(cmd.Cmd):
     self.onecycle=once
     self.end=False
 
-  def do_echo(self, arg, arg2=None):
-    print(arg, arg2)
+  def do_echo(self, arg):
+    print("Echo:", arg)
     return self.onecycle
 
   def do_list(self, arg):
     num=0
     argv=arg.split()
-    if len(argv) > 1 and argv[1] == '-r':
-      rtsh.refreshRTObjectList()
+    l_flag=False
+
+    if len(argv) > 0:
+      if argv[0] == '-r':
+        rtsh.refreshRTObjectList()
+      elif argv[0] == '-l':
+        l_flag=True
+      else:
+        print("Invalid option")
   
     print("===== RTCs =====")
     res = self.rtsh.getRTObjectList()
@@ -298,9 +311,36 @@ class RtCmd(cmd.Cmd):
       if n[1]:
         stat=self.rtsh.get_component_state(n[0])
         if stat == ACTIVE_STATE:
-          print(num, ":", n[0], "*")
-        else :
-          print(num, ":", n[0])
+          comp_name = n[0]+"*"
+        else:
+          comp_name = n[0]
+         
+        print(num, ":", comp_name)
+        if l_flag:
+          ports=self.rtsh.getPorts(n[0])
+          for pp in ports:
+            pname=pp[0].split('.')[1]
+            typ=pp[1]['port.port_type']
+            if typ == "DataInPort":
+              d_typ=pp[1]['dataport.data_type'].split(":")[1]
+              port_str = pname+"("+d_typ+")"
+              print("     <-", port_str)
+            elif typ == "DataOutPort":
+              d_typ=pp[1]['dataport.data_type'].split(":")[1]
+              port_str = pname+"("+d_typ+")"
+              print("     ->", port_str)
+            elif typ == "CorbaPort":
+              d_typ=pp[1]['interface_type_name']
+              if_dir=pp[1]['interface_polarity']
+              port_str = pname+"("+d_typ+")"
+              if if_dir == PROVIDED:
+                print("     =o", port_str)
+              else:  # REQUIRED
+                print("     =C", port_str)
+            else:
+              port_str = pname
+              print("     --", port_str)
+
       else:
         print(num, ":[", n[0], "]")
     print("")
@@ -319,26 +359,48 @@ class RtCmd(cmd.Cmd):
     print("")
     return self.onecycle
 
+  def do_get_connectors(self, arg):
+    try:
+      name, port = arg.split(":")
+      cons=self.rtsh.getConnectors(name, port)
+      if cons is None:
+        print("   No connectors")
+      else:
+        for con in cons:
+          info=self.rtsh.getConnectionInfo(con)
+          print("   ", info['name'],":", info['ports'][0],"==",info['ports'][1])
+    except:
+      print("Error in get_connectors:", arg)
+
   def do_get_connection(self, arg):
     argv=arg.split()
-    cons = self.rtsh.getConnections(argv[0], argv[1])
-    num=0
-    if cons:
-      for x in cons:
-        print(num, ":", cons)
-        num += 1
+    if len(argv) > 1:
+      cons = self.rtsh.getConnections(argv[0], argv[1])
+      num=0
+      if cons:
+        for x in cons:
+          print(num, ":", cons)
+          num += 1
+      else:
+        print("No connection")
     else:
-      print("No connection")
+      print("get_connection comp1:p comp2:p")
     return self.onecycle
 
   def do_disconnect(self, arg):
     argv=arg.split()
-    self.rtsh.disconnect(argv[1], argv[2])
+    if len(argv) > 1:
+      self.rtsh.disconnect(argv[0], argv[1])
+    else:
+      print("disconnect comp1:p comp2:p")
     return self.onecycle
 
   def do_connect(self, arg):
     argv=arg.split()
-    self.rtsh.connect(argv[1], argv[2])
+    if len(argv) > 1:
+      self.rtsh.connect(argv[0], argv[1])
+    else:
+      print("connect comp1:p comp2:p")
     return self.onecycle
 
   def do_activate(self, arg):
