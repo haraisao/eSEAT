@@ -248,27 +248,33 @@ class Rtc_Sh:
       return None
       
   def activate(self, name):
+    res=None
     obj=self.resolveRTObject(name)
     if obj :
       ec=obj.get_owned_contexts()[0]
-      ec.activate_component(obj)
-    return None
+      res=ec.activate_component(obj)
+    return res
       
   def deactivate(self, name):
+    res=None
     obj=self.resolveRTObject(name)
     if obj :
       ec=obj.get_owned_contexts()[0]
-      ec.deactivate_component(obj)
-    return None
+      res=ec.deactivate_component(obj)
+    return res
 
   def get_component_state(self, name):
+    stat=None
     obj=self.resolveRTObject(name)
-    ec=obj.get_owned_contexts()[0]
-    return ec.get_component_state(obj)
+    if obj:
+      ec=obj.get_owned_contexts()[0]
+      stat=ec.get_component_state(obj)
+    return stat
 
   def terminate(self, name):
     obj=self.resolveRTObject(name)
-    obj.exit()
+    if obj:
+      obj.exit()
     return None
 
 #
@@ -323,7 +329,7 @@ class RtCmd(cmd.Cmd):
             cons=self.rtsh.getConnectors(n[0], pname)
             typ=pp[1]['port.port_type']
             if cons:
-              con_str="-- "+str([ c.name for c in cons])
+              con_str="\n        +- "+str([ c.name for c in cons])
             else:
               con_str=""
 
