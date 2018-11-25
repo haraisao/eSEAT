@@ -369,6 +369,21 @@ class RtCmd(cmd.Cmd):
     print("")
     return self.onecycle
 
+  def complete_get_ports(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
+
+  def complete_object_name(self, text, line, begind, endidx):
+    names=self.rtsh.object_list.keys()
+    if not text:
+      completions=names[:]
+    else:
+      completions= [ n
+                     for n in name
+                     if n.startswitch(text)
+                   ]
+            
+    return completions 
+
   def do_get_connectors(self, arg):
     try:
       name, port = arg.split(":")
@@ -381,6 +396,9 @@ class RtCmd(cmd.Cmd):
           print("   ", info['name'],":", info['ports'][0],"==",info['ports'][1])
     except:
       print("Error in get_connectors:", arg)
+
+  def complete_get_connectors(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
 
   def do_get_connection(self, arg):
     argv=arg.split()
@@ -397,6 +415,9 @@ class RtCmd(cmd.Cmd):
       print("get_connection comp1:p comp2:p")
     return self.onecycle
 
+  def complete_get_connection(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
+
   def do_disconnect(self, arg):
     argv=arg.split()
     if len(argv) > 1:
@@ -404,6 +425,9 @@ class RtCmd(cmd.Cmd):
     else:
       print("disconnect comp1:p comp2:p")
     return self.onecycle
+
+  def complete_disconnect(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
 
   def do_connect(self, arg):
     argv=arg.split()
@@ -413,11 +437,17 @@ class RtCmd(cmd.Cmd):
       print("connect comp1:p comp2:p")
     return self.onecycle
 
+  def complete_connect(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
+
   def do_activate(self, arg):
     argv=arg.split(',')
     for v in argv:
       self.rtsh.activate(v)
     return self.onecycle
+
+  def complete_activate(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
 
   def do_deactivate(self, arg):
     argv=arg.split(',')
@@ -425,10 +455,16 @@ class RtCmd(cmd.Cmd):
       self.rtsh.deactivate(v)
     return self.onecycle
 
+  def complete_deactivate(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
+
   def do_get_state(self, arg):
     stat=self.rtsh.get_component_state(arg)
     print("State:", arg,":", stat)
     return self.onecycle
+
+  def complete_get_state(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
 
   def do_terminate(self, arg):
     argv=arg.split(',')
@@ -436,11 +472,17 @@ class RtCmd(cmd.Cmd):
       self.rtsh.terminate(v)
     return self.onecycle
 
+  def complete_terminate(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
+
   def do_unbind(self, arg):
     argv=arg.split(',')
     for v in argv:
       self.rtsh.unbind(v)
     return self.onecycle
+
+  def complete_unbind(self, text, line, begind, endidx):
+    return self.complete_object_name(text, line, begind, endidx)
 
   def do_bye(self, arg):
     print('...BYE')
