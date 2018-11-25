@@ -320,23 +320,37 @@ class RtCmd(cmd.Cmd):
           ports=self.rtsh.getPorts(n[0])
           for pp in ports:
             pname=pp[0].split('.')[1]
+            cons=self.rtsh.getConnectors(n[0], pname)
             typ=pp[1]['port.port_type']
             if typ == "DataInPort":
               d_typ=pp[1]['dataport.data_type'].split(":")[1]
               port_str = pname+"("+d_typ+")"
-              print("     <-", port_str)
+              if cons:
+                print("     <-", port_str, " -- ", len(cons))
+              else:
+                print("     <-", port_str)
             elif typ == "DataOutPort":
               d_typ=pp[1]['dataport.data_type'].split(":")[1]
               port_str = pname+"("+d_typ+")"
-              print("     ->", port_str)
+              if cons:
+                print("     ->", port_str, "--",len(cons))
+              else:
+                print("     ->", port_str)
             elif typ == "CorbaPort":
               d_typ=pp[1]['interface_type_name']
               if_dir=pp[1]['interface_polarity']
               port_str = pname+"("+d_typ+")"
               if if_dir == PROVIDED:
-                print("     =o", port_str)
+                if cons:
+                  print("     =o", port_str, "--",len(cons))
+                else:
+                  print("     =o", port_str)
+
               else:  # REQUIRED
-                print("     =C", port_str)
+                if cons:
+                  print("     =C", port_str, "--", len(cons))
+                else:
+                  print("     =C", port_str)
             else:
               port_str = pname
               print("     --", port_str)
@@ -404,11 +418,15 @@ class RtCmd(cmd.Cmd):
     return self.onecycle
 
   def do_activate(self, arg):
-    self.rtsh.activate(arg)
+    argv=arg.split(',')
+    for v in argv:
+      self.rtsh.activate(v)
     return self.onecycle
 
   def do_deactivate(self, arg):
-    self.rtsh.deactivate(arg)
+    argv=arg.split(',')
+    for v in argv:
+      self.rtsh.deactivate(v)
     return self.onecycle
 
   def do_get_state(self, arg):
@@ -417,11 +435,15 @@ class RtCmd(cmd.Cmd):
     return self.onecycle
 
   def do_terminate(self, arg):
-    self.rtsh.terminate(arg)
+    argv=arg.split(',')
+    for v in argv:
+      self.rtsh.terminate(v)
     return self.onecycle
 
   def do_unbind(self, arg):
-    self.rtsh.unbind(arg)
+    argv=arg.split(',')
+    for v in argv:
+      self.rtsh.unbind(v)
     return self.onecycle
 
   def do_bye(self, arg):
