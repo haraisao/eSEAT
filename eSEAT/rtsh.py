@@ -322,35 +322,31 @@ class RtCmd(cmd.Cmd):
             pname=pp[0].split('.')[1]
             cons=self.rtsh.getConnectors(n[0], pname)
             typ=pp[1]['port.port_type']
+            if cons:
+              con_str="-- "+str([ c.name for c in cons])
+            else:
+              con_str=""
+
             if typ == "DataInPort":
               d_typ=pp[1]['dataport.data_type'].split(":")[1]
               port_str = pname+"("+d_typ+")"
-              if cons:
-                print("     <-", port_str, " -- ", len(cons))
-              else:
-                print("     <-", port_str)
+              print("     <-", port_str, con_str)
+
             elif typ == "DataOutPort":
               d_typ=pp[1]['dataport.data_type'].split(":")[1]
               port_str = pname+"("+d_typ+")"
-              if cons:
-                print("     ->", port_str, "--",len(cons))
-              else:
-                print("     ->", port_str)
+              print("     ->", port_str, con_str)
+
             elif typ == "CorbaPort":
               d_typ=pp[1]['interface_type_name']
               if_dir=pp[1]['interface_polarity']
               port_str = pname+"("+d_typ+")"
               if if_dir == PROVIDED:
-                if cons:
-                  print("     =o", port_str, "--",len(cons))
-                else:
-                  print("     =o", port_str)
+                print("     =o", port_str, con_str)
 
               else:  # REQUIRED
-                if cons:
-                  print("     =C", port_str, "--", len(cons))
-                else:
-                  print("     =C", port_str)
+                print("     =C", port_str, con_str)
+
             else:
               port_str = pname
               print("     --", port_str)
