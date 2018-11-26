@@ -51,7 +51,7 @@ class Rtc_Sh:
     self.maxlen=20
     self.object_list={}
     self.current_ctx=""
-    self.getRTObjectList()
+    #self.getRTObjectList()
 
   def resolveRTObject(self, name):
     try:
@@ -280,7 +280,7 @@ class Rtc_Sh:
 #
 #
 class RtCmd(cmd.Cmd):
-  intro="Welcome to RtCmd"
+  #intro="Welcome to RtCmd"
   prompt="==> "
   file=None
 
@@ -288,6 +288,7 @@ class RtCmd(cmd.Cmd):
     cmd.Cmd.__init__(self)
     if rtsh is None:
       self.rtsh=Rtc_Sh()
+      self.rtsh.getRTObjectList()
     else:
       self.rtsh=rtsh
     self.onecycle=once
