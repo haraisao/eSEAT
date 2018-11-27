@@ -31,8 +31,6 @@
 
 
   <script>
-    //var bb=document.getElementById('container');  
-
     var joystick	= new VirtualJoystick({
 		container	: document.getElementById('container'),
 		mouseSupport	: true,
@@ -40,11 +38,6 @@
 
 	var status = 0;
 
-/*
-	joystick.addEventListener('touchStart', function(){
-		;
-	})
-*/
 	joystick.addEventListener('touchEnd', function(){
 		sendValueToRtc('Stop, 0, 0');
 	})

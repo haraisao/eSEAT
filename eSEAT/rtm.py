@@ -55,7 +55,7 @@ from RTC  import *
 from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals,daemonize
 import SeatmlParser
 
-from rtsh import *
+from rtcmd import *
 
 __version__="2.5"
 
@@ -539,7 +539,10 @@ class eSEATManager:
         instance_name = SeatmlParser.formatInstanceName(instance_name)
         self.comp.setInstanceName(instance_name)
 
-        self.comp.setRtsh(Rtc_Sh(self.manager.getORB()))
+        try:
+          self.comp.setRtsh(Rtc_Sh(self.manager.getORB()))
+        except:
+          pass
         self.comp.seatmgr=self
 
         #

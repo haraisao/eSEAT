@@ -305,7 +305,7 @@ class RtCmd(cmd.Cmd):
 
     if len(argv) > 0:
       if argv[0] == '-r':
-        rtsh.refreshRTObjectList()
+        self.rtsh.refreshRTObjectList()
       elif argv[0] == '-l':
         l_flag=True
       else:
@@ -573,5 +573,4 @@ def main():
 #  M A I N 
 #
 if __name__=='__main__':
-  #while True:
-    RtCmd().cmdloop()
+    main()
