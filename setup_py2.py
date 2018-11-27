@@ -14,5 +14,6 @@ setup(name='eSEAT',
       [console_scripts]
       eSEAT = eSEAT.main:main
       eSEAT_Node = eSEAT.core:main_node
+      rtcmd = eSEAT.rtsh:main
       """,
     ) 

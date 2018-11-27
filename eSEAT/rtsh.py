@@ -281,7 +281,7 @@ class Rtc_Sh:
 #
 class RtCmd(cmd.Cmd):
   #intro="Welcome to RtCmd"
-  prompt="==> "
+  prompt="=> "
   file=None
 
   def __init__(self, rtsh=None, once=False):
@@ -563,6 +563,10 @@ def dict2nvlist(dict) :
   for tmp in dict.keys() :
     rslt.append(SDOPackage.NameValue(tmp, omniORB.any.to_any(dict[tmp])))
   return rslt
+
+def main():
+  RtCmd().cmdloop(intro="Welcome to RtCmd")
+
 
 #########################################################################
 #
