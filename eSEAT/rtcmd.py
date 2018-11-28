@@ -481,7 +481,7 @@ class RtCmd(cmd.Cmd):
       return self.compl_object_name(text, line, begind, endidx)
 
   def do_activate(self, arg):
-    argv=arg.split(',')
+    argv=arg.split()
     for v in argv:
       self.rtsh.activate(v)
     return self.onecycle
@@ -490,7 +490,7 @@ class RtCmd(cmd.Cmd):
     return self.compl_object_name(text, line, begind, endidx)
 
   def do_deactivate(self, arg):
-    argv=arg.split(',')
+    argv=arg.split()
     for v in argv:
       self.rtsh.deactivate(v)
     return self.onecycle
@@ -507,7 +507,7 @@ class RtCmd(cmd.Cmd):
     return self.compl_object_name(text, line, begind, endidx)
 
   def do_terminate(self, arg):
-    argv=arg.split(',')
+    argv=arg.split()
     for v in argv:
       self.rtsh.terminate(v)
     return self.onecycle
@@ -516,7 +516,7 @@ class RtCmd(cmd.Cmd):
     return self.compl_object_name(text, line, begind, endidx)
 
   def do_unbind(self, arg):
-    argv=arg.split(',')
+    argv=arg.split()
     for v in argv:
       self.rtsh.unbind(v)
     return self.onecycle
