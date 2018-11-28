@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(name='eSEAT',
       version='2.5',
-      install_requires=['bs4', 'lxml', 'PyYAML'],
+      install_requires=['bs4', 'lxml', 'PyYAML', 'PyReadline'],
       description='extended Speech Event Action Transfer(eSEAT)',
       author='Isao Hara and Yosuke Matsusaka, AIST',
       author_email='isao-hara@aist.go.jp',
@@ -14,6 +14,6 @@ setup(name='eSEAT',
       [console_scripts]
       eSEAT = eSEAT.main:main
       eSEAT_Node = eSEAT.core:main_node
-      rtcmd = eSEAT.rtsh:main
+      rtcmd = eSEAT.rtcmd:main
       """,
     ) 
