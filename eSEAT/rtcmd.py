@@ -287,8 +287,12 @@ class RtCmd(cmd.Cmd):
   def __init__(self, rtsh=None, once=False):
     cmd.Cmd.__init__(self)
     if rtsh is None:
-      self.rtsh=Rtc_Sh()
-      self.rtsh.getRTObjectList()
+      try:
+        self.rtsh=Rtc_Sh()
+        self.rtsh.getRTObjectList()
+      except:
+        print("Error: NameService not found.")
+        os._exit(-1)
     else:
       self.rtsh=rtsh
     self.onecycle=once
@@ -570,7 +574,10 @@ def dict2nvlist(dict) :
   return rslt
 
 def main():
-  RtCmd().cmdloop(intro="Welcome to RtCmd")
+  if len(sys.argv) > 1:
+    return RtCmd().onecmd(" ".join(sys.argv[1:]))
+  else:
+    RtCmd().cmdloop(intro="Welcome to RtCmd")
 
 
 #########################################################################
