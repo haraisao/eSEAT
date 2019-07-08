@@ -212,12 +212,12 @@ class RosAdaptor(object):
 
   #
   # 
-  def createPublisher(self, name, datatype, size=1):
+  def createPublisher(self, name, datatype, size=1, nodelay=False):
     global ros_node
     if self.type == 'Publisher':
       if __ros_version__ == 1:
         dtype=getMsgClass(datatype)
-        self._port=rospy.Publisher(name, dtype, queue_size=size)
+        self._port=rospy.Publisher(name, dtype, queue_size=size, tcp_nodelay=nodelay)
         self.service_dtype=dtype
 
       elif __ros_version__ == 2:

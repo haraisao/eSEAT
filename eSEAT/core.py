@@ -254,12 +254,12 @@ class eSEAT_Core:
 
     #
     #
-    def createRosPublisher(self, name, datatype, size=1):
+    def createRosPublisher(self, name, datatype, size=1, nodelay=False):
       if __ros_version__ > 0:
         self.initRosNode()
         if self.ros_node:
           self.adaptors[name]=RosAdaptor(name, 'Publisher', self)
-          self.adaptors[name].createPublisher(name, datatype, size)
+          self.adaptors[name].createPublisher(name, datatype, size, nodelay)
 
     #
     #
@@ -411,7 +411,11 @@ class eSEAT_Core:
                    size=int(size_str)
                 else:
                    size=1
-                self.createRosPublisher(name, tag.get('datatype'),size)
+                deley_str=tag.get('nodelay')
+                if delay_str:   
+                    self.createRosPublisher(name, tag.get('datatype'), size, True)
+                else:
+                    self.createRosPublisher(name, tag.get('datatype'), size)
 
             elif type == 'ros_sub' :
                 fname=tag.get('file')
