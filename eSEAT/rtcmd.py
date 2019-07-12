@@ -27,7 +27,11 @@ import threading
 import subprocess
 #import utils
 
-import readline
+try:
+  import readline
+except:
+  pass
+  
 import cmd
 
 #########################

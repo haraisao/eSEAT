@@ -37,7 +37,7 @@ from hashlib import sha1
 try:
   from core import setGlobals, getGlobals
 except:
-  from core import setGlobals, getGlobals
+  from .core import setGlobals, getGlobals
 
 import logging
 import logging.handlers
@@ -141,7 +141,7 @@ class SocketPort(threading.Thread):
   #
   # Connect
   #
-  def connect(self, async=True):
+  def connect(self, m_async=True):
     if self.mainloop :
       return 1
 
@@ -160,7 +160,7 @@ class SocketPort(threading.Thread):
       self.close()
       return -1
 
-    if async :
+    if m_async :
       print ("Start read thread ",self.name)
       self.start()
 

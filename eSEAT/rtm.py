@@ -26,9 +26,13 @@ import traceback
 import optparse
 import threading
 import subprocess
-import utils
 
-from viewer import OutViewer
+try:
+    import utils
+    from viewer import OutViewer
+except:
+    from . import utils
+    from .viewer import OutViewer
 
 if os.getenv('SEAT_ROOT') :
   rootdir=os.getenv('SEAT_ROOT')
@@ -52,10 +56,14 @@ from RTC  import *
 ########################################
 #  eSEAT_Core
 #
-from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals,daemonize
-import SeatmlParser
-
-from rtcmd import *
+try:
+    from core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals,daemonize
+    import SeatmlParser
+    from rtcmd import *
+except:
+    from .core import eSEAT_Core,eSEAT_Gui,getGlobals,setGlobals,daemonize
+    from . import SeatmlParser
+    from .rtcmd import *
 
 __version__="2.5"
 
@@ -63,9 +71,11 @@ __version__="2.5"
 #
 #  Sprcification of eSEAT
 #
+
 eseat_spec = ["implementation_id", "eSEAT",
              "type_name",         "eSEAT",
-             "description",       __doc__.encode('UTF-8'),
+#             "description",       __doc__.encode('UTF-8'),
+             "description",       __doc__,
              "version",           __version__,
              "vendor",            "AIST",
              "category",          "OpenHRI",
@@ -555,9 +565,8 @@ class eSEATManager:
     #  Parse command line option...
     def parseArgs(self, flag=True):
         encoding = locale.getpreferredencoding()
-        sys.stdout = codecs.getwriter(encoding)(sys.stdout, errors = "replace")
-        sys.stderr = codecs.getwriter(encoding)(sys.stderr, errors = "replace")
-
+        #sys.stdout = codecs.getwriter(encoding)(sys.stdout, errors = "replace")
+        #sys.stderr = codecs.getwriter(encoding)(sys.stderr, errors = "replace")
         parser = utils.MyParser(version=__version__, usage="%prog [seatmlfile]",
                                 description=__doc__)
 
@@ -576,7 +585,6 @@ class eSEATManager:
         parser.add_option('-o', '--option', dest='option', action='append',
                       default=None,
                       help='specify custom configuration parameter')
-
         try:
             opts, args = parser.parse_args()
         except (optparse.OptionError, e):
