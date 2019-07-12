@@ -424,7 +424,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         if s[-3:] == "Seq"     : seq = True
 
         dtype = str
-        if s.count("WString")  : dtype = unicode
+        #if s.count("WString")  : dtype = unicode
+        if s.count("WString")  : dtype = str          
         elif s.count("String") : dtype = str
         elif s.count("Float")  : dtype = float
         elif s.count("Double") : dtype = float
