@@ -27,6 +27,8 @@ import optparse
 import threading
 import subprocess
 
+import random
+
 try:
     import utils
     from viewer import OutViewer
@@ -80,7 +82,7 @@ eseat_spec = ["implementation_id", "eSEAT",
              "vendor",            "AIST",
              "category",          "OpenHRI",
              "activity_type",     "DataFlowComponent",
-             "max_instance",      "1",
+             "max_instance",      "10",
              "language",          "Python",
              "lang_type",         "script",
              "conf.default.scriptfile", "None",
@@ -147,6 +149,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._on_timeout = -1
         self.rate_hz=0 
         self.rtsh=None
+        print("====Finish initialize")
 
     def setRtsh(self, s):
         self.rtsh=s
@@ -170,13 +173,16 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #  onInitialize
     #
     def onInitialize(self):
+        print("---1")
         OpenRTM_aist.DataFlowComponentBase.onInitialize(self)
+        print("---2")
         self._logger = RtcLogger(self._properties.getProperty("instance_name"))
         self._logger.info("eSEAT (Extended Simple Event Action Transfer) version " + __version__)
         self._logger.info("Copyright (C) 2009-2014 Yosuke Matsusaka and Isao Hara")
+        print("---3")
         self.bindParameter("scriptfile", self._scriptfile, "None")
         self.bindParameter("scorelimit", self._scorelimit, "0.0")
-
+        print("---4")
         return RTC_OK
 
     #
@@ -244,7 +250,8 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             self.resetTimer()
             try:
                 if isinstance(data, TimedString):
-                    data.data = data.data.decode('utf-8')
+                    #data.data = data.data.decode('utf-8')
+                    data.data = data.data
                     self.processResult(name, data.data)
                     self.processOnDataIn(name, data)
                 elif isinstance(data, TimedWString):
@@ -620,7 +627,8 @@ class eSEATManager:
     def moduleInit(self, manager):
         profile = OpenRTM_aist.Properties(defaults_str=eseat_spec)
         manager.registerFactory(profile, eSEAT, OpenRTM_aist.Delete)
-        self.comp = manager.createComponent("eSEAT")
+        c_name="eSEAT"
+        self.comp = manager.createComponent(c_name)
         self.comp.manager = manager
         manager.unregisterComponent(self.comp)
 

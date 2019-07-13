@@ -6,6 +6,7 @@ import sys
 import os
 import traceback
 import threading
+import platform
 
 import yaml
 
@@ -59,7 +60,7 @@ except:
 #  Functions
 #
 def setRosMaster(hostname=None):
-  if not hostname : hostname = os.uname()[1]
+  if not hostname : hostname = platform.uname()[1]
   os.environ['ROS_MASTER_URI'] = 'http://%s:11311' % hostname
 
 #

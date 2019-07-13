@@ -86,6 +86,8 @@ def getGlobals():
 def setGlobals(name, val):
     globals()[name] = val
 
+def unicode(s):
+    return str(s)
 
 #########
 #  SocketAdaptor
@@ -478,11 +480,11 @@ class eSEAT_Core:
               self._data[name] = data
 
         elif dtype == str:
-            self._data[name].data = data.encode(code)
-
-        elif dtype == unicode:
-            self._logger.info("sending message to %s, %s" % (data,code))
-            self._data[name].data = unicode(data)
+            #self._data[name].data = data.encode(code)
+            self._data[name].data = data
+        #elif dtype == unicode:
+        #    self._logger.info("sending message to %s, %s" % (data,code))
+        #    self._data[name].data = unicode(data)
 
         elif dtype == int  and dtype == type(data) :
             self._data[name].data = dtype(data)
@@ -577,12 +579,11 @@ class eSEAT_Core:
     def processResult(self, name, s):
         try:
             s = unicode(s)
-        except UnicodeDecodeError:
-            s = str(s).encode('string_escape')
-            s = unicode(s)
+        #except UnicodeDecodeError:
+        #    s = str(s).encode('string_escape')
+        #    s = unicode(s)
         except:
             pass
-
         self._logger.info("got input %s (%s)" % (s, name))
         cmds = None
 
@@ -596,6 +597,7 @@ class eSEAT_Core:
             return False
         #
         #
+        print("===Execute====", cmds)
         cmds.execute(s)
         self.resetTimer()
         return True

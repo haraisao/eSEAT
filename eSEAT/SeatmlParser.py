@@ -33,6 +33,8 @@ except:
   from . import core as eSEAT_Core
   from . import Task
 
+def unicode(s):
+    return str(s)
 
 ###########################################
 #
@@ -341,29 +343,29 @@ class SEATML_Parser():
         #
         #  Others
         else:
-           self.logError(u"Invalid tag found: " + unicode(e.tag))
+           self.logError("Invalid tag found: " + unicode(e.tag))
 
     #
     #  load rules from external seatml file
     #
     def loadRuleFile(self, name, f, sname=None):
         f = f.replace("\\", "\\\\")
-        self.logInfo(u"load script file(loadRuleFile): " + f)
+        self.logInfo("load script file(loadRuleFile): " + f)
 
         try:
             doc = etree.parse(f)
         except etree.XMLSyntaxError as e:
-            self.logError(u"invalid xml syntax(loadRuleFile): " + unicode(e))
+            self.logError("invalid xml syntax(loadRuleFile): " + unicode(e))
             return 1
         except IOError as e:
-            self.logError(u"unable to open file " + f + " (loadRuleFile): " + unicode(e))
+            self.logError("unable to open file " + f + " (loadRuleFile): " + unicode(e))
             return 1
 
         try:
             if self._xmlschema :
                 self._xmlschema.assert_(doc)
         except AssertionError as b:
-            self.logError(u"invalid script file: " + f + " (loadRuleFile): " + unicode(b))
+            self.logError("invalid script file: " + f + " (loadRuleFile): " + unicode(b))
             return 1
 
         for s in doc.findall('state'):
@@ -373,7 +375,7 @@ class SEATML_Parser():
                         self.parseRule(name, e)
                 return
 
-        self.logError(u"no rule foud: " + f +":"+unicode(sname))
+        self.logError("no rule foud: " + f +":"+unicode(sname))
 
     #
     #   Sub parser for <rule>tag 
@@ -384,7 +386,7 @@ class SEATML_Parser():
         if e.get('file'):
             loadfile = os.path.join(self.seatml_base_dir, e.get('file'))
             if loadfile in self.include_rules :
-                self.logError(u"already included: " + e.get('file'))
+                self.logError("already included: " + e.get('file'))
                 return
             self.include_rules.append(loadfile)
             try:
@@ -434,7 +436,7 @@ class SEATML_Parser():
     def parseExec(self, name, e):
         commands = self.parseCommands(e)
         self.parent.states[name].onexec = commands
-        self.logInfo(u"register <onexec> on " + name)
+        self.logInfo("register <onexec> on " + name)
         return commands
 
     #
@@ -443,7 +445,7 @@ class SEATML_Parser():
     def parseActivated(self, e):
         commands = self.parseCommands(e)
         self.parent.states['all'].onactivated = commands
-        self.logInfo(u"register <onactivated> on all")
+        self.logInfo("register <onactivated> on all")
         return commands
 
     #
@@ -452,7 +454,7 @@ class SEATML_Parser():
     def parseDeactivated(self, name, e):
         commands = self.parseCommands(e)
         self.parent.states[name].ondeactivated = commands
-        self.logInfo(u"register <ondeactivaetd> on " + name)
+        self.logInfo("register <ondeactivaetd> on " + name)
         return commands
 
     #
@@ -463,7 +465,7 @@ class SEATML_Parser():
         commands = self.parseCommands(e)
         commands.timeout = float(tout)
         self.parent.states[name].ontimeout = commands
-        self.logInfo(u"register <ontimeout> on " + name)
+        self.logInfo("register <ontimeout> on " + name)
         return commands
 
     #######################################################
@@ -474,15 +476,15 @@ class SEATML_Parser():
         f = f.replace("\\", "\\\\")
         self.seatml_base_dir = os.path.dirname(f)
         
-        self.logInfo(u"load script file: " + f)
+        self.logInfo("load script file: " + f)
 
         try:
             doc = etree.parse(f)
         except etree.XMLSyntaxError as e:
-            self.logError(u"invalid xml syntax: " + unicode(e))
+            self.logError("invalid xml syntax: " + unicode(e))
             return 1
         except IOError as e:
-            self.logError(u"unable to open file " + f + ": " + unicode(e))
+            self.logError("unable to open file " + f + ": " + unicode(e))
             return 1
 
 
@@ -490,7 +492,7 @@ class SEATML_Parser():
             if self._xmlschema :
                 self._xmlschema.assert_(doc)
         except AssertionError as b:
-            self.logError(u"invalid script file: " + f + ": " + unicode(b))
+            self.logError("invalid script file: " + f + ": " + unicode(b))
             return 1
 
         self.parent.items = {}
@@ -690,8 +692,8 @@ def convertDataType(dtype, data, code='utf-8'):
   if dtype == str:
      return data.encode(code)
 
-  elif dtype == unicode:
-     return unicode(data)
+  #elif dtype == unicode:
+  #   return unicode(data)
 
   elif dtype == int or dtype == float :
      return dtype(data)
