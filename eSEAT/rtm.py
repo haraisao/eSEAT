@@ -527,7 +527,6 @@ class eSEATManager:
            argv.insert(1, "-f") 
            argv.insert(2, rootdir + "/rtc.conf") 
 
-
         #
         #
         if opts:
@@ -537,10 +536,14 @@ class eSEATManager:
         if self.run_as_daemon :
             daemonize()
 
+        if self.naming_format:
+            argv.insert(1,"-o")
+            argv.insert(2,"naming.formats:"+self.naming_format)
+
         self.manager = OpenRTM_aist.Manager.init(argv)
 
-        if self.naming_format:
-            self.manager._config.setProperty("naming.formats", self.naming_format)
+        #if self.naming_format:
+        #    self.manager._config.setProperty("naming.formats", self.naming_format)
 
         #
         # create Component
@@ -562,7 +565,6 @@ class eSEATManager:
         #
         # Gui stdout
         if opts and opts.run_out_viewer:
-            #print ("CreateViewer")
             self.viewer = OutViewer()
 
     #
@@ -623,8 +625,7 @@ class eSEATManager:
     def moduleInit(self, manager):
         profile = OpenRTM_aist.Properties(defaults_str=eseat_spec)
         manager.registerFactory(profile, eSEAT, OpenRTM_aist.Delete)
-        c_name="eSEAT"
-        self.comp = manager.createComponent(c_name)
+        self.comp = manager.createComponent("eSEAT")
         self.comp.manager = manager
         manager.unregisterComponent(self.comp)
 
@@ -636,7 +637,6 @@ class eSEATManager:
         naming_names = manager.formatString(naming_formats, self.comp.getProperties())
         self.comp.getProperties().setProperty("naming.names",naming_names)
         manager.registerComponent(self.comp)
-
 
     #
     #  Start Manager
