@@ -149,7 +149,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._on_timeout = -1
         self.rate_hz=0 
         self.rtsh=None
-        print("====Finish initialize")
+
 
     def setRtsh(self, s):
         self.rtsh=s
@@ -173,16 +173,12 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
     #  onInitialize
     #
     def onInitialize(self):
-        print("---1")
         OpenRTM_aist.DataFlowComponentBase.onInitialize(self)
-        print("---2")
         self._logger = RtcLogger(self._properties.getProperty("instance_name"))
         self._logger.info("eSEAT (Extended Simple Event Action Transfer) version " + __version__)
         self._logger.info("Copyright (C) 2009-2014 Yosuke Matsusaka and Isao Hara")
-        print("---3")
         self.bindParameter("scriptfile", self._scriptfile, "None")
         self.bindParameter("scorelimit", self._scorelimit, "0.0")
-        print("---4")
         return RTC_OK
 
     #

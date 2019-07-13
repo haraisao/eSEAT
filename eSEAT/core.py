@@ -597,7 +597,6 @@ class eSEAT_Core:
             return False
         #
         #
-        print("===Execute====", cmds)
         cmds.execute(s)
         self.resetTimer()
         return True
