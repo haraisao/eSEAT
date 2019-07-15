@@ -199,6 +199,7 @@ class eSEAT_Core:
         self.ros_anonymous=False
 
         self.interval=1
+        self.send_with_thread=0.001
 
     #
     #
@@ -503,8 +504,12 @@ class eSEAT_Core:
                 self._logger.error( "ERROR in send: %s %s" % (name , data))
 
         try:
-            threading.Thread(target=self._port[name].write, name="send_data", args=(self._data[name],)).start()
-            #self._port[name].write(self._data[name])
+            if self.send_with_thread > 0:
+                send_data=threading.Thread(target=self._port[name].write, name="send_data", args=(self._data[name],))
+                send_data.start()
+                send_data.join(self.send_with_thread)
+            else:
+                self._port[name].write(self._data[name])
         except:
             self._logger.error("Fail to sending message to %s" % (name,))
 
