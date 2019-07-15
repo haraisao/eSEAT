@@ -32,9 +32,11 @@ import random
 try:
     import utils
     from viewer import OutViewer
+    from SeatmlParser import convertDataType
 except:
     from . import utils
     from .viewer import OutViewer
+    from .SeatmlParser import convertDataType
 
 if os.getenv('SEAT_ROOT') :
   rootdir=os.getenv('SEAT_ROOT')
@@ -246,8 +248,10 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             self.resetTimer()
             try:
                 if isinstance(data, TimedString):
-                    #data.data = data.data.decode('utf-8')
-                    data.data = data.data
+                    if sys.version_info.major == 2:
+                        data.data = data.data.decode('utf-8')
+                    else:
+                        data.data = data.data.encode('raw-unicode-escape').decode()
                     self.processResult(name, data.data)
                     self.processOnDataIn(name, data)
                 elif isinstance(data, TimedWString):
@@ -457,13 +461,75 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         except:
             return False
 
+    ###########################
+    # Send Data 
     #
-    #
-    def writeData(self,name):
+    def send(self, name, data, code='utf-8'):
+        if isinstance(data, str) :
+            self._logger.info("sending message %s (to %s)" % (data, name))
+        else:
+            self._logger.info("sending message to %s" % (name,))
+
+        dtype = self.adaptortype[name][1]
+
+        if self.adaptortype[name][2]:
+            ndata = []
+            if type(data) == str :
+              for d in data.split(","):
+                ndata.append( convertDataType(dtype, d, code) )
+              self._data[name].data = ndata
+            else:
+              self._data[name] = data
+
+        elif dtype == str:
+            #self._data[name].data = data.encode(code)
+            if self._datatype[name] == TimedString:
+                self._data[name].data = data.encode().decode('unicode_escape')
+            else: 
+                self._data[name].data = data
+
+        elif sys.version_info.major == 2 and dtype == unicode:
+            self._logger.info("sending message to %s, %s" % (data,code))
+            self._data[name].data = unicode(data)
+
+        elif dtype == int  and dtype == type(data) :
+            self._data[name].data = dtype(data)
+
+        elif dtype == float and dtype == type(data) :
+            self._data[name].data = dtype(data)
+
+        else:
+            try:
+                if type(data) == str :
+                  self._data[name] = apply(dtype, eval(data))
+                else:
+                  self._data[name] = data
+            except:
+                self._logger.error( "ERROR in send: %s %s" % (name , data))
+
         try:
-            self._port[name].write()
+            if self.send_with_thread > 0:
+                send_data=threading.Thread(target=self._port[name].write, name="send_data", args=(self._data[name],))
+                send_data.start()
+                send_data.join(self.send_with_thread)
+            else:
+                self._port[name].write(self._data[name])
         except:
-            pass
+            self._logger.error("Fail to sending message to %s" % (name,))
+
+    #
+    #
+    def writeData(self, name):
+        try:
+            if self.send_with_thread > 0:
+                send_data=threading.Thread(target=self._port[name].write, name="send_data", args=(self._data[name],))
+                send_data.start()
+                send_data.join(self.send_with_thread)
+            else:
+                self._port[name].write(self._data[name])
+            #self._port[name].write()
+        except:
+            self._logger.error("Fail to sending message to %s" % (name,))
 
     #
     #

@@ -691,17 +691,20 @@ def decompStringSub(str):
 #
 def convertDataType(dtype, data, code='utf-8'):
   if dtype == str:
-     return data.encode(code)
+    if sys.version_info.major == 2:
+        return data.encode(code)
+    else:
+        return data
 
   elif sys.version_info.major == 2 and dtype == unicode:
-     return unicode(data)
+    return unicode(data)
 
   elif dtype == int or dtype == float :
-     return dtype(data)
+    return dtype(data)
   else:
-     if type(data) == str :
-       return eval(data)
-     return data
+    if type(data) == str :
+        return eval(data)
+    return data
 
 #
 # Component Name

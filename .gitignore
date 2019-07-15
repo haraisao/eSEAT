@@ -6,3 +6,4 @@ seatsat.egg-info/
 contrib/
 test/
 *.log
+eSEAT.egg-info
