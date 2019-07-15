@@ -482,6 +482,7 @@ class eSEAT_Core:
         elif dtype == str:
             #self._data[name].data = data.encode(code)
             self._data[name].data = data
+
         #elif dtype == unicode:
         #    self._logger.info("sending message to %s, %s" % (data,code))
         #    self._data[name].data = unicode(data)
@@ -502,6 +503,7 @@ class eSEAT_Core:
                 self._logger.error( "ERROR in send: %s %s" % (name , data))
 
         try:
+            #print("=====>", self._data[name])
             self._port[name].write(self._data[name])
         except:
             self._logger.error("Fail to sending message to %s" % (name,))
