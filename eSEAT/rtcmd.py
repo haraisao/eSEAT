@@ -222,8 +222,8 @@ class Rtc_Sh:
       p1=self.getPortRef(name1, port1)
       p2=self.getPortRef(name2, port2)
       if p1 and p2:
-        name=string.join([name1, port1, name2, port2], '_')
-        prof_req=ConnectorProfile(name, "", [p1, p2], dict2nvlist(con_prof)) 
+        name='_'.join([name1, port1, name2, port2])
+        prof_req=ConnectorProfile(name, "", [p1, p2], dict2nvlist(con_prof))
         res, prof=p1.connect(prof_req)
       else:
         res="Error in connect"
@@ -387,7 +387,6 @@ class RtCmd(cmd.Cmd):
         pnames=[]
         for pp in ports:
           pnames.append(pp[0].split('.')[1])
-
         if not pname:
           completions=pnames[:]
         else:
@@ -397,8 +396,8 @@ class RtCmd(cmd.Cmd):
     except:
       traceback.print_exc()
       completions=[]
-
-    return completions
+    return [ objname+":"+p for p in completions]
+    #return completions
 
   def do_get_ports(self, arg):
     num=0
