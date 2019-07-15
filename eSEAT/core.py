@@ -503,8 +503,8 @@ class eSEAT_Core:
                 self._logger.error( "ERROR in send: %s %s" % (name , data))
 
         try:
-            #print("=====>", self._data[name])
-            self._port[name].write(self._data[name])
+            threading.Thread(target=self._port[name].write, name="send_data", args=(self._data[name],)).start()
+            #self._port[name].write(self._data[name])
         except:
             self._logger.error("Fail to sending message to %s" % (name,))
 
