@@ -33,8 +33,9 @@ except:
   from . import core as eSEAT_Core
   from . import Task
 
-def unicode(s):
-    return str(s)
+if sys.version_info.major > 2:
+    def unicode(s):
+        return str(s)
 
 ###########################################
 #
@@ -692,8 +693,8 @@ def convertDataType(dtype, data, code='utf-8'):
   if dtype == str:
      return data.encode(code)
 
-  #elif dtype == unicode:
-  #   return unicode(data)
+  elif sys.version_info.major == 2 and dtype == unicode:
+     return unicode(data)
 
   elif dtype == int or dtype == float :
      return dtype(data)
