@@ -103,10 +103,12 @@ class eSEATDataListener(OpenRTM_aist.ConnectorDataListenerT):
         self._name = name
         self._type = type
         self._obj = obj
+        self._ondata_thread=None
     
     def __call__(self, info, cdrdata):
         data = OpenRTM_aist.ConnectorDataListenerT.__call__(self,
                         info, cdrdata, instantiateDataType(self._type))
+        
         self._obj.onData(self._name, data)
 
 #########################################################################
@@ -151,6 +153,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._on_timeout = -1
         self.rate_hz=0 
         self.rtsh=None
+        self._send_thread=None
 
 
     def setRtsh(self, s):
@@ -507,27 +510,16 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             except:
                 self._logger.error( "ERROR in send: %s %s" % (name , data))
 
-        try:
-            if self.send_with_thread > 0:
-                send_data=threading.Thread(target=self._port[name].write, name="send_data", args=(self._data[name],))
-                send_data.start()
-                send_data.join(self.send_with_thread)
-            else:
-                self._port[name].write(self._data[name])
-        except:
-            self._logger.error("Fail to sending message to %s" % (name,))
+        self.writeData(name)
 
     #
     #
     def writeData(self, name):
         try:
-            if self.send_with_thread > 0:
-                send_data=threading.Thread(target=self._port[name].write, name="send_data", args=(self._data[name],))
-                send_data.start()
-                send_data.join(self.send_with_thread)
-            else:
-                self._port[name].write(self._data[name])
-            #self._port[name].write()
+            if self._send_thread :
+                self._send_thread.join(1)
+            self._send_thread=threading.Thread(target=self._port[name].write, name="send_data", args=(self._data[name],))
+            self._send_thread.start()
         except:
             self._logger.error("Fail to sending message to %s" % (name,))
 
