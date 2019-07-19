@@ -495,11 +495,12 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             self._logger.info("sending message to %s, %s" % (data,code))
             self._data[name].data = unicode(data)
 
-        elif dtype == int  and dtype == type(data) :
-            self._data[name].data = dtype(data)
-
-        elif dtype == float and dtype == type(data) :
-            self._data[name].data = dtype(data)
+        elif dtype == int  or dtype == float:
+            try:
+                self._data[name].data = dtype(data)
+            except:
+                self._logger.error("Fail to sending message to %s" % (name, ))
+                return
 
         else:
             try:
@@ -509,6 +510,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                   self._data[name] = data
             except:
                 self._logger.error( "ERROR in send: %s %s" % (name , data))
+                return
 
         self.writeData(name)
 
