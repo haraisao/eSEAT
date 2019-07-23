@@ -7,14 +7,14 @@ if "%1" == "" (
   goto :end
 ) 
 
-if not exist rtm_l (
-  mkdir rtm_l
+if not exist rtm_idl (
+  mkdir rtm_idl
 )
 
-if exist rtm_l/ (
-  omniidl -bpython -Crtm_l %1
+if exist rtm_idl/ (
+  omniidl -bpython -Crtm_idl %1
 ) else (
-  echo rtm_l is not directory, please remove rtm_l
+  echo rtm_idl is not directory, please remove rtm_idl
 )
 
 :end

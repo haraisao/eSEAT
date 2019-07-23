@@ -4,5 +4,5 @@
   @set PYTHON_DIR=%%i
   @set PYTHON_PATHS=%%i;%%i\Scripts
 )
-@set PYTHONPATH=rtm_l;%PYTHONPATH%
+@set PYTHONPATH=rtm_idl;%PYTHONPATH%
 @set PATH=%~dp0..\bin;%PATH%

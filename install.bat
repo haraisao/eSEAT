@@ -20,15 +20,15 @@ echo Install eSEAT
 %PYTHON_DIR%\python.exe setup_py3.py install
 
 FOR  %%x in (%FILES%) do (
-  xcopy %%x %INST_DIR%\etc /D /I /Y /K
+  xcopy %%x %INST_DIR%\etc\ /D /I /Y /K
 )
 
 FOR  %%x in (%BIN_FILES%) do (
-  xcopy  %%x %INSt_DIR%\bin /D /I /Y /K
+  xcopy  %%x %INSt_DIR%\bin\ /D /I /Y /K
 )
 
 FOR  %%x in (%DIRS%) do (
-  xcopy  %%x %INSt_DIR%\%%x /D /I /Y /K
+  xcopy  %%x %INSt_DIR%\%%x\ /D /I /Y /K
 )
 
 
