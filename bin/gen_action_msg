@@ -3,7 +3,7 @@
 if [ `lsb_release -rs` == "16.04" ];then
   export ROS_DISTRO=kinetic
 elif [ `lsb_release -rs` == "18.04" ];then
-  export ROS_DISTRO=bouncy
+  export ROS_DISTRO=melodic
 else
   export ROS_DISTRO=
   echo "Unknown distribution...."

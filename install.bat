@@ -7,8 +7,8 @@ set PYTHON_DIR=
   @set PYTHON_DIR=%%i
 )
 
-set FILES=etc\rtc.conf etc\template.seatml etc\setup.bash
-set BIN_FILES=bin\*.bat bin\*.exe
+set FILES=etc\rtc.conf etc\template.seatml etc\setup.bat
+set BIN_FILES=bin_win32\*.bat bin_win32\*.exe
 set DIRS=html libs 3rd_party examples ros_samples
 
 if "%INST_DIR%" == "" (

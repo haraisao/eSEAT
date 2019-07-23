@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<seatml>
+  <general name="SimpleIO2">
+    <adaptor name="str_out" type="rtcout" datatype="TimedString" />
+    <adaptor name="str_in" type="rtcin" datatype="TimedString" />
+<!--
+    <adaptor name="web" type="web"  port="8080" document_root="/usr/local/eSEAT/html" />
+-->
+  </general>
+
+  <state name="main_mode">
+
+    <label text="SimpleIO" colspan="3" bg_color="blue" />
+
+    <brk />
+    <label text="Input:" />
+    <input id="textIn" width="50" >
+        <message sendto="str_out" input="main_mode:textIn" />
+    </input>
+    <button label="Send">
+        <message sendto="str_out" >Hello</message>
+    </button>
+    <brk />
+  
+    <label text="Coming Text:" />
+    <text id="textOut" width="50" height="5" colspan="2" >
+    </text>
+    <brk />
+
+    <button label="Clear">
+      <script>
+       seat.clearText("main_mode:textOut")
+      </script>
+    </button>
+
+    <rule source="str_in">
+      <script>
+       seat.appendText("main_mode:textOut", rtc_in_data.data+"\n")
+      </script>
+<!--
+      <message sendto="web" input="main_mode:textOut" />
+      <script sendto="web">
+        rtc_result = rtc_in_data.data
+      </script>
+-->
+    </rule>
+
+  </state>
+</seatml>
