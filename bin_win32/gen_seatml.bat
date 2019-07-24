@@ -8,7 +8,7 @@ if "%SEATML%" == "" (
   goto :end
 )
 
-set TEMPLATE=%~dp0..\etc\template.seatml
+set TEMPLATE=%~dp0..\template.seatml
 
 %~dp0sed.exe s/_sample_/%SEATML%/ %TEMPLATE% > %SEATML%.seatml
 

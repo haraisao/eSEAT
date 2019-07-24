@@ -54,7 +54,7 @@ try:
   import RtcAdaptor
 except:
   try:
-    from . import RtcAdator
+    from . import RtcAdaptor
   except:
     RtcAdaptor=None
 
