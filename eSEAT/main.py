@@ -51,12 +51,12 @@ opts = None
 ########
 #  for OpenRTM-aist
 try:
-  import rtm
+  import RtcAdaptor
 except:
   try:
-    from . import rtm
+    from . import RtcAdator
   except:
-    rtm=None
+    RtcAdaptor=None
 
 try:
   from core import main_node
@@ -71,8 +71,8 @@ __version__ = "2.5"
 #
 def main(mlfile=None, daemon=False):
   try:
-    if rtm:
-      rtm.main_rtm(mlfile, daemon)
+    if RtcAdaptor:
+      RtcAdaptor.main_rtm(mlfile, daemon)
     else:
       main_node(mlfile,daemon)
   except:

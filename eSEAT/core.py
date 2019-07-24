@@ -71,10 +71,17 @@ try:
     import OpenRTM_aist
     import omniORB
     from RTC import * 
-    from rtm import instantiateDataType 
+    from RtcAdator import instantiateDataType 
 except:
     pass
 
+try:
+    from RtcAdator import instantiateDataType 
+except:
+    try:
+        from .RtcAdator import instantiateDataType 
+    except:
+        pass
 ###############################################################
 #  Global Variables
 #
@@ -415,7 +422,7 @@ class eSEAT_Core:
                    size=int(size_str)
                 else:
                    size=1
-                deley_str=tag.get('nodelay')
+                delay_str=tag.get('nodelay')
                 if delay_str:   
                     self.createRosPublisher(name, tag.get('datatype'), size, True)
                 else:

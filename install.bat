@@ -8,7 +8,7 @@ set PYTHON_DIR=
 )
 
 set FILES=etc\rtc.conf etc\template.seatml etc\setup.bat
-set BIN_FILES=bin_win32\*.bat bin_win32\*.exe
+set BIN_FILES=bin_win32\*.bat bin_win32\*.exe bin_win32\gen_ros_msg bin_win32\gen_ros_pkg
 set DIRS=html libs 3rd_party examples ros_samples
 
 if "%INST_DIR%" == "" (
