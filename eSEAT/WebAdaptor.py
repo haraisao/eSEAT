@@ -28,8 +28,11 @@ import subprocess
 
 import itertools
 
-import ssl
-
+try:
+  import ssl
+except:
+  ssl=None
+  
 import base64
 import random
 from hashlib import sha1
