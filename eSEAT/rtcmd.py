@@ -372,7 +372,7 @@ class RtCmd(cmd.Cmd):
     return self.onecycle
 
   def compl_object_name(self, text, line, begind, endidx):
-    names=self.rtsh.object_list.keys()
+    names=list(self.rtsh.object_list.keys())
     if not text:
       completions=names[:]
     else:
