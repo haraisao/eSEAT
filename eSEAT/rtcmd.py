@@ -562,6 +562,8 @@ class RtCmd(cmd.Cmd):
       self.file.close()
       self.file = None
 
+  def emptyline(self):
+    return
 
 def nvlist2dict(nvlist):
   res={}
