@@ -459,7 +459,6 @@ class RtCmd(cmd.Cmd):
     else:
       return self.compl_object_name(text, line, begind, endidx)
 
-
   def do_disconnect(self, arg):
     argv=arg.split()
     if len(argv) > 1:
@@ -564,6 +563,11 @@ class RtCmd(cmd.Cmd):
 
   def emptyline(self):
     return
+
+  def completenames(self, text, *ignored):
+    dotext = 'do_'+text
+    retval = [a[3:]+" " for a in self.get_names() if a.startswith(dotext)]
+    return retval
 
 def nvlist2dict(nvlist):
   res={}
