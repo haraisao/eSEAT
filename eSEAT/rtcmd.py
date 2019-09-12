@@ -15,17 +15,10 @@ Copyright (C) 2018
 from __future__ import print_function
 import sys
 import os
-import getopt
-import codecs
-import locale
 import time
 import signal
 import re
 import traceback
-import optparse
-import threading
-import subprocess
-#import utils
 
 try:
   import readline
@@ -40,11 +33,14 @@ import CosNaming
 from CorbaNaming import *
 import SDOPackage
 from omniORB import CORBA,URI,any
+
 import string
 
 #
 #
 class Rtc_Sh:
+  #
+  #
   def __init__(self, orb=None, server_name='localhost'):
     if orb is None:
       self.orb = CORBA.ORB_init(sys.argv)
@@ -57,6 +53,8 @@ class Rtc_Sh:
     self.current_ctx=""
     #self.getRTObjectList()
 
+  #
+  #
   def resolveRTObject(self, name):
     try:
       if name.count(".rtc") == 0 : name = name+".rtc"
@@ -67,14 +65,20 @@ class Rtc_Sh:
       #traceback.print_exc()
       return None
 
+  #
+  #
   def unbind(self, name):
     self.naming.unbind(name)
     print("Unbind :", name)
     return
 
+  #
+  #
   def clearObjectList(self):
     self.object_list={}
 
+  #
+  #
   def getRTObjectList(self, name_context=None, parent=""):
     res=[]
     if name_context is None:
@@ -91,6 +95,8 @@ class Rtc_Sh:
         tl = bind_i.next_n(self.maxlen)
     return res
 
+  #
+  #
   def resolveBindings(self, bind, name_context, parent):
     res = []
     prefix=parent
@@ -120,10 +126,14 @@ class Rtc_Sh:
       res = self.getRTObjectList( ctx, parent)
     return res
 
+  #
+  #
   def refreshObjectList(self):
     self.object_list = {}
     return self.getRTObjectList()
 
+  #
+  #
   def getPorts(self, name):
     res=[]
     if name.count(".rtc") == 0 : name = name+".rtc"
@@ -145,6 +155,62 @@ class Rtc_Sh:
       print("No such RTC:", name)
     return res
 
+  #
+  # get DataInPort
+  def getInPorts(self, name, info=""):
+    res=[]
+    dtype=""
+    if name.count(".rtc") == 0 : name = name+".rtc"
+    if not (name in self.object_list):
+      self.refreshObjectList()
+    
+    if info:
+      oname = info.split(":")
+      dtype = self.getPortDataType(oname[0], oname[1])
+  
+    if name in self.object_list:
+      port_ref = self.object_list[name].get_ports()
+      for p in port_ref:
+        pp = p.get_port_profile()
+        pprof =  nvlist2dict(pp.properties)
+
+        if pprof['port.port_type'] == 'DataInPort' and pprof['dataport.data_type'] == dtype:
+          if pp.interfaces:
+            ifp=pp.interfaces[0]
+            pprof['interface_name'] = ifp.instance_name
+            pprof['interface_type_name'] = ifp.type_name
+            pprof['interface_polarity'] = ifp.polarity
+          res.append( (pp.name, pprof))
+    else:
+      print("No such RTC:", name)
+    return res
+
+  #
+  # get DataOutPort
+  def getOutPorts(self, name):
+    res=[]
+    if name.count(".rtc") == 0 : name = name+".rtc"
+    if not (name in self.object_list):
+      self.refreshObjectList()
+
+    if name in self.object_list:
+      port_ref = self.object_list[name].get_ports()
+      for p in port_ref:
+        pp = p.get_port_profile()
+        pprof =  nvlist2dict(pp.properties)
+        if pprof['port.port_type'] == 'DataOutPort' :
+          if pp.interfaces:
+            ifp=pp.interfaces[0]
+            pprof['interface_name'] = ifp.instance_name
+            pprof['interface_type_name'] = ifp.type_name
+            pprof['interface_polarity'] = ifp.polarity
+          res.append( (pp.name, pprof))
+    else:
+      print("No such RTC:", name)
+    return res
+
+  #
+  #
   def getPortRef(self, name, port):
     res=[]
     if name in self.object_list:
@@ -162,6 +228,26 @@ class Rtc_Sh:
       print("No such port:", name, ":", port)
     return None
 
+  #
+  #
+  def getPortDataType(self, name, port):
+    res=[]
+    if name.count(".rtc") == 0 : name = name+".rtc"
+    if not (name in self.object_list):
+      self.refreshObjectList()
+
+    if name in self.object_list:
+      port_ref = self.object_list[name].get_ports()
+      for p in port_ref:
+        pp = p.get_port_profile()
+        pprof =  nvlist2dict(pp.properties)
+        if pp.name.split(".")[1] == port:
+          return pprof['dataport.data_type']
+    else:
+      print("No such RTC:", name)
+    return None
+  #
+  #
   def getConnectors(self, name, port):
     port_ref=self.getPortRef(name, port)
     if port_ref:
@@ -169,11 +255,15 @@ class Rtc_Sh:
       return cons
     return None
  
+  #
+  #
   def getConnectionInfo(self, con):
     ports = [(con.ports[0].get_port_profile()).name, (con.ports[1].get_port_profile()).name]
     res={'name': con.name, 'ports': ports, 'id': con.connector_id }
     return res
 
+  #
+  #
   def getConnections(self, name, port):
     res = []
     cons = self.getConnectors(name, port)
@@ -182,6 +272,8 @@ class Rtc_Sh:
         res.append(self.getConnectionInfo(c))
     return res
 
+  #
+  #
   def find_connection(self, portname1, portname2):
     try:
       name1, port1 = portname1.split(":")
@@ -202,6 +294,8 @@ class Rtc_Sh:
       traceback.print_exc()
       return None
 
+  #
+  #
   def connect(self, portname1, portname2, service=False):
     if service:
       con_prof = {'port.port_type':'CorbaPort' }
@@ -232,6 +326,8 @@ class Rtc_Sh:
     print(res)
     return
 
+  #
+  #
   def disconnect(self, portname1, portname2):
     try:
       con=self.find_connection(portname1, portname2)
@@ -243,6 +339,8 @@ class Rtc_Sh:
     except:
       print("Fail to disconnect:", portname1, portname2)
 
+  #
+  #
   def getEC(self, name):
     obj=self.resolveRTObject(name)
     if obj :
@@ -250,7 +348,9 @@ class Rtc_Sh:
       return ec
     else:
       return None
-      
+
+  #
+  #
   def activate(self, name):
     res=None
     obj=self.resolveRTObject(name)
@@ -258,7 +358,9 @@ class Rtc_Sh:
       ec=obj.get_owned_contexts()[0]
       res=ec.activate_component(obj)
     return res
-      
+
+  #
+  #
   def deactivate(self, name):
     res=None
     obj=self.resolveRTObject(name)
@@ -267,6 +369,8 @@ class Rtc_Sh:
       res=ec.deactivate_component(obj)
     return res
 
+  #
+  #
   def get_component_state(self, name):
     stat=None
     obj=self.resolveRTObject(name)
@@ -275,6 +379,8 @@ class Rtc_Sh:
       stat=ec.get_component_state(obj)
     return stat
 
+  #
+  #
   def terminate(self, name):
     obj=self.resolveRTObject(name)
     if obj:
@@ -288,6 +394,8 @@ class RtCmd(cmd.Cmd):
   prompt="=> "
   file=None
 
+  #
+  #
   def __init__(self, rtsh=None, once=False):
     cmd.Cmd.__init__(self)
     if rtsh is None:
@@ -302,10 +410,16 @@ class RtCmd(cmd.Cmd):
     self.onecycle=once
     self.end=False
 
+    self._info=""
+
+  #
+  #
   def do_echo(self, arg):
     print("Echo:", arg)
     return self.onecycle
 
+  #
+  #
   def do_list(self, arg):
     num=0
     argv=arg.split()
@@ -371,6 +485,8 @@ class RtCmd(cmd.Cmd):
     print("")
     return self.onecycle
 
+  #
+  #
   def compl_object_name(self, text, line, begind, endidx):
     names=list(self.rtsh.object_list.keys())
     if not text:
@@ -379,6 +495,8 @@ class RtCmd(cmd.Cmd):
       completions= [ n for n in names if n.startswith(text) ]
     return completions 
 
+  #
+  #
   def compl_port_name(self, text, line, begind, endidx):
     try:
       objname, pname=text.split(':',1)
@@ -399,6 +517,8 @@ class RtCmd(cmd.Cmd):
     return [ objname+":"+p for p in completions]
     #return completions
 
+  #
+  #
   def do_get_ports(self, arg):
     num=0
     ports = self.rtsh.getPorts(arg)
@@ -412,9 +532,13 @@ class RtCmd(cmd.Cmd):
     print("")
     return self.onecycle
 
+  #
+  #
   def complete_get_ports(self, text, line, begind, endidx):
     return self.compl_object_name(text, line, begind, endidx)
 
+  #
+  #
   def do_get_connectors(self, arg):
     try:
       name, port = arg.split(":")
@@ -428,6 +552,8 @@ class RtCmd(cmd.Cmd):
     except:
       print("Error in get_connectors:", arg)
 
+  #
+  #
   def complete_get_connectors(self, text, line, begind, endidx):
     args=line.split()
     if line[endidx-1] != ' ' and args[-1].find(':') > 0 :
@@ -436,6 +562,8 @@ class RtCmd(cmd.Cmd):
     else:
       return self.compl_object_name(text, line, begind, endidx)
 
+  #
+  #
   def do_get_connection(self, arg):
     argv=arg.split()
     if len(argv) > 1:
@@ -451,6 +579,8 @@ class RtCmd(cmd.Cmd):
       print("get_connection comp1:p comp2:p")
     return self.onecycle
 
+  #
+  #
   def complete_get_connection(self, text, line, begind, endidx):
     args=line.split()
     if line[endidx-1] != ' ' and args[-1].find(':') > 0 :
@@ -459,6 +589,8 @@ class RtCmd(cmd.Cmd):
     else:
       return self.compl_object_name(text, line, begind, endidx)
 
+  #
+  #
   def do_disconnect(self, arg):
     argv=arg.split()
     if len(argv) > 1:
@@ -467,6 +599,8 @@ class RtCmd(cmd.Cmd):
       print("disconnect comp1:p comp2:p")
     return self.onecycle
 
+  #
+  #
   def complete_disconnect(self, text, line, begind, endidx):
     args=line.split()
     if line[endidx-1] != ' ' and args[-1].find(':') > 0 :
@@ -475,6 +609,8 @@ class RtCmd(cmd.Cmd):
     else:
       return self.compl_object_name(text, line, begind, endidx)
 
+  #
+  #
   def do_connect(self, arg):
     argv=arg.split()
     if len(argv) > 1:
@@ -483,46 +619,118 @@ class RtCmd(cmd.Cmd):
       print("connect comp1:p comp2:p")
     return self.onecycle
 
+  #
+  #
   def complete_connect(self, text, line, begind, endidx):
     args=line.split()
+    try:
+      self._info=args[1]
+    except:
+      self._info=""
+
     if line[endidx-1] != ' ' and args[-1].find(':') > 0 :
       text=args[-1]
-      return self.compl_port_name(text, line, begind, endidx)
+      if(len(args) > 2):
+        return self.compl_inport_name(text, line, begind, endidx, self._info)
+      else:
+        return self.compl_outport_name(text, line, begind, endidx)
     else:
       return self.compl_object_name(text, line, begind, endidx)
 
+
+  #
+  #
+  def compl_inport_name(self, text, line, begind, endidx, info=""):
+    try:
+      objname, pname=text.split(':',1)
+      if objname:
+        ports=self.rtsh.getInPorts(objname, info)
+        pnames=[]
+        for pp in ports:
+          pnames.append(pp[0].split('.')[1])
+        if not pname:
+          completions=pnames[:]
+        else:
+          completions= [ n for n in pnames if n.startswith(pname) ]
+      else:
+        completions=[]
+    except:
+      traceback.print_exc()
+      completions=[]
+    return [ objname+":"+p for p in completions]
+
+  #
+  #
+  def compl_outport_name(self, text, line, begind, endidx):
+    try:
+      objname, pname=text.split(':',1)
+      if objname:
+        ports=self.rtsh.getOutPorts(objname)
+        pnames=[]
+        for pp in ports:
+          pnames.append(pp[0].split('.')[1])
+        if not pname:
+          completions=pnames[:]
+        else:
+          completions = [ n for n in pnames if n.startswith(pname) ]
+      else:
+        completions=[]
+    except:
+      traceback.print_exc()
+      completions=[]
+    if len(completions) == 1:
+      return [ objname+":"+p+" " for p in completions]
+    else:
+      return [ objname+":"+p for p in completions]
+
+  #
+  #
   def do_activate(self, arg):
     argv=arg.split()
     for v in argv:
       self.rtsh.activate(v)
     return self.onecycle
 
+  #
+  #
   def complete_activate(self, text, line, begind, endidx):
     return self.compl_object_name(text, line, begind, endidx)
 
+  #
+  #
   def do_deactivate(self, arg):
     argv=arg.split()
     for v in argv:
       self.rtsh.deactivate(v)
     return self.onecycle
 
+  #
+  #
   def complete_deactivate(self, text, line, begind, endidx):
     return self.compl_object_name(text, line, begind, endidx)
 
+  #
+  #
   def do_get_state(self, arg):
     stat=self.rtsh.get_component_state(arg)
     print("State:", arg,":", stat)
     return self.onecycle
 
+  #
+  #
   def complete_get_state(self, text, line, begind, endidx):
     return self.compl_object_name(text, line, begind, endidx)
 
+  #
+  #
   def do_terminate(self, arg):
     argv=arg.split()
     for v in argv:
       self.rtsh.terminate(v)
     return self.onecycle
 
+  #
+  #
   def complete_terminate(self, text, line, begind, endidx):
     return self.compl_object_name(text, line, begind, endidx)
 
