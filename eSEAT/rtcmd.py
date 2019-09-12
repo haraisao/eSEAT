@@ -19,6 +19,7 @@ import time
 import signal
 import re
 import traceback
+import subprocess
 
 try:
   import readline
@@ -382,7 +383,11 @@ class Rtc_Sh:
   #
   #
   def terminate(self, name):
-    obj=self.resolveRTObject(name)
+    try:
+      obj=self.resolveRTObject(name)
+    except:
+      obj=None
+  
     if obj:
       obj.exit()
     return None
@@ -393,6 +398,7 @@ class RtCmd(cmd.Cmd):
   #intro="Welcome to RtCmd"
   prompt="=> "
   file=None
+
 
   #
   #
@@ -411,6 +417,7 @@ class RtCmd(cmd.Cmd):
     self.end=False
 
     self._info=""
+    self.processes = []
 
   #
   #
@@ -743,8 +750,42 @@ class RtCmd(cmd.Cmd):
   def complete_unbind(self, text, line, begind, endidx):
     return self.compl_object_name(text, line, begind, endidx)
 
+  def do_system(self, arg):
+    cmdline = arg.split()
+    try:
+      proc = subprocess.Popen(cmdline, shell=True)
+      self.processes.append(proc)
+    except:
+      traceback.print_exc()
+
+  def do_killall(self, arg):
+    print(self.processes)
+    for p in self.processes:
+      if p.poll() is None:
+        print("--wait--", p)
+        p.terminate()
+        p.wait(5)
+
+  def do_refresh(self,arg):
+    self.rtsh.getRTObjectList()
+
+  def do_cmds(self, arg):
+    with open(arg, "r") as f:
+      cmds = f.read()
+      for cmd in cmds.split("\n"):
+        cmd = cmd.split("#")[0].strip()
+        if cmd :
+          self.onecmd(cmd)
+
+  def do_sleep(self, arg):
+    time.sleep(int(arg))
+
   def do_bye(self, arg):
     print('...BYE')
+    for p in self.processes:
+      if p.poll() is None:
+        p.terminate()
+        p.wait()
     self.close()
     self.end=True
     return True
@@ -789,6 +830,13 @@ def dict2nvlist(dict) :
   for tmp in dict.keys() :
     rslt.append(SDOPackage.NameValue(tmp, omniORB.any.to_any(dict[tmp])))
   return rslt
+
+def execute_from_file(fname):
+  rtcmd=RtCmd()
+  with open(fname, "r") as f:
+    cmds = f.read()
+    for cmd in cmds.split("\n"):
+      rtcmd.onecmd(cmd)
 
 def main():
   if len(sys.argv) > 1:

@@ -1492,7 +1492,6 @@ class eSEAT_Gui:
     ## Display/Hide GUI Window
     def showFrame(self, name):
         if self.frames[name] :
-           print("--frame:",self.frames[name])
            self.frames[name].pack(expand = True, fill = BOTH)
            for i in range(self.n_cols+1):
                try:
@@ -1502,7 +1501,7 @@ class eSEAT_Gui:
            for i in range(self.n_rows+1):
                try:
                    if i % 2 == 1:
-                       self.frames[name].grid_rowconfigure(i, weight=4)
+                       self.frames[name].grid_rowconfigure(i, weight=10)
                    else:
                        self.frames[name].grid_rowconfigure(i, weight=1)
                except:
