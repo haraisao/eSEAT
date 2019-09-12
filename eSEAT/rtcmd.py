@@ -506,6 +506,20 @@ class RtCmd(cmd.Cmd):
     print("")
     return self.onecycle
 
+
+  #
+  #
+  def get_object_names(self, text):
+    names=list(self.rtsh.object_list.keys())
+    if not text or text == 'all':
+      completions=names[:]
+    else:
+      try:
+        completions= [ n for n in names if re.match(text, n) ]
+      except:
+        pass
+    return completions
+
   #
   #
   def compl_object_name(self, text, line, begind, endidx):
@@ -726,8 +740,11 @@ class RtCmd(cmd.Cmd):
       print("No NameService")
       return self.onecycle
     argv=arg.split()
+
     for v in argv:
-      self.rtsh.activate(v)
+      objs = self.get_object_names(v)
+      for obj in objs:
+        self.rtsh.activate(obj)
     return self.onecycle
 
   #
@@ -741,9 +758,12 @@ class RtCmd(cmd.Cmd):
     if self.rtsh is None:
       print("No NameService")
       return self.onecycle
+
     argv=arg.split()
     for v in argv:
-      self.rtsh.deactivate(v)
+      objs = self.get_object_names(v)
+      for obj in objs:
+        self.rtsh.deactivate(obj)
     return self.onecycle
 
   #
@@ -774,7 +794,10 @@ class RtCmd(cmd.Cmd):
       return self.onecycle
     argv=arg.split()
     for v in argv:
-      self.rtsh.terminate(v)
+      objs = self.get_object_names(v)
+      for obj in objs:
+        self.rtsh.terminate(obj)
+
     return self.onecycle
 
   #
