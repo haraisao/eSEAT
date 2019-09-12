@@ -913,6 +913,8 @@ class eSEAT_Gui:
         self.radiobuttons = {}
         self.listboxes = {}
         self.labels = {}
+        self.n_rows=0
+        self.n_cols=0
 
     #
     #  check the GUI items
@@ -1333,6 +1335,8 @@ class eSEAT_Gui:
     ## Layout GUI items
     def packItems(self, name):
       try:
+        self.n_rows=0
+        self.n_cols=0
         i={}
         j={}
         n=self.max_columns
@@ -1364,10 +1368,15 @@ class eSEAT_Gui:
 
                 else :
                    if type(itm) == list:
-                       itm[0].grid(row=j[fn], column=i[fn], columnspan=itm[1], rowspan=itm[2], sticky=W+E)
+                       itm[0].grid(row=j[fn], column=i[fn], columnspan=itm[1], rowspan=itm[2], sticky="nsew")
+                       if self.n_rows < j[fn]: self.n_rows = j[fn]
+                       if self.n_cols < i[fn]: self.n_cols = i[fn]
                        i[fn] = i[fn] + itm[1] 
+
                    else :
-                       itm.grid(row=j[fn], column=i[fn], sticky=W + E)
+                       itm.grid(row=j[fn], column=i[fn], sticky="nsew")
+                       if self.n_rows < j[fn]: self.n_rows = j[fn]
+                       if self.n_cols < i[fn]: self.n_cols = i[fn]
                        i[fn] = i[fn] + 1
 
                    i[fn] = i[fn] % self.max_columns
@@ -1483,7 +1492,22 @@ class eSEAT_Gui:
     ## Display/Hide GUI Window
     def showFrame(self, name):
         if self.frames[name] :
-           self.frames[name].pack()
+           print("--frame:",self.frames[name])
+           self.frames[name].pack(expand = True, fill = BOTH)
+           for i in range(self.n_cols+1):
+               try:
+                   self.frames[name].grid_columnconfigure(i, weight=1)
+               except:
+                   pass
+           for i in range(self.n_rows+1):
+               try:
+                   if i % 2 == 1:
+                       self.frames[name].grid_rowconfigure(i, weight=4)
+                   else:
+                       self.frames[name].grid_rowconfigure(i, weight=1)
+               except:
+                   pass
+           #self.frames[name].grid_rowconfigure(5, weight=1)
 
     def hideFrame(self, name):
         if self.frames[name] :
@@ -1504,7 +1528,7 @@ class eSEAT_Gui:
                 self.createGuiPanel(st)
 
             self.showFrame(self.init_state)
-            self.frames[self.init_state].pack()
+            #self.frames[self.init_state].pack(expand = True, fill = BOTH)
 
             self.root.bind("<<state_transfer>>", self.stateChanged)
             self.setTitle(self.getInstanceName())
@@ -1681,7 +1705,7 @@ class eSEAT_Node_Manager:
     #
     #  Parse command line option...
     def parseArgs(self, flag=True):
-        encoding = locale.getpreferredencoding()
+        #encoding = locale.getpreferredencoding()
         #sys.stdout = codecs.getwriter(encoding)(sys.stdout, errors = "replace")
         #sys.stderr = codecs.getwriter(encoding)(sys.stderr, errors = "replace")
 
