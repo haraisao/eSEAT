@@ -399,7 +399,6 @@ class RtCmd(cmd.Cmd):
   prompt="=> "
   file=None
 
-
   #
   #
   def __init__(self, rtsh=None, once=False):
@@ -409,8 +408,9 @@ class RtCmd(cmd.Cmd):
         self.rtsh=Rtc_Sh()
         self.rtsh.getRTObjectList()
       except:
+        self.rtsh=None
         print("Error: NameService not found.")
-        os._exit(-1)
+        #os._exit(-1)
     else:
       self.rtsh=rtsh
     self.onecycle=once
@@ -427,7 +427,21 @@ class RtCmd(cmd.Cmd):
 
   #
   #
+  def do_connectNS(self, arg):
+    if self.rtsh is None:
+      try:
+        self.rtsh=Rtc_Sh()
+        self.rtsh.getRTObjectList()
+      except:
+        print("Error: NameService not found.")
+    else:
+      print("Already connected NameService.")
+  #
+  #
   def do_list(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     num=0
     argv=arg.split()
     l_flag=False
@@ -527,6 +541,9 @@ class RtCmd(cmd.Cmd):
   #
   #
   def do_get_ports(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     num=0
     ports = self.rtsh.getPorts(arg)
     print("====== Ports(%s) ======" % arg)
@@ -547,6 +564,9 @@ class RtCmd(cmd.Cmd):
   #
   #
   def do_get_connectors(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     try:
       name, port = arg.split(":")
       cons=self.rtsh.getConnectors(name, port)
@@ -572,6 +592,9 @@ class RtCmd(cmd.Cmd):
   #
   #
   def do_get_connection(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     argv=arg.split()
     if len(argv) > 1:
       cons = self.rtsh.getConnections(argv[0], argv[1])
@@ -599,6 +622,9 @@ class RtCmd(cmd.Cmd):
   #
   #
   def do_disconnect(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     argv=arg.split()
     if len(argv) > 1:
       self.rtsh.disconnect(argv[0], argv[1])
@@ -619,6 +645,9 @@ class RtCmd(cmd.Cmd):
   #
   #
   def do_connect(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     argv=arg.split()
     if len(argv) > 1:
       self.rtsh.connect(argv[0], argv[1])
@@ -693,6 +722,9 @@ class RtCmd(cmd.Cmd):
   #
   #
   def do_activate(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     argv=arg.split()
     for v in argv:
       self.rtsh.activate(v)
@@ -706,6 +738,9 @@ class RtCmd(cmd.Cmd):
   #
   #
   def do_deactivate(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     argv=arg.split()
     for v in argv:
       self.rtsh.deactivate(v)
@@ -719,6 +754,9 @@ class RtCmd(cmd.Cmd):
   #
   #
   def do_get_state(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     stat=self.rtsh.get_component_state(arg)
     print("State:", arg,":", stat)
     return self.onecycle
@@ -731,6 +769,9 @@ class RtCmd(cmd.Cmd):
   #
   #
   def do_terminate(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     argv=arg.split()
     for v in argv:
       self.rtsh.terminate(v)
@@ -742,6 +783,9 @@ class RtCmd(cmd.Cmd):
     return self.compl_object_name(text, line, begind, endidx)
 
   def do_unbind(self, arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     argv=arg.split()
     for v in argv:
       self.rtsh.unbind(v)
@@ -767,6 +811,9 @@ class RtCmd(cmd.Cmd):
         p.wait(5)
 
   def do_refresh(self,arg):
+    if self.rtsh is None:
+      print("No NameService")
+      return self.onecycle
     self.rtsh.getRTObjectList()
 
   def do_cmds(self, arg):
