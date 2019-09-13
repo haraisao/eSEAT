@@ -650,11 +650,14 @@ class eSEAT_Core:
     # Event process for Julius
     #
     def processJuliusResult(self, name, s):
-        doc = BeautifulSoup(s)
+        doc = BeautifulSoup(s, 'lxml')
 
         for s in doc.findAll('data'):
             rank = int(s['rank'])
-            score = float(s['score'])
+            try:
+                score = float(s['score'])
+            except:
+                score = 0.0
             text = s['text']
             self._logger.info("#%i: %s (%f)" % (rank, text, score))
 
@@ -877,13 +880,15 @@ class eSEAT_Core:
     # Finalize
     #
     def finalizeSEAT(self):
-        for a in self.adaptors.itervalues():
+        for a in self.adaptors.values():
             if isinstance(a, SocketAdaptor):
                 a.terminate()
                 a.join()
             elif isinstance(a, WebSocketServer):
                 a.terminate()
-        if self.root : self.root.quit()
+        if self.root :
+            self.root.quit()
+            self.root.destroy()
         return 
     #
     #
@@ -1559,7 +1564,9 @@ class eSEAT_Node(eSEAT_Core, eSEAT_Gui):
     #
     def exit(self, flag=False):
         try:
-            if self.root : self.root.quit()
+            if self.root :
+                self.root.quit()
+                self.root.destroy()
             if not flag : self.manager.exit()
         except:
             pass
