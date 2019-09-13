@@ -20,6 +20,7 @@ import signal
 import re
 import traceback
 import subprocess
+import platform
 
 try:
   import readline
@@ -36,6 +37,19 @@ import SDOPackage
 from omniORB import CORBA,URI,any
 
 import string
+
+#
+#
+def check_process(name):
+    if platform.system() == "Windows":
+        name=os.path.splitext(name)[0] + ".exe"
+        proc=subprocess.Popen('tasklist', shell=True, stdout=subprocess.PIPE)
+        for line in proc.stdout:
+            if line.decode('shift-jis').startswith(name):
+                
+                return True
+    print("===", name, "is not running.")
+    return False
 
 #
 #
@@ -741,6 +755,7 @@ class RtCmd(cmd.Cmd):
       return self.onecycle
     argv=arg.split()
 
+    self.rtsh.getRTObjectList()
     for v in argv:
       objs = self.get_object_names(v)
       for obj in objs:
@@ -759,6 +774,7 @@ class RtCmd(cmd.Cmd):
       print("No NameService")
       return self.onecycle
 
+    self.rtsh.getRTObjectList()
     argv=arg.split()
     for v in argv:
       objs = self.get_object_names(v)
@@ -792,6 +808,8 @@ class RtCmd(cmd.Cmd):
     if self.rtsh is None:
       print("No NameService")
       return self.onecycle
+
+    self.rtsh.getRTObjectList()
     argv=arg.split()
     for v in argv:
       objs = self.get_object_names(v)
@@ -909,6 +927,9 @@ def execute_from_file(fname):
       rtcmd.onecmd(cmd)
 
 def main():
+  if not check_process("omniNames") :
+    subprocess.Popen(["cmd", "/c", "start", "rtm-naming.bat"])
+
   if len(sys.argv) > 1:
     return RtCmd().onecmd(" ".join(sys.argv[1:]))
   else:
