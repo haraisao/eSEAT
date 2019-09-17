@@ -441,9 +441,9 @@ class Rtc_Sh:
       res, prof=p1.connect(prof_req)
     except:
       res="Error  in connect2"
-      if silent :print(res)
+      if not silent :print(res)
       return None
-    if silent :print("connect2", res)
+    if not silent :print("connect2", res)
     return prof
 
   #
@@ -994,7 +994,7 @@ class RtCmd(cmd.Cmd):
 
   #
   #
-  def compl_outport_name(self, text, line, begind, endidx):
+  def compl_outport_name(self, text, line, begind, endidx, sp=" "):
     try:
       objname, pname=text.split(':',1)
       if objname:
@@ -1012,7 +1012,7 @@ class RtCmd(cmd.Cmd):
       traceback.print_exc()
       completions=[]
     if len(completions) == 1:
-      return [ objname+":"+p+" " for p in completions]
+      return [ objname+":"+p+sp for p in completions]
     else:
       return [ objname+":"+p for p in completions]
 
@@ -1249,8 +1249,56 @@ class RtCmd(cmd.Cmd):
   def do_injection(self, arg):
     if self.no_rtsh() : return self.onecycle
   
-    argv=arg.split(" ", 1)
-    cname, pname =argv[0].split(":")
+    argv=arg.split(" ")
+    cname=None
+    pname=None
+    formatter=None
+    nloop=0
+    data=""
+    intval = 1
+    timeout=0
+
+    for i in range(len(argv)):
+      if argv[i] == "-m":
+        i += 1
+        try:
+          module="import "+ argv[i]
+          exec(module, globals())
+        except:
+          print("Error in import module")
+          pass
+      elif argv[i] == "-n":
+        i += 1
+        try:
+          nloop=int(argv[i])
+        except:
+          print("Invalid options")
+          pass
+      elif argv[i] == "-r":
+        i += 1
+        try:
+          intval=1.0/float(argv[i])
+        except:
+          print("Invalid options")
+          pass
+      elif argv[i] == "-t":
+        i += 1
+        try:
+          timeout=float(argv[i])
+        except:
+          print("Invalid options")
+          pass
+      elif argv[i] == "-c":
+        i += 1
+        data = ' '.join(argv[i:])
+        break
+      else:
+        if argv[i].find(":") > 0 and cname is None:
+          cname, pname = argv[i].split(":")
+          try:
+            pname, formatter = pname.split("#")
+          except:
+            pass
 
     dtype = self.rtsh.getPortDataType(cname, pname)
     if dtype :
@@ -1266,20 +1314,35 @@ class RtCmd(cmd.Cmd):
 
       self.rtsh.createDataPort("injection", dtype2, "rtcout")
       cprof=self.rtsh.connect2("injection_"+cname+"_"+pname, self.rtsh._port["injection"]._objref, pref)
+      print("=======")
 
       #
-      # send data 
-      if len(argv) == 1:
+      # send data
+      ctm=time.time()
+      if not data.strip() :
         loop = True
+        count=0
         while loop:
+          if nloop > 0 and count >= nloop: break
           print("injection ==> ", end="")
           try:
             data=input()
             self.sendData(data)
+            count += 1
           except EOFError:
             loop = False
       else:
-        self.sendData(argv[1])
+        if timeout > 0:
+          while True:
+            self.sendData(data)
+            time.sleep(intval)
+            if time.time() > ctm+timeout: break
+        else:
+          if nloop <= 0: nloop=1
+          for i in range(nloop):
+            self.sendData(data)
+            if i < nloop-1:
+              time.sleep(intval)
 
       #
       # disconnect
@@ -1314,9 +1377,51 @@ class RtCmd(cmd.Cmd):
   #
   def do_print(self, arg):
     if self.no_rtsh() : return self.onecycle
-  
     argv=arg.split(" ")
-    cname, pname = argv[0].split(":")
+    cname=None
+    pname=None
+    formatter=None
+    nloop=1
+    timeout=0
+    intval=1
+    for i in range(len(argv)):
+      if argv[i] == "-m":
+        i += 1
+        try:
+          module="import "+ argv[i]
+          exec(module, globals())
+        except:
+          print("Error in import module")
+          pass
+      elif argv[i] == "-n":
+        i += 1
+        try:
+          nloop=int(argv[i])
+        except:
+          print("Invalid options")
+          pass
+      elif argv[i] == "-r":
+        i += 1
+        try:
+          intval=1.0/float(argv[i])
+        except:
+          print("Invalid options")
+          pass
+      elif argv[i] == "-t":
+        i += 1
+        try:
+          timeout=float(argv[i])
+        except:
+          print("Invalid options")
+          pass
+      else:
+        if argv[i].find(":") > 0 and cname is None:
+          cname, pname = argv[i].split(":")
+          try:
+            pname, formatter = pname.split("#")
+          except:
+            pass
+
     dtype = self.rtsh.getPortDataType(cname, pname)
 
     if dtype :
@@ -1332,20 +1437,57 @@ class RtCmd(cmd.Cmd):
 
       self.rtsh.createDataPort("print", dtype2, "rtcin")
       cprof=self.rtsh.connect2("print_"+cname+"_"+pname, self.rtsh._port["print"]._objref, pref)
+      print("=======")
 
+      ##############################
       #
-      # recieve data
-      loop = True
-      while loop:
-        if self.rtsh.isNew("print"):
-          loop = False
-        time.sleep(0.3)
-      data = self.rtsh.readData("print")
-      print(data)
+      ctm=time.time()
+      if timeout > 0:
+        while True:
+          if self.rtsh.isNew("print"):
+            data = self.rtsh.readData("print")
+          else:
+            data=None
+          if time.time() > ctm+timeout: break
+          # output with formatter
+          if data is None:
+            print("== No Data")
+          else:
+            if formatter :
+              try:
+                fmt=eval(formatter)
+                print(fmt(data))
+              except:
+                print(data)
+            else:
+              print(data)
+          time.sleep(intval)
+
+      else:
+        for i in range(nloop):
+          #
+          # recieve data
+          loop = True
+          while loop:
+            if self.rtsh.isNew("print"):
+              loop = False
+            time.sleep(0.3)
+          data = self.rtsh.readData("print")
+
+          # output with formatter
+          if formatter :
+            try:
+              fmt=eval(formatter)
+              print(fmt(data))
+            except:
+              print(data)
+          else:
+            print(data)
+      ###########################
       #
       # disconnect
       self.rtsh._port["print"].disconnect(cprof.connector_id)
-      print("-- disconnect print",self.onecycle)
+      #print("-- disconnect print",self.onecycle)
       
     if self.onecycle: self.close()
 
@@ -1358,7 +1500,7 @@ class RtCmd(cmd.Cmd):
 
     if line[endidx-1] != ' ' and args[-1].find(':') > 0 :
       text=args[-1]
-      return self.compl_outport_name(text, line, begind, endidx)
+      return self.compl_outport_name(text, line, begind, endidx, "")
     else:
       return self.compl_object_name(text, line, begind, endidx, ":")
 
@@ -1402,6 +1544,30 @@ class RtCmd(cmd.Cmd):
     return False
 
 
+def parse_print_args(argv):
+  cname=None
+  pname=None
+  formatter=None
+  for i in range(len(argv)):
+    if argv[i] == "-m":
+      i += 1
+      try:
+        module="import "+ argv[i]
+        exec(module, globals())
+      except:
+        print("Error in import module")
+        pass
+
+    else:
+      if argv[i].find(":") > 0:
+        cname, pname = argv[i].split(":")
+        try:
+          pname, formatter = pname.split("#")
+        except:
+          formatter = None
+  return cname, pname, formatter
+
+
 #########################################
 #   Functions
 #
@@ -1424,6 +1590,11 @@ def execute_from_file(fname):
     cmds = f.read()
     for cmd in cmds.split("\n"):
       rtcmd.onecmd(cmd)
+
+def fmt_TimedString(data):
+  res = "Time: %d\n" % (data.tm.sec + data.tm.nsec/10000000.0)
+  res += "Data: %s" % data.data
+  return res
 
 ####
 #   M A I N
