@@ -512,6 +512,13 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
                 self._logger.error( "ERROR in send: %s %s" % (name , data))
                 return
 
+        try:
+            ctm=time.time()
+            self._data[name].tm.sec = int(ctm) 
+            self._data[name].tm.nsec = (ctm - self._data[name].tm.sec) * 1000000000
+        except:
+            pass
+        
         self.writeData(name)
 
     #
