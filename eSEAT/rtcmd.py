@@ -165,6 +165,8 @@ class Rtc_Sh:
     self._ProviderPort = {}
     self._datatype = {}
     self._send_thread = None
+
+    self._rtcmd=None
     ########################################
 
   #
@@ -179,6 +181,8 @@ class Rtc_Sh:
     except:
       pass
 
+  def setRtcmd(self, obj):
+    self._rtcmd=obj
   #
   #
   def initRtmManager(self):
@@ -530,7 +534,7 @@ class Rtc_Sh:
 
   ##############################################
   #
-  def createInPort(self, name, type=TimedString, listener=True):
+  def createInPort(self, name, type=RTC.TimedString, listener=True):
         self._datatype[name]=type
         self._data[name] = instantiateDataType(type)
         self._port[name] = OpenRTM_aist.InPort(name, self._data[name])
@@ -548,7 +552,7 @@ class Rtc_Sh:
   #
   # Create the OutPort of RTC
   #
-  def createOutPort(self, name, type=TimedString):
+  def createOutPort(self, name, type=RTC.TimedString):
         self._datatype[name]=type
         self._data[name] = instantiateDataType(type)
         self._port[name] = OpenRTM_aist.OutPort(name, self._data[name],
@@ -563,7 +567,7 @@ class Rtc_Sh:
   #
   # Create and Register DataPort of RTC
   #
-  def createDataPort(self, name, dtype, inout):
+  def createDataPort(self, name, dtype, inout, listener=False):
         if inout == 'rtcout':
             self.adaptortype[name] = self.getDataType(dtype)
             self.createOutPort(name, self.adaptortype[name][0])
@@ -571,7 +575,7 @@ class Rtc_Sh:
 
         elif inout == 'rtcin':
             self.adaptortype[name] = self.getDataType(dtype)
-            self.createInPort(name, self.adaptortype[name][0], listener=False)
+            self.createInPort(name, self.adaptortype[name][0], listener=listener)
             self.adaptors[name] = self
         else:
             return False
@@ -580,7 +584,10 @@ class Rtc_Sh:
   #
   #
   def onData(self, name, data):
-    print("===>", name, data)
+    try:
+      self._rtcmd.onData(data)
+    except:
+      print("===>", name, data)
     return
 
   #
@@ -740,12 +747,15 @@ class RtCmd(cmd.Cmd):
       try:
         self.rtsh=Rtc_Sh()
         self.rtsh.getRTObjectList()
+
       except:
         self.rtsh=None
         print("Error: NameService not found.")
         #os._exit(-1)
     else:
       self.rtsh=rtsh
+
+    if self.rtsh:  self.rtsh.setRtcmd(self)
     self.onecycle=once
     self.end=False
 
@@ -755,13 +765,16 @@ class RtCmd(cmd.Cmd):
     self._error=0
     self._rtc_state=None
     self.loop=False
+    self.print_conection=None
+    self.print_callback=None
+    self.print_formatter=None
+  
   #
   #
   def __del__(self):
     self.close()
     if self.rtsh :
       del self.rtsh
-
 
   #
   #
@@ -1081,7 +1094,7 @@ class RtCmd(cmd.Cmd):
       objs = self.get_object_names(v)
       for obj in objs:
         res=self.rtsh.activate(obj)
-        if res == RTC.RTC_ERROR: self._error=1
+        #if res == RTC.RTC_ERROR: self._error=1
     return self.onecycle
 
   #
@@ -1100,7 +1113,7 @@ class RtCmd(cmd.Cmd):
       objs = self.get_object_names(v)
       for obj in objs:
         res=self.rtsh.deactivate(obj)
-        if res == RTC.RTC_ERROR: self._error=1
+        #if res == RTC.RTC_ERROR: self._error=1
     return self.onecycle
 
   #
@@ -1219,12 +1232,27 @@ class RtCmd(cmd.Cmd):
   ###
   #  COMMAND: launch
   def do_launch(self, arg):
-    with open(arg, "r", encoding="utf-8") as f:
+    argv = arg.split(" ")
+    verbose=False
+    fname=None
+    for i in range(len(argv)):
+      if argv[i] == "-v":
+        verbose=True
+      elif fname is None:
+        fname = argv[i]
+      else:
+        pass
+  
+    if fname is None:
+      self._error=1
+      return self.onecycle
+
+    with open(fname, "r", encoding="utf-8") as f:
       cmds = f.read()
       for cmd in cmds.split("\n"):
         cmd = cmd.split("#")[0].strip()
         if cmd :
-          print("execute:", cmd)
+          if verbose: print("execute:", cmd)
           self.onecmd(cmd)
           if self._error > 0:
             print("ERROR", self._error)
@@ -1280,9 +1308,13 @@ class RtCmd(cmd.Cmd):
   #
   def close(self):
     self.loop=False
+    if self.print_conection:
+      self.rtsh._port["print"].disconnect(self.print_conection)
+
     if self.file:
       self.file.close()
       self.file = None
+
     if self.rtsh and self.rtsh.manager:
       self.rtsh.manager.shutdown()
 
@@ -1370,7 +1402,7 @@ class RtCmd(cmd.Cmd):
 
       self.rtsh.createDataPort("inject", dtype2, "rtcout")
       cprof=self.rtsh.connect2("inject_"+cname+"_"+pname, self.rtsh._port["inject"]._objref, pref)
-      print("=======")
+      print("=== inject ====")
 
       #
       # send data
@@ -1403,7 +1435,7 @@ class RtCmd(cmd.Cmd):
       #
       # disconnect
       self.rtsh._port["inject"].disconnect(cprof.connector_id)
-      print("-- disconnect inject",self.onecycle)
+      #print("-- disconnect inject",self.onecycle)
       
     #if self.onecycle: self.close()
 
@@ -1440,6 +1472,9 @@ class RtCmd(cmd.Cmd):
     nloop=1
     timeout=0
     intval=1
+    listener=False
+    callback=None
+
     for i in range(len(argv)):
       if argv[i] == "-m":
         i += 1
@@ -1470,13 +1505,26 @@ class RtCmd(cmd.Cmd):
         except:
           print("Invalid options")
           pass
+      elif argv[i] == "-l":
+        listener=True
+
+      elif argv[i] == "-c":
+        i += 1
+        try:
+          callback=argv[i]
+        except:
+          print("Invalid options")
+          pass
       else:
         if argv[i].find(":") > 0 and cname is None:
           cname, pname = argv[i].split(":")
           try:
             pname, formatter = pname.split("#")
           except:
-            pass
+            try:
+              pname, formatter = pname.split("$")
+            except:
+              pass
 
     dtype = self.rtsh.getPortDataType(cname, pname)
 
@@ -1491,24 +1539,55 @@ class RtCmd(cmd.Cmd):
         self.rtsh.initRtmManager()
         self.rtsh.refreshObjectList()
 
-      self.rtsh.createDataPort("print", dtype2, "rtcin")
+      self.rtsh.createDataPort("print", dtype2, "rtcin", listener)
       cprof=self.rtsh.connect2("print_"+cname+"_"+pname, self.rtsh._port["print"]._objref, pref)
-      print("=======")
-
+      print("=======print:", formatter)
+      self.print_formatter=formatter
+      try:
+        if callback: self.print_callback = eval(callback)
+      except:
+        pass
       ##############################
       #
-      ctm=time.time()
-      if timeout > 0:
-        while True:
-          if self.rtsh.isNew("print"):
+      if listener:
+        print("Connector_id:", cprof.connector_id)
+        self.print_conection=cprof.connector_id
+        pass
+      else:
+        ctm=time.time()
+        if timeout > 0:
+          while True:
+            if self.rtsh.isNew("print"):
+              data = self.rtsh.readData("print")
+            else:
+              data=None
+            if time.time() > ctm+timeout: break
+            # output with formatter
+            if data is None:
+              print("== No Data")
+            else:
+              if formatter :
+                try:
+                  fmt=eval(formatter)
+                  print(fmt(data))
+                except:
+                  print(data)
+              else:
+                print(data)
+            time.sleep(intval)
+
+        else:
+          for i in range(nloop):
+            #
+            # recieve data
+            self.loop = True
+            while self.loop:
+              if self.rtsh.isNew("print"):
+                self.loop = False
+              time.sleep(0.3)
             data = self.rtsh.readData("print")
-          else:
-            data=None
-          if time.time() > ctm+timeout: break
-          # output with formatter
-          if data is None:
-            print("== No Data")
-          else:
+
+            # output with formatter
             if formatter :
               try:
                 fmt=eval(formatter)
@@ -1517,36 +1596,13 @@ class RtCmd(cmd.Cmd):
                 print(data)
             else:
               print(data)
-          time.sleep(intval)
-
-      else:
-        for i in range(nloop):
-          #
-          # recieve data
-          self.loop = True
-          while self.loop:
-            if self.rtsh.isNew("print"):
-              self.loop = False
-            time.sleep(0.3)
-          data = self.rtsh.readData("print")
-
-          # output with formatter
-          if formatter :
-            try:
-              fmt=eval(formatter)
-              print(fmt(data))
-            except:
-              print(data)
-          else:
-            print(data)
-      ###########################
-      #
-      # disconnect
-      self.rtsh._port["print"].disconnect(cprof.connector_id)
-      #print("-- disconnect print",self.onecycle)
+        ###########################
+        #
+        # disconnect
+        self.rtsh._port["print"].disconnect(cprof.connector_id)
+        #print("-- disconnect print",self.onecycle)
       
-    if self.onecycle: self.close()
-
+    #if self.onecycle: self.close()
     return self.onecycle
 
   #
@@ -1559,6 +1615,28 @@ class RtCmd(cmd.Cmd):
       return self.compl_outport_name(text, line, begind, endidx, "")
     else:
       return self.compl_object_name(text, line, begind, endidx, ":")
+
+
+  def do_print_exit(self, arg):
+    if self.no_rtsh() : return self.onecycle
+    if self.print_conection:
+      self.rtsh._port["print"].disconnect(self.print_conection)
+      self.print_conection=None
+    return self.onecycle
+
+  def onData(self, data):
+    if self.print_callback:
+      self.print_callback(data)
+    else:
+      if self.print_formatter:
+        try:
+          fmt=eval(self.print_formatter)
+          print(fmt(data))
+        except:
+          print("--format error: ", end="")
+          print(data)
+      else:
+        print(data)
 
   #
   # COMMAD waite_for
@@ -1650,13 +1728,16 @@ def fmt_TimedString(data):
 def main():
   if not check_process("omniNames") :
     subprocess.Popen(["cmd", "/c", "start", "rtm-naming.bat"])
+    time.sleep(2)
 
   if len(sys.argv) > 1:
     rtcmd=RtCmd(once=True)
     signal.signal(signal.SIGINT, lambda: rtcmd.close())
-    return  rtcmd.onecmd(" ".join(sys.argv[1:]))
+    rtcmd.onecmd(" ".join(sys.argv[1:]))
+    rtcmd.close()
   else:
     RtCmd().cmdloop(intro="Welcome to RtCmd")
+  return
 
 
 #########################################################################
