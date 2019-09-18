@@ -515,7 +515,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         try:
             ctm=time.time()
             self._data[name].tm.sec = int(ctm) 
-            self._data[name].tm.nsec = (ctm - self._data[name].tm.sec) * 1000000000
+            self._data[name].tm.nsec = int((ctm - self._data[name].tm.sec) * 1000000000)
         except:
             pass
         
@@ -701,6 +701,7 @@ class eSEATManager:
                 if 'SEAT_ROOT' in os.environ and os.environ['SEAT_ROOT']:
                     self._scriptfile = os.path.join(os.environ['SEAT_ROOT'], self._scriptfile)
             
+            if os.path.basename(self._scriptfile).count(".seatml") == 0 : self._scriptfile += ".seatml"
             ret = self.comp.loadSEATML(self._scriptfile)
             if ret : raise Exception("Error in moduleInit")
 
