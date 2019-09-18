@@ -505,7 +505,11 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         else:
             try:
                 if type(data) == str :
-                  self._data[name] = apply(dtype, eval(data))
+                  if sys.version_info.major == 2 :
+                    self._data[name] = apply(dtype, eval(data))
+                  else:
+                    arg=eval(data)
+                    self._data[name] = dtype(*arg)
                 else:
                   self._data[name] = data
             except:

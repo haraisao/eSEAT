@@ -47,6 +47,12 @@ import RTC, RTC__POA
 
 #####################################################
 #
+def encodeStr(data):
+  return data.encode().decode('unicode_escape')
+
+def decodeStr(data):
+  return data.encode('raw-unicode-escape').decode()
+
 def check_process(name):
     if platform.system() == "Windows":
         name=os.path.splitext(name)[0] + ".exe"
@@ -630,23 +636,21 @@ class Rtc_Sh:
   #
   # Send Data 
   #
-  def send(self, name, data, code='utf-8', raw=False):
+  def send(self, name, data, code='utf-8', raw=False, tm=False):
     dtype = self.adaptortype[name][1]
-
     if raw :
       try:
         if type(data) == str :
-          self._data[name] = apply(dtype, eval(data))
+          ctm=time.time()
+          tm="RTC.Time(%d,%d)" % (int(ctm), int((ctm - int(ctm))*1000000000))
+          data=data.replace('{time}', tm)
+          self._data[name] = eval(data)
+         
         else:
           self._data[name] = data
       except:
         return
-      try:
-        ctm=time.time()
-        self._data[name].tm.sec = int(ctm) 
-        self._data[name].tm.nsec = int((ctm - self._data[name].tm.sec) * 1000000000)
-      except:
-        pass
+
       self.writeData(name)
       return
 
@@ -660,9 +664,8 @@ class Rtc_Sh:
         self._data[name] = data
 
     elif dtype == str:
-      #self._data[name].data = data.encode(code)
       if self._datatype[name] == TimedString:
-        self._data[name].data = data.encode().decode('unicode_escape')
+        self._data[name].data = encodeStr(data)
       else: 
         self._data[name].data = data
 
@@ -677,23 +680,26 @@ class Rtc_Sh:
     else:
       try:
         if type(data) == str :
-          self._data[name] = apply(dtype, eval(data))
+          arg=eval(data)
+          self._data[name] = dtype(*arg)
         else:
           self._data[name] = data
       except:
         return
-    try:
-      ctm=time.time()
-      self._data[name].tm.sec = int(ctm) 
-      self._data[name].tm.nsec = int((ctm - self._data[name].tm.sec) * 1000000000)
-    except:
-      pass
+    if tm:
+      try:
+        ctm=time.time()
+        self._data[name].tm.sec = int(ctm) 
+        self._data[name].tm.nsec = int((ctm - self._data[name].tm.sec) * 1000000000)
+      except:
+        pass
 
     self.writeData(name)
 
   #
   #
   def writeData(self, name, no_thread=True):
+    print("====>",self._data[name])
     try:
       if no_thread:
         return self._port[name].write(self._data[name])
@@ -1345,6 +1351,7 @@ class RtCmd(cmd.Cmd):
     data=""
     intval = 1
     timeout=0
+    raw=False
 
     for i in range(len(argv)):
       if argv[i] == "-m":
@@ -1377,6 +1384,8 @@ class RtCmd(cmd.Cmd):
         except:
           print("Invalid options")
           pass
+      elif argv[i] == "--raw":
+        raw=True
       elif argv[i] == "-c":
         i += 1
         data = ' '.join(argv[i:])
@@ -1416,20 +1425,20 @@ class RtCmd(cmd.Cmd):
           print("inject ==> ", end="")
           try:
             data=input()
-            self.sendData(data)
+            self.sendData(data,raw)
             count += 1
           except EOFError:
             self.loop = False
       else:
         if timeout > 0:
           while True:
-            self.sendData(data)
+            self.sendData(data, raw)
             time.sleep(intval)
             if time.time() > ctm+timeout: break
         else:
           if nloop <= 0: nloop=1
           for i in range(nloop):
-            self.sendData(data)
+            self.sendData(data, raw)
             if i < nloop-1:
               time.sleep(intval)
       
@@ -1437,7 +1446,6 @@ class RtCmd(cmd.Cmd):
       # disconnect
       self.rtsh._port["inject"].disconnect(cprof.connector_id)
       #print("-- disconnect inject",self.onecycle)
-      
     #if self.onecycle: self.close()
 
     return self.onecycle
@@ -1455,12 +1463,7 @@ class RtCmd(cmd.Cmd):
       return self.compl_object_name(text, line, begind, endidx, ":")
 
   def sendData(self, data, raw=False):
-    self.rtsh.send("inject", data, raw)
-    #try:
-    #  self.rtsh.send("inject", eval(data))
-    #except:
-    #  self.rtsh.send("inject", data)
-    #return 
+    self.rtsh.send("inject", data, raw=raw)
 
   #
   #
