@@ -434,19 +434,20 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         if s[-3:] == "Seq"     : seq = True
 
         dtype = str
-        if sys.version_info.major == 2 and s.count("WString")  : dtype = unicode
-        elif s.count("WString")  : dtype = str          
-        elif s.count("String") : dtype = str
-        elif s.count("Float")  : dtype = float
-        elif s.count("Double") : dtype = float
-        elif s.count("Short")  : dtype = int
-        elif s.count("Long")   : dtype = int
-        elif s.count("Octet")  : dtype = int
-        elif s.count("Char")   : dtype = str
-        elif s.count("Boolean"): dtype = int
-        else                   : dtype = eval("%s" % s)
+        if sys.version_info.major == 2 and s.count("TimedWString")  : dtype = unicode
+        elif s.count("TimedWString")  : dtype = str          
+        elif s.count("TimedString") : dtype = str
+        elif s.count("TimedFloat")  : dtype = float
+        elif s.count("TimedDouble") : dtype = float
+        elif s.count("TimedShort")  : dtype = int
+        elif s.count("TimedLong")   : dtype = int
+        elif s.count("TimedOctet")  : dtype = int
+        elif s.count("TimedChar")   : dtype = str
+        elif s.count("TimesBoolean"): dtype = int
+        else                   : dtype = eval("%s" % s, getGlobals())
 
-        return (eval("%s" % s), dtype, seq)
+        #print((eval("%s" % s, getGlobals()), dtype, seq))
+        return (eval("%s" % s, getGlobals()), dtype, seq)
 
     #
     #
@@ -506,9 +507,9 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
             try:
                 if type(data) == str :
                   if sys.version_info.major == 2 :
-                    self._data[name] = apply(dtype, eval(data))
+                    self._data[name] = apply(dtype, eval(data, getGlobals()))
                   else:
-                    arg=eval(data)
+                    arg=eval(data, getGlobals())
                     self._data[name] = dtype(*arg)
                 else:
                   self._data[name] = data
