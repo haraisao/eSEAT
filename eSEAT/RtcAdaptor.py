@@ -71,6 +71,11 @@ except:
 
 __version__="2.5"
 
+import OpenRTM_aist.version
+
+def rtm_version():
+    ver=OpenRTM_aist.version.openrtm_version.split(".")
+    return int(ver[0])*10000 + int(ver[1]) * 100 + int(ver[2]) 
 #########################################################################
 #
 #  Sprcification of eSEAT
@@ -106,9 +111,11 @@ class eSEATDataListener(OpenRTM_aist.ConnectorDataListenerT):
         self._ondata_thread=None
     
     def __call__(self, info, cdrdata):
-        data = OpenRTM_aist.ConnectorDataListenerT.__call__(self,
+        if rtm_version() <= 10200:
+            data = OpenRTM_aist.ConnectorDataListenerT.__call__(self,
                         info, cdrdata, instantiateDataType(self._type))
-        
+        else:
+            data = cdrdata
         self._obj.onData(self._name, data)
 
 #########################################################################
@@ -292,8 +299,13 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
         self._datatype[name]=type
         self._data[name] = instantiateDataType(type)
         self._port[name] = OpenRTM_aist.InPort(name, self._data[name])
-        self._port[name].addConnectorDataListener(
+        if rtm_version() <= 10200:
+            self._port[name].addConnectorDataListener(
                             OpenRTM_aist.ConnectorDataListenerType.ON_BUFFER_WRITE,
+                            eSEATDataListener(name, type, self))
+        else:
+            self._port[name].addConnectorDataListener(
+                            OpenRTM_aist.ConnectorDataListenerType.ON_RECEIVED,
                             eSEATDataListener(name, type, self))
         self.registerInPort(name, self._port[name])
 
