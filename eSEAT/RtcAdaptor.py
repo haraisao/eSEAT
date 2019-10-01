@@ -118,6 +118,8 @@ class eSEATDataListener(OpenRTM_aist.ConnectorDataListenerT):
             data = cdrdata
         self._obj.onData(self._name, data)
 
+        return OpenRTM_aist.ConnectorListenerStatus.NO_CHANGE, data
+        
 #########################################################################
 #
 #
