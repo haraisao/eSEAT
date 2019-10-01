@@ -150,6 +150,12 @@ def isDataOutport(prof, info):
   except:
     return True
 
+def isServicePort(prof, info):
+  try:
+    return (prof['port.port_type'] == 'CorbaPort')
+  except:
+    return True
+
 def format_connection(con):
   res=""
   res+=" %s\n" % con[0].connector_id
@@ -178,7 +184,9 @@ class RtcDataListener(OpenRTM_aist.ConnectorDataListenerT):
         self._obj.onData(self._name, data)
       else:
         self._obj.onData(self._name, cdrdata)
-
+        
+      return OpenRTM_aist.ConnectorListenerStatus.NO_CHANGE, data
+      
 ###########################################################################
 #
 #
@@ -957,20 +965,23 @@ class Rtc_Sh:
     cons = self.getAllConnectors(name)
     cons = sum(cons, [])
     res = []
+
     for con in cons:
-      #print("--", con.ports[0].get_port_profile().name, " <==> ", name)
-      if con.ports[0].get_port_profile().name.startswith(name.split('.')[0]):
+      #print("--", con.ports[0].get_port_profile().name, " <==> ", name, name.split('/')[-1].split('.')[0])
+      if con.ports[0].get_port_profile().name.startswith(name.split('/')[-1].split('.')[0]):
         pp=con.ports[0].get_port_profile()
+        
         pprof =  nvlist2dict(pp.properties)
+        
         if pprof['port.port_type'] == 'DataInPort':
           con.ports.reverse()
         elif pprof['port.port_type'] == 'CorbaPort':
           inp=pp.interfaces[0]
           if inp.polarity == PROVIDED:
             con.ports.reverse()
-
-        res.append([x.get_port_profile().name for x in con.ports])
+        res.append([get_obj_port(x) for x in con.ports])
     return res
+
   #
   # test
   def createGraph(self, rtcs="all"):
@@ -994,20 +1005,24 @@ class Rtc_Sh:
       disp_name = name.split('/')[-1].split(".")[0]
       nodes[name] = pydot.Node(disp_name, style="filled", fillcolor=color, shape="rect", fontcolor=fcolor)
       graph.add_node(nodes[name])
-      cons=self.get_connectors_of_rtc(name)
+      cons =self.get_connectors_of_rtc(name)
 
       if cons : links = links + cons
 
     for lnk in links:
-      oobj, oport = lnk[0].split('.')
-      iobj, iport = lnk[1].split('.')
+      oobj, oport = lnk[0]
+      iobj, iport = lnk[1]
       lbl="%s => %s" % (oport, iport)
       edge = pydot.Edge(nodes[oobj], nodes[iobj], dir="forward", label=lbl)
       graph.add_edge(edge)
 
-
     showGraph(graph)
   #----- END OF Rtc_Sh
+
+def get_obj_port(port):
+  pprof=port.get_port_profile()
+  comp=nvlist2dict(pprof.owner.get_component_profile().properties)['naming.names']
+  return [comp, pprof.name.split(".")[-1]]
 
 ##################################################################
 #   cass RtCmd
@@ -1343,7 +1358,88 @@ class RtCmd(cmd.Cmd):
     else:
       return [ objname+":"+p for p in completions]
 
+ ###
+  #  COMMAND: connect_service
+  def do_connect_service(self, arg):
+    if self.no_rtsh() : return self.onecycle
 
+    argv=arg.split()
+    if len(argv) > 1:
+      res=self.rtsh.connect(argv[0], argv[1], True)
+      if res is None: self._error = 1
+    else:
+      print("connect comp1:p comp2:p")
+      self._error=1
+    return self.onecycle
+
+  #
+  #
+  def compl_provider_name(self, text, line, begind, endidx, info=""):
+    try:
+      objname, pname=text.split(':',1)
+      if objname:
+        if info:
+          oname = info.split(":")
+          dtype = self.rtsh.getPortDataType(oname[0], oname[1])
+        else:
+          dtype = info
+
+        ports=self.rtsh.getPorts(objname, isServicePort, dtype)
+        pnames=[]
+        for pp in ports:
+          if 'interface_polarity' in pp and pp['interface_polarity'] == PROVIDED:
+            pnames.append(pp[0].split('.')[1])
+        if not pname:
+          completions=pnames[:]
+        else:
+          completions= [ n for n in pnames if n.startswith(pname) ]
+      else:
+        completions=[]
+    except:
+      traceback.print_exc()
+      completions=[]
+    return [ objname+":"+p for p in completions]
+
+  #
+  #
+  def compl_consumer_name(self, text, line, begind, endidx, sp=" "):
+    try:
+      objname, pname=text.split(':',1)
+      if objname:
+        ports=self.rtsh.getPorts(objname, isServicePort)
+        pnames=[]
+        for pp in ports:
+          if 'interface_polarity' in pp and pp['interface_polarity'] == REQUIRED:
+            pnames.append(pp[0].split('.')[1])
+        if not pname:
+          completions=pnames[:]
+        else:
+          completions = [ n for n in pnames if n.startswith(pname) ]
+      else:
+        completions=[]
+    except:
+      traceback.print_exc()
+      completions=[]
+    if len(completions) == 1:
+      return [ objname+":"+p+sp for p in completions]
+    else:
+      return [ objname+":"+p for p in completions]
+
+  def complete_connect_service(self, text, line, begind, endidx):
+    args=line.split()
+    try:
+      self._info=args[1]
+    except:
+      self._info=""
+
+    if line[endidx-1] != ' ' and args[-1].find(':') > 0 :
+      text=args[-1]
+      if(len(args) > 2):
+        return self.compl_provider_name(text, line, begind, endidx, self._info)
+      else:
+        return self.compl_consumer_name(text, line, begind, endidx)
+    else:
+      return self.compl_object_name(text, line, begind, endidx, ":")
   ###
   #  COMMAND: disconnect
   def do_disconnect(self, arg):
