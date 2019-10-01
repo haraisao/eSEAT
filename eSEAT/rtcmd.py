@@ -55,6 +55,13 @@ except:
 sys.path.append(".")
 sys.path.append("rtm")
 
+import OpenRTM_aist.version
+
+##### rtm version
+def rtm_version():
+    ver=OpenRTM_aist.version.openrtm_version.split(".")
+    return int(ver[0])*10000 + int(ver[1]) * 100 + int(ver[2]) 
+
 #######  T E S T ###############
 def showGraph(graph):
     img = Image.open(io.BytesIO(graph.create_png()))
@@ -165,9 +172,12 @@ class RtcDataListener(OpenRTM_aist.ConnectorDataListenerT):
         self._ondata_thread=None
     
     def __call__(self, info, cdrdata):
+      if rtm_version() < 20000:
         data = OpenRTM_aist.ConnectorDataListenerT.__call__(self,
                         info, cdrdata, instantiateDataType(self._type))
         self._obj.onData(self._name, data)
+      else:
+        self._obj.onData(self._name, cdrdata)
 
 ###########################################################################
 #
@@ -736,8 +746,13 @@ class Rtc_Sh:
     self._port[name] = OpenRTM_aist.InPort(name, self._data[name])
 
     if listener:
-      self._port[name].addConnectorDataListener(
+      if rtm_version() < 20000:
+        self._port[name].addConnectorDataListener(
                             OpenRTM_aist.ConnectorDataListenerType.ON_BUFFER_WRITE,
+                            RtcDataListener(name, type, self))
+      else:
+        self._port[name].addConnectorDataListener(
+                            OpenRTM_aist.ConnectorDataListenerType.ON_RECEIVED,
                             RtcDataListener(name, type, self))
 
     self._port[name].initConsumers()
@@ -1354,7 +1369,8 @@ class RtCmd(cmd.Cmd):
     if self.no_rtsh() : return self.onecycle
 
     argv=arg.split()
-    self.rtsh.getRTObjectList()
+    self.rtsh.refreshObjectList()
+
     for v in argv:
       objs = self.get_object_names(v)
       for obj in objs:
@@ -1372,7 +1388,8 @@ class RtCmd(cmd.Cmd):
   def do_deactivate(self, arg):
     if self.no_rtsh() : return self.onecycle
 
-    self.rtsh.getRTObjectList()
+    self.rtsh.refreshObjectList()
+
     argv=arg.split()
     for v in argv:
       objs = self.get_object_names(v)
@@ -1406,7 +1423,8 @@ class RtCmd(cmd.Cmd):
   def do_reset(self, arg):
     if self.no_rtsh() : return self.onecycle
 
-    self.rtsh.getRTObjectList()
+    self.rtsh.refreshObjectList()
+
     argv=arg.split()
     for v in argv:
       objs = self.get_object_names(v)
@@ -1424,7 +1442,7 @@ class RtCmd(cmd.Cmd):
   def do_terminate(self, arg):
     if self.no_rtsh() : return self.onecycle
 
-    self.rtsh.getRTObjectList()
+    self.rtsh.refreshObjectList()
     argv=arg.split()
     for v in argv:
       objs = self.get_object_names(v)

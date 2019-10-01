@@ -75,7 +75,8 @@ import OpenRTM_aist.version
 
 def rtm_version():
     ver=OpenRTM_aist.version.openrtm_version.split(".")
-    return int(ver[0])*10000 + int(ver[1]) * 100 + int(ver[2]) 
+    return int(ver[0])*10000 + int(ver[1]) * 100 + int(ver[2])
+
 #########################################################################
 #
 #  Sprcification of eSEAT
