@@ -64,6 +64,7 @@ def rtm_version():
 
 #######  T E S T ###############
 def showGraph(graph):
+    #graph.write_png('rtcmd.png')
     img = Image.open(io.BytesIO(graph.create_png()))
     img.show()
 
@@ -218,6 +219,7 @@ class Rtc_Sh:
     self._send_thread = None
 
     self._rtcmd=None
+    self._update_thread = None
     ########################################
 
   #
@@ -423,7 +425,6 @@ class Rtc_Sh:
     else:
       print("No such RTC:", name)
     return None
-
 
   #
   #
@@ -984,7 +985,7 @@ class Rtc_Sh:
 
   #
   # test
-  def createGraph(self, rtcs="all"):
+  def createGraph(self, rtcs="all", view=True):
     if rtcs == "all" or rtcs == "":
       rtc_names = self.getRTObjectNames()
     else:
@@ -1012,17 +1013,52 @@ class Rtc_Sh:
     for lnk in links:
       oobj, oport = lnk[0]
       iobj, iport = lnk[1]
-      lbl="%s => %s" % (oport, iport)
+      lbl=" [%s => %s] " % (oport, iport)
       edge = pydot.Edge(nodes[oobj], nodes[iobj], dir="forward", label=lbl)
       graph.add_edge(edge)
 
-    showGraph(graph)
+    if view:
+      showGraph(graph)
+    
+    return graph
+
+  def updateGraphImage(self, fname='rtcmd.png'):
+    self._loop = True
+    while self._loop:
+      try:
+        graph = self.createGraph('all', False)
+        graph.write_png(fname)
+      except:
+        print("==> Fail to update ", fname)
+        pass
+      time.sleep(1)
+
+  def startGraphUpdate(self):
+    if not self._update_thread :
+      self._update_thread=threading.Thread(target=self.updateGraphImage)
+      self._update_thread.start()
+  
+  def stopGraphUpdate(self):
+    if self._update_thread :
+      self._loop=False
+      self._update_thread.join(10)
+      self._update_thread=None
+
   #----- END OF Rtc_Sh
 
 def get_obj_port(port):
-  pprof=port.get_port_profile()
-  comp=nvlist2dict(pprof.owner.get_component_profile().properties)['naming.names']
-  return [comp, pprof.name.split(".")[-1]]
+  pp=port.get_port_profile()
+  pprof =  nvlist2dict(pp.properties)
+  if pprof['port.port_type'] == 'CorbaPort':
+    inp=pp.interfaces[0]
+    if inp.polarity == PROVIDED:
+      pname="P:"+pp.name.split(".")[-1]
+    else:
+      pname="C:"+pp.name.split(".")[-1]
+  else:
+    pname=pp.name.split(".")[-1]
+  comp=nvlist2dict(pp.owner.get_component_profile().properties)['naming.names']
+  return [comp, pname]
 
 ##################################################################
 #   cass RtCmd
@@ -1077,6 +1113,20 @@ class RtCmd(cmd.Cmd):
       self._error = 1
       return True
     return False
+
+  ###
+  #  CPMMAND: 
+  def do_start_graph(self, arg):
+    if self.no_rtsh() : return self.onecycle
+    self.rtsh.startGraphUpdate()
+    return self.onecycle
+
+  ###
+  #  CPMMAND: 
+  def do_stop_graph(self, arg):
+    if self.no_rtsh() : return self.onecycle
+    self.rtsh.stopGraphUpdate()
+    return self.onecycle
 
   ###
   #  CPMMAND: list
@@ -1367,6 +1417,7 @@ class RtCmd(cmd.Cmd):
     if len(argv) > 1:
       res=self.rtsh.connect(argv[0], argv[1], True)
       if res is None: self._error = 1
+      else: print("OK")
     else:
       print("connect comp1:p comp2:p")
       self._error=1
@@ -1374,20 +1425,14 @@ class RtCmd(cmd.Cmd):
 
   #
   #
-  def compl_provider_name(self, text, line, begind, endidx, info=""):
+  def compl_provider_name(self, text, line, begind, endidx):
     try:
       objname, pname=text.split(':',1)
       if objname:
-        if info:
-          oname = info.split(":")
-          dtype = self.rtsh.getPortDataType(oname[0], oname[1])
-        else:
-          dtype = info
-
-        ports=self.rtsh.getPorts(objname, isServicePort, dtype)
+        ports=self.rtsh.getPorts(objname, isServicePort)
         pnames=[]
         for pp in ports:
-          if 'interface_polarity' in pp and pp['interface_polarity'] == PROVIDED:
+          if 'interface_polarity' in pp[1] and pp[1]['interface_polarity'] == PROVIDED:
             pnames.append(pp[0].split('.')[1])
         if not pname:
           completions=pnames[:]
@@ -1409,7 +1454,7 @@ class RtCmd(cmd.Cmd):
         ports=self.rtsh.getPorts(objname, isServicePort)
         pnames=[]
         for pp in ports:
-          if 'interface_polarity' in pp and pp['interface_polarity'] == REQUIRED:
+          if 'interface_polarity' in pp[1] and pp[1]['interface_polarity'] == REQUIRED:
             pnames.append(pp[0].split('.')[1])
         if not pname:
           completions=pnames[:]
@@ -1435,7 +1480,7 @@ class RtCmd(cmd.Cmd):
     if line[endidx-1] != ' ' and args[-1].find(':') > 0 :
       text=args[-1]
       if(len(args) > 2):
-        return self.compl_provider_name(text, line, begind, endidx, self._info)
+        return self.compl_provider_name(text, line, begind, endidx)
       else:
         return self.compl_consumer_name(text, line, begind, endidx)
     else:
@@ -1692,6 +1737,7 @@ class RtCmd(cmd.Cmd):
     self.rtsh.disconnectAllPorts()
     #if self.print_conection:
     #  self.print_conection[0].disconnect(self.print_conection[1])
+    self.rtsh.stopGraphUpdate()
 
     if self.file:
       self.file.close()
