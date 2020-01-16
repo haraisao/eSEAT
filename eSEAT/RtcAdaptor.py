@@ -501,6 +501,7 @@ class eSEAT(OpenRTM_aist.DataFlowComponentBase, eSEAT_Gui, eSEAT_Core):
               self._data[name] = data
 
         elif dtype == str:
+            if data is None: data=""
             #self._data[name].data = data.encode(code)
             if self._datatype[name] == TimedString:
                 self._data[name].data = data.encode().decode('unicode_escape')
