@@ -544,7 +544,8 @@ class eSEAT_Core:
     def processResult(self, name, s):
         if sys.version_info.major == 2:
             try:
-                s = unicode(s)
+                #s = unicode(s)
+                pass
             except UnicodeDecodeError:
                 s = str(s).encode('string_escape')
                 s = unicode(s)
